@@ -1,0 +1,40 @@
+{
+  "workbench.colorTheme": "One Monokai",
+  "workbench.colorCustomizations": {
+    "titleBar.activeForeground": "#222",
+    "titleBar.inactiveForeground": "#222222CC",
+    "titleBar.activeBackground": "#F65579", // Danger (Server)
+    "titleBar.inactiveBackground": "#F65579CC" // Danger (Server)
+    // "titleBar.activeBackground": "#FFC042", // Warning (Front End)
+    // "titleBar.inactiveBackground": "#FFC042CC" // Warning (Front End)
+    // "titleBar.activeBackground": "#33BBEB", // Normal (Local)
+    // "titleBar.inactiveBackground": "#33BBEBCC" // Normal (Local)
+    // "titleBar.activeBackground": "#49D454", // Safe (Public / Live)
+    // "titleBar.inactiveBackground": "#49D454CC" // Safe  (Public / Live)
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "editor.rulers": [80, 100],
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2, // Should be the same as prettier tab width
+  "eslint.alwaysShowStatus": true,
+  "prettier.tabWidth": 2, // Should be the same as editor tab size
+  "prettier.singleQuote": true,
+  "emmet.excludeLanguages": ["markdown"],
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
