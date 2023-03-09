@@ -1,8 +1,9 @@
+/* eslint-disable-next-line */
 import { NS } from '@ns';
 
 export async function main(ns: NS) {
   function test(name: string, times: number) {
-    for (let n: number = 0; n < times; n += 1) {
+    for (let n = 0; n < times; n += 1) {
       ns.print(`[MMMMMM Multiplier] ${n} times ${name}`);
     }
   }
