@@ -2,9 +2,13 @@
 
 Collection of scripts while trying out Bitburner
 
+---
+
 ## Logic
 
 Add image of logic flow here
+
+---
 
 ### Scripts
 
@@ -23,6 +27,8 @@ Add image of logic flow here
 - [Bitburner Official Documentation - Remote API](https://bitburner-official.readthedocs.io/en/latest/remoteapi.html)
 - [Bitburner Official Documentation - Netscript](https://bitburner-official.readthedocs.io/en/latest/netscript.html)
 - [Bitburner Official Github - Netscript Interface](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.md)
+
+---
 
 ### Credit
 

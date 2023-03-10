@@ -10,7 +10,6 @@ interface Controller {
   ringTargets: any[];
   ringFocus: any[];
   ringFocusMax: number;
-  ringFocusMin: number;
 }
 
 const controller: Controller = {
@@ -22,7 +21,6 @@ const controller: Controller = {
   ringTargets: [],
   ringFocus: [],
   ringFocusMax: 1,
-  ringFocusMin: 1,
 };
 
 export async function main(ns: NS) {
@@ -125,21 +123,30 @@ export async function main(ns: NS) {
   }
 
   function getFocus() {
-    const rFocus = [];
     if (controller.ringTargets.length > 0) {
-      const fMin = Math.ceil(controller.hacking / 3);
-      const fMax = Math.ceil(controller.hacking / 2); // FIXME:
-
-      if (fMin > controller.ringFocusMin && fMin <= controller.hacking) {
-        controller.ringFocusMin = fMin;
-      }
+      const fMax = Math.ceil(controller.hacking / 2);
 
       if (fMax > controller.ringFocusMax && fMax <= controller.hacking) {
         controller.ringFocusMax = fMax;
       }
 
-      controller.ringTargets.sort(focusSort).filter((node) => {}); // FIXME:
+      const rFocus = controller.ringTargets
+        .sort(focusSort)
+        .filter((node) => node.requiredHackingSkill <= fMax);
+
+      if (rFocus.length <= 0) {
+        return ns.getServer('n00dles');
+      }
+      controller.ringFocus = rFocus;
+      return rFocus;
     }
+    return ns.getServer('n00dles');
+  }
+
+  function updateFocus() {
+    controller.ringFocus.forEach((node, i) => {
+      controller.ringFocus[i] = ns.getServer(node.hostname);
+    });
   }
 
   // root all servers with 0 ports
@@ -163,19 +170,11 @@ export async function main(ns: NS) {
   function updateDisplay() {
     ns.clearLog();
     ns.print(
-      `[Hacking] ${controller.hacking} | Focus (${controller.ringFocusMin} - ${controller.ringFocusMax})`
+      `[Hacking] ${controller.hacking} | Focus (1 - ${controller.ringFocusMax})`
     );
 
-    const rowRing = '%-9s | %5s | %7s | %4s | %7s | %-12s';
-    ns.printf(
-      rowRing,
-      '[Ring]',
-      'Total',
-      'Reclaim',
-      'Bots',
-      'Targets',
-      'Focus'
-    );
+    const rowRing = '%-9s | %5s | %6s | %9s | %7s | %-12s';
+    ns.printf(rowRing, '[Ring]', 'Total', 'Hack', 'Bots', 'Targets', 'Focus');
     ns.printf(
       rowRing,
       '',
@@ -183,10 +182,20 @@ export async function main(ns: NS) {
       `${controller.ringReclaim.length}`,
       `${controller.ringBots.length}`,
       `${controller.ringTargets.length}`,
-      '*n00dles'
+      `${controller.ringFocus[0].hostname}`
     );
 
-    const rowTargets = '%-9s | %5s | %5s | %9s | %7s | %-12s';
+    ns.printf(
+      rowRing,
+      '---------',
+      '-----',
+      '------',
+      '---------',
+      '-------',
+      '--------------'
+    );
+
+    const rowTargets = '%-9s | %5s | %6s | %9s | %7s | %-12s';
     ns.printf(
       rowTargets,
       '[Targets]',
@@ -196,19 +205,24 @@ export async function main(ns: NS) {
       'Max',
       'Server'
     );
-    ns.printf(
-      rowTargets,
-      '',
-      '*999',
-      '*+5.00',
-      '*$123.00B',
-      '*123.00B',
-      '*n00dles'
-    );
+
+    controller.ringFocus.forEach((node, i) => {
+      const fAction = i === 0 ? '* Focus' : '';
+      ns.printf(
+        rowTargets,
+        `${fAction}`,
+        `${node.requiredHackingSkill}`,
+        `+${ns.formatNumber(node.hackDifficulty - node.minDifficulty, 2)}`,
+        `${ns.formatNumber(node.moneyAvailable, 2, 1000, true)}`,
+        `${ns.formatNumber(node.moneyMax, 2, 1000, true)}`,
+        `${node.hostname}`
+      );
+    });
   }
 
   while (true) {
     updatePlayer();
+    updateFocus();
     updateDisplay();
     await ns.sleep(flags.refresh as number);
   }
