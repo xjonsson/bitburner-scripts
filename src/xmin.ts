@@ -18,3 +18,8 @@ export async function main(ns: NS) {
     }
   }
 }
+
+/* eslint-disable-next-line */
+export function autocomplete(data: any, args: any) {
+  return data.servers;
+}
