@@ -17,12 +17,12 @@ Add image of logic flow here
 
 ### Resources
 
-[Bitburner Remote File API](zRemoteAPI.md)
-[Step by step install](zBeginnersGuide.md)
-[Bitburner Official Github - Typescript Template for Remote API](https://github.com/bitburner-official/typescript-template)
-[Bitburner Official Documentation - Remote API](https://bitburner-official.readthedocs.io/en/latest/remoteapi.html)
-[Bitburner Official Documentation - Netscript](https://bitburner-official.readthedocs.io/en/latest/netscript.html)
-[Bitburner Official Github - Netscript Interface](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.md)
+- [Bitburner Remote File API](zRemoteAPI.md)
+- [Step by step install](zBeginnersGuide.md)
+- [Bitburner Official Github - Typescript Template for Remote API](https://github.com/bitburner-official/typescript-template)
+- [Bitburner Official Documentation - Remote API](https://bitburner-official.readthedocs.io/en/latest/remoteapi.html)
+- [Bitburner Official Documentation - Netscript](https://bitburner-official.readthedocs.io/en/latest/netscript.html)
+- [Bitburner Official Github - Netscript Interface](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.md)
 
 ### Credit
 
