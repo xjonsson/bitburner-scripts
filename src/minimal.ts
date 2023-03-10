@@ -149,8 +149,32 @@ export async function main(ns: NS) {
     });
   }
 
-  // root all servers with 0 ports
-  // select the best target for level
+  function reclaim() {
+    if (controller.ringReclaim.length > 0) {
+      controller.ringReclaim.forEach((node) => {
+        if (node.numOpenPortsRequired >= 5) {
+          ns.sqlinject(node.hostname);
+        }
+        if (node.numOpenPortsRequired >= 4) {
+          ns.httpworm(node.hostname);
+        }
+        if (node.numOpenPortsRequired >= 3) {
+          ns.relaysmtp(node.hostname);
+        }
+        if (node.numOpenPortsRequired >= 2) {
+          ns.ftpcrack(node.hostname);
+        }
+        if (node.numOpenPortsRequired >= 1) {
+          ns.brutessh(node.hostname);
+        }
+        if (node.numOpenPortsRequired >= 0) {
+          ns.nuke(node.hostname);
+        }
+      });
+      getRing();
+    }
+  }
+
   // scp xmin to new bots
 
   function updatePlayer() {
@@ -160,6 +184,7 @@ export async function main(ns: NS) {
       controller.hacking = hacking;
       getPrograms();
       getRing();
+      reclaim();
       getFocus();
 
       return true;
@@ -170,7 +195,7 @@ export async function main(ns: NS) {
   function updateDisplay() {
     ns.clearLog();
     ns.print(
-      `[Hacking] ${controller.hacking} | Focus (1 - ${controller.ringFocusMax})`
+      `[Hacking] ${controller.hacking} | Programs ${controller.programs} | Focus (1-${controller.ringFocusMax})`
     );
 
     const rowRing = '%-9s | %5s | %6s | %9s | %7s | %-12s';
@@ -227,87 +252,3 @@ export async function main(ns: NS) {
     await ns.sleep(flags.refresh as number);
   }
 }
-
-const server = {
-  hasAdminRights: true,
-  hostname: 'harakiri-sushi',
-  ip: '85.2.9.7',
-  maxRam: 16,
-  ramUsed: 0,
-  ftpPortOpen: false,
-  httpPortOpen: false,
-  smtpPortOpen: false,
-  sqlPortOpen: false,
-  sshPortOpen: false,
-  hackDifficulty: 15,
-  minDifficulty: 5,
-  moneyAvailable: 4000000,
-  moneyMax: 100000000,
-  numOpenPortsRequired: 0,
-  requiredHackingSkill: 40,
-};
-
-const player = {
-  hp: { current: 10, max: 10 },
-  skills: {
-    hacking: 81,
-    strength: 1,
-    defense: 1,
-    dexterity: 1,
-    agility: 1,
-    charisma: 1,
-    intelligence: 0,
-  },
-  exp: {
-    hacking: 2033.3142387672988,
-    strength: 0,
-    defense: 0,
-    dexterity: 0,
-    agility: 0,
-    charisma: 0,
-    intelligence: 0,
-  },
-  mults: {
-    hacking_chance: 1.1703288165374026,
-    hacking_speed: 1.171894225433512,
-    hacking_money: 1.5259389331269984,
-    hacking_grow: 1.0615227360883468,
-    hacking: 1.5920829273158414,
-    strength: 1.0615227360883468,
-    defense: 1.0615227360883468,
-    dexterity: 1.0615227360883468,
-    agility: 1.0615227360883468,
-    charisma: 1.0615227360883468,
-    hacking_exp: 2.026828387925936,
-    strength_exp: 1.342826261151759,
-    defense_exp: 1.342826261151759,
-    dexterity_exp: 1.342826261151759,
-    agility_exp: 1.342826261151759,
-    charisma_exp: 1.342826261151759,
-    company_rep: 1.0615227360883468,
-    faction_rep: 1.0615227360883468,
-    crime_money: 1.0615227360883468,
-    crime_success: 1.0615227360883468,
-    hacknet_node_money: 2.6772598581713187,
-    hacknet_node_purchase_cost: 0.720662849689855,
-    hacknet_node_ram_cost: 0.9420429407710522,
-    hacknet_node_core_cost: 0.9420429407710522,
-    hacknet_node_level_cost: 0.8007364996553944,
-    work_money: 1.0615227360883468,
-    bladeburner_max_stamina: 1,
-    bladeburner_stamina_gain: 1,
-    bladeburner_analysis: 1,
-    bladeburner_success_chance: 1,
-  },
-  numPeopleKilled: 0,
-  money: 71054.93919306507,
-  city: 'Sector-12',
-  location: 'Alpha Enterprises',
-  bitNodeN: 1,
-  totalPlaytime: 619442400,
-  playtimeSinceLastAug: 267508400,
-  playtimeSinceLastBitnode: 619442400,
-  jobs: {},
-  factions: [],
-  entropy: 0,
-};
