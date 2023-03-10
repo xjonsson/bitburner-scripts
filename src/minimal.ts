@@ -1,26 +1,32 @@
 /* eslint-disable-next-line */
 import { NS } from '@ns';
 
+const xcode = 'xmin.js';
+
 interface Controller {
   hacking: number;
   programs: number;
+  scriptRam: number;
   ringAll: any[];
   ringReclaim: any[];
   ringBots: any[];
   ringTargets: any[];
   ringFocus: any[];
   ringFocusMax: number;
+  ringDeploy: string;
 }
 
 const controller: Controller = {
   hacking: 0,
   programs: 0,
+  scriptRam: 0,
   ringAll: [],
   ringReclaim: [],
   ringBots: [],
   ringTargets: [],
   ringFocus: [],
   ringFocusMax: 1,
+  ringDeploy: '',
 };
 
 export async function main(ns: NS) {
@@ -94,7 +100,8 @@ export async function main(ns: NS) {
 
       if (
         node.requiredHackingSkill <= controller.hacking &&
-        node.moneyMax > 0
+        node.moneyMax > 0 &&
+        node.hasAdminRights
       ) {
         rTargets.push(node);
       }
@@ -175,7 +182,18 @@ export async function main(ns: NS) {
     }
   }
 
-  // scp xmin to new bots
+  function deploy() {
+    if (controller.ringDeploy !== controller.ringFocus[0].hostname) {
+      const rTarget = controller.ringFocus[0].hostname as string;
+      controller.ringBots.forEach((node) => {
+        ns.scp(xcode, node.hostname, 'home');
+        ns.scriptKill(xcode, node.hostname);
+        const maxThreads = Math.floor(node.maxRam / controller.scriptRam);
+        ns.exec(xcode, node.hostname, maxThreads, rTarget);
+        controller.ringDeploy = rTarget;
+      });
+    }
+  }
 
   function updatePlayer() {
     const { hacking } = ns.getPlayer().skills;
@@ -186,6 +204,9 @@ export async function main(ns: NS) {
       getRing();
       reclaim();
       getFocus();
+      deploy();
+
+      ns.print(controller.ringBots[0].TEST);
 
       return true;
     }
@@ -231,6 +252,16 @@ export async function main(ns: NS) {
       'Server'
     );
 
+    ns.printf(
+      rowRing,
+      '---------',
+      '-----',
+      '------',
+      '---------',
+      '-------',
+      '--------------'
+    );
+
     controller.ringFocus.forEach((node, i) => {
       const fAction = i === 0 ? '* Focus' : '';
       ns.printf(
@@ -244,6 +275,8 @@ export async function main(ns: NS) {
       );
     });
   }
+
+  controller.scriptRam = ns.getScriptRam(xcode);
 
   while (true) {
     updatePlayer();

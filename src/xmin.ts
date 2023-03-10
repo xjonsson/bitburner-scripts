@@ -2,45 +2,19 @@
 import { NS } from '@ns';
 
 export async function main(ns: NS) {
-  ns.tail();
-  ns.clearLog();
-  // Defines the "target server", which is the server
-  // that we're going to hack. In this case, it's "n00dles"
-  const target = 'harakiri-sushi';
+  const target = ns.args[0] || 'n00dles';
+  const moneyThresh = ns.getServerMaxMoney(target as string) * 0.75;
+  const secThresh = ns.getServerMinSecurityLevel(target as string) + 5;
 
-  // Defines how much money a server should have before we hack it
-  // In this case, it is set to 75% of the server's max money
-  const moneyThresh = ns.getServerMaxMoney(target) * 0.75;
-
-  // Defines the maximum security level the target server can
-  // have. If the target's security level is higher than this,
-  // we'll weaken it before doing anything else
-  const securityThresh = ns.getServerMinSecurityLevel(target) + 5;
-
-  // Message so we know whats happening
-  const msgTarget = `Targeting [${target}] | \$T(${moneyThresh}) | \sT(${securityThresh})`;
-  ns.print(msgTarget);
-
-  // If we have the BruteSSH.exe program, use it to open the SSH Port
-  // on the target server
-  if (ns.fileExists('BruteSSH.exe', 'home')) {
-    ns.brutessh(target);
-  }
-
-  // Get root access to target server
-  ns.nuke(target);
-
-  // Infinite loop that continously hacks/grows/weakens the target server
   while (true) {
-    if (ns.getServerSecurityLevel(target) > securityThresh) {
-      // If the server's security level is above our threshold, weaken it
-      await ns.weaken(target);
-    } else if (ns.getServerMoneyAvailable(target) < moneyThresh) {
-      // If the server's money is less than our threshold, grow it
-      await ns.grow(target);
+    const sec = ns.getServerSecurityLevel(target as string);
+    const moneyAvailable = ns.getServerMoneyAvailable(target as string);
+    if (sec > secThresh) {
+      await ns.weaken(target as string);
+    } else if (moneyAvailable < moneyThresh) {
+      await ns.grow(target as string);
     } else {
-      // Otherwise, hack it
-      await ns.hack(target);
+      await ns.hack(target as string);
     }
   }
 }

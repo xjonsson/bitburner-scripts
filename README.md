@@ -12,10 +12,15 @@ Add image of logic flow here
 
 ### Scripts
 
-| Script  | RAM   | Purpose                       | Arguments                                            | Methods | Logic                                    |
-| ------- | ----- | ----------------------------- | ---------------------------------------------------- | ------- | ---------------------------------------- |
-| Start   | 1.7GB | Controls the start of the run | - ram (on home in GB)<br>- silent (flag for no tail) | -       | ![Start](docs/Module-Start.jpg?raw=true) |
-| Minimal |       |                               |                                                      |         |                                          |
+| Script  | RAM    | Purpose                                                 | Logic                                        |
+| ------- | ------ | ------------------------------------------------------- | -------------------------------------------- |
+| Start   | 2.7GB  | Controls the start of the run                           | ![Start](docs/Module-Start.jpg?raw=true)     |
+| Minimal | 7.70GB | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true) |
+| Monitor | 4.15GB | Monitors a server for security, money, threads and time | ![Monitor](docs/Module-Monitor.png?raw=true) |
+| xmin    | 2.40GB | Minimal Hack, Weak, Grow on single target               | ![xmin](docs/Module-xmin.jpg?raw=true)       |
+| xhack   | 1.75GB | Distributable hack script                               | -                                            |
+| xweak   | 1.80GB | Distributable weak script                               | -                                            |
+| xgrow   | 1.80GB | Distributable grow script                               | -                                            |
 
 ---
 
