@@ -12,7 +12,6 @@ export async function main(ns: NS) {
   if (!hRAM || flags.help) {
     ns.tprint('This script controls the start of the game.');
     ns.tprint(`USAGE: run ${ns.getScriptName()} HOME_RAM (in GB)`);
-    ns.tprint('Example:');
     ns.tprint(`> run ${ns.getScriptName()} 32`);
     return;
   }

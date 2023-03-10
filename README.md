@@ -8,10 +8,10 @@ Add image of logic flow here
 
 ### Scripts
 
-| Script  | RAM   | Purpose                       | Arguments                                            | Methods | Logic                           |
-| ------- | ----- | ----------------------------- | ---------------------------------------------------- | ------- | ------------------------------- |
-| Start   | 1.7GB | Controls the start of the run | - ram (on home in GB)<br>- silent (flag for no tail) | -       | ![Start](docs/Module-Start.jpg) |
-| Minimal |       |                               |                                                      |         |                                 |
+| Script  | RAM   | Purpose                       | Arguments                                            | Methods | Logic                                    |
+| ------- | ----- | ----------------------------- | ---------------------------------------------------- | ------- | ---------------------------------------- |
+| Start   | 1.7GB | Controls the start of the run | - ram (on home in GB)<br>- silent (flag for no tail) | -       | ![Start](docs/Module-Start.jpg?raw=true) |
+| Minimal |       |                               |                                                      |         |                                          |
 
 ---
 
