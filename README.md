@@ -14,7 +14,7 @@ Add image of logic flow here
 | Configs    | X.XXGB | Global configuration options                            | - TBD                                               |
 | Minimal    | 7.70GB | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true)        |
 | Controller | X.XXGB | Manages game loop with ram                              | - TBD                                               |
-| Player     | X.XXGB | Handles player data                                     | - TBD                                               |
+| zPlayer    | 2.25GB | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
 | Network    | X.XXGB | Handles ring network                                    | - TBD                                               |
 | Server     | X.XXGB | Servers home, ring, hacknet, servers, bots and targets  | - TBD                                               |
 | Focus      | X.XXGB | Handles targeting and distribution                      | - TBD                                               |

@@ -1,7 +1,6 @@
-/* eslint-disable */
+/* eslint-disable-next-line */
 import { NS } from '@ns';
-import { configs } from 'configs.js';
-/* eslint-enable */
+import { configs } from './configs.js';
 
 export async function main(ns: NS) {
   ns.tail();
