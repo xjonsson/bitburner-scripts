@@ -187,7 +187,7 @@ export async function main(ns: NS) {
       const rTarget = controller.ringFocus[0].hostname as string;
       controller.ringBots.forEach((node) => {
         ns.scp(xcode, node.hostname, 'home');
-        ns.scriptKill(xcode, node.hostname);
+        ns.kill(xcode, node.hostname, controller.ringDeploy);
         const maxThreads = Math.floor(node.maxRam / controller.scriptRam);
         ns.exec(xcode, node.hostname, maxThreads, rTarget);
         controller.ringDeploy = rTarget;
@@ -269,7 +269,7 @@ export async function main(ns: NS) {
         `${fAction}`,
         `${node.requiredHackingSkill}`,
         `+${ns.formatNumber(node.hackDifficulty - node.minDifficulty, 2)}`,
-        `${ns.formatNumber(node.moneyAvailable, 2, 1000, true)}`,
+        `${((node.moneyAvailable / node.moneyMax) * 100).toFixed(2)}%`,
         `${ns.formatNumber(node.moneyMax, 2, 1000, true)}`,
         `${node.hostname}`
       );

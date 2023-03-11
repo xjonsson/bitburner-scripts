@@ -15,7 +15,8 @@
     "node_modules/**",
     "build/**",
     "dist/**",
-    "NetscriptDefinitions.d.ts"
+    "NetscriptDefinitions.d.ts",
+    "tsconfig.json"
   ],
   "rules": {
     "no-console": "warn",
