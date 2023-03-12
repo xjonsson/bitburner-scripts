@@ -3,7 +3,7 @@ import { NS } from '@ns';
 import Player from './zPlayer.js';
 /* eslint-enable */
 
-// NOTE: You must be on the terminal tab for injection to work
+// NOTE: You must be on the terminal tab for injection to work.
 
 const terminalInput = document.getElementById('terminal-input');
 const handler = Object.keys(terminalInput)[1];
