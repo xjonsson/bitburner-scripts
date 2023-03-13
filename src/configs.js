@@ -1,14 +1,28 @@
 export const configs = {
+  hackAmount: 0.1, // 10%
   reserve: 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
   reserveRAM: 128, // However much you want to keep available for other scripts
-  nodesTargetCount: 24, // 24 Soft Max (Real Max Infinity)
+  nodesTargetCount: 26, // 24 Soft Max (Real Max Infinity)
   nodesTargetLevel: 200, // 200 Max
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
   serversTargetRAM: 1048576, // L10 (1024) L20 (1048576) (Pow2 2, 4, 8)
+  softwareCost: {
+    tor: 200000, // 200 K
+    ssh: 500000, // 500 K
+    ftp: 1500000, // 1.5 Million
+    smtp: 5000000, // 5 Million
+    http: 30000000, // 30 Million
+    sql: 250000000, // 250 Million
+    serverProfiler: 500000, // 500 K
+    deepscanV1: 500000, // 500 K
+    deepscanV2: 25000000, // 25 Million
+    autolink: 1000000, // 1 Million
+    formulas: 5000000000, // 5 Billion
+  },
 };
 
 /* 
