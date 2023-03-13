@@ -5,8 +5,6 @@ import { numCycleForGrowthCorrected } from './zCalc.js';
 import Player from './zPlayer.js';
 /* eslint-enable */
 
-const { hackAmount } = configs;
-
 export default class Server {
   ns: NS;
   hostname: string;
@@ -15,7 +13,7 @@ export default class Server {
   constructor(ns: NS, hostname: string) {
     this.ns = ns;
     this.hostname = hostname;
-    this.hackAmount = hackAmount;
+    this.hackAmount = configs.hackAmount;
   }
 
   get data(): any {
