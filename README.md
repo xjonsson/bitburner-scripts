@@ -25,6 +25,8 @@ Add image of logic flow here
 | xweak      | 1.80GB  | Distributable weak script                               | -                                                   |
 | xgrow      | 1.80GB  | Distributable grow script                               | -                                                   |
 | zPlayer    | 2.25GB  | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
+| zServer    | 5.55GB  | Class to handle servers and calculations                | -                                                   |
+| zCalc      | 2.10GB  | Calculation functions numCycleForGrowthCorrected        | -                                                   |
 | uDoor      | 29.50GB | Auto backdoors all servers without singularity api      | -                                                   |
 | uRoute     | 1.80GB  | Utility to provide route to server                      | -                                                   |
 
