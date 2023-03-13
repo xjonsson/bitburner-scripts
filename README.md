@@ -11,11 +11,10 @@ Add image of logic flow here
 | Script     | RAM     | Purpose                                                 | Logic                                               |
 | ---------- | ------- | ------------------------------------------------------- | --------------------------------------------------- |
 | Start      | 2.7GB   | Controls the start of the run                           | ![Start](docs/Module-Start.jpg?raw=true)            |
-| Configs    | X.XXGB  | Global configuration options                            | - TBD                                               |
+| Configs    | X.XXGB  | Global configuration options                            | -                                                   |
 | Minimal    | 7.70GB  | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true)        |
 | Controller | X.XXGB  | Manages game loop with ram                              | - TBD                                               |
-| Network    | X.XXGB  | Handles ring network                                    | - TBD                                               |
-| Server     | X.XXGB  | Servers home, ring, hacknet, servers, bots and targets  | - TBD                                               |
+| Network    | 12.00GB | Handles ring and networking                             | - TBD                                               |
 | Focus      | X.XXGB  | Handles targeting and distribution                      | - TBD                                               |
 | Shop       | X.XXGB  | Handles shopping and flow                               | - TBD                                               |
 | Monitor    | 4.15GB  | Monitors a server for security, money, threads and time | ![Monitor](docs/Module-Monitor.png?raw=true)        |
@@ -25,7 +24,7 @@ Add image of logic flow here
 | xweak      | 1.80GB  | Distributable weak script                               | -                                                   |
 | xgrow      | 1.80GB  | Distributable grow script                               | -                                                   |
 | zPlayer    | 2.25GB  | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
-| zServer    | 5.55GB  | Class to handle servers and calculations                | -                                                   |
+| zServer    | 5.55GB  | Servers home, ring, hacknet, servers, bots and targets  | -                                                   |
 | zCalc      | 2.10GB  | Calculation functions numCycleForGrowthCorrected        | -                                                   |
 | uDoor      | 29.50GB | Auto backdoors all servers without singularity api      | -                                                   |
 | uRoute     | 1.80GB  | Utility to provide route to server                      | -                                                   |
