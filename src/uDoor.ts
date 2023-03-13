@@ -69,7 +69,7 @@ export async function main(ns: NS) {
   ns.disableLog('sleep');
 
   const p = new Player(ns);
-  const rowHeader = ' %5s | %-20s | %-24s ';
+  const rowHeader = ' %5s | %5s | %-20s | %-24s ';
 
   const network = ringScan(ns, 'home')
     .filter((hostname) => hostname !== 'home')
@@ -110,13 +110,25 @@ export async function main(ns: NS) {
   });
 
   ns.print(`[Doors]  ${doors.length}`);
-  ns.printf(rowHeader, 'Level', 'Server', 'Route');
-  ns.printf(rowHeader, '-----', '------------------', '------------------');
+  ns.printf(rowHeader, 'Door', 'Level', 'Server', 'Time');
+  ns.printf(
+    rowHeader,
+    '-----',
+    '-----',
+    '------------------',
+    '------------------'
+  );
 
   while (doors.length > 0) {
     const delay = ns.getHackTime(doors[0].hostname) / 4 + 1000;
     if (doors[0].level <= p.hacking) {
-      ns.printf(rowHeader, doors[0].level, doors[0].hostname, '');
+      ns.printf(
+        rowHeader,
+        doors.length,
+        doors[0].level,
+        doors[0].hostname,
+        ns.tFormat(delay - 1000)
+      );
       openDoor(ns, doors[0].route);
       doors.shift();
     }

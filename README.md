@@ -26,6 +26,14 @@ Add image of logic flow here
 | xgrow      | 1.80GB  | Distributable grow script                               | -                                                   |
 | zPlayer    | 2.25GB  | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
 | uDoor      | 29.50GB | Auto backdoors all servers without singularity api      | -                                                   |
+| uRoute     | 1.80GB  | Utility to provide route to server                      | -                                                   |
+
+---
+
+### Notes
+
+- uDoor.js - Needs to be run while looking at terminal (InjectHTML limitation)
+- uDoor.js - If using 'Do something else' can cause script to stop injecting, kill, refresh, start fixes it
 
 ---
 
