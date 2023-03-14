@@ -36,6 +36,24 @@ export default class Network {
     this.targets = [];
   }
 
+  get hacknetCount(): number {
+    return this.ns.hacknet.numNodes();
+  }
+
+  get hacknetDone(): any {
+    return this.hacknet
+      .filter((node: any) => node.maxed)
+      .reduce((total) => total + 1, 0);
+  }
+
+  hacknetMaxed(node: any): boolean {
+    return (
+      node.level >= this.nodesTargetLevel &&
+      node.ram >= this.nodesTargetRAM &&
+      node.cores >= this.nodesTargetCores
+    );
+  }
+
   updateHacknet(): any {
     const nodeCount = this.ns.hacknet.numNodes();
     const nodes = [];
@@ -44,11 +62,13 @@ export default class Network {
       const node = {
         id: n,
         exists: true,
-        name: exists.name,
+        maxed: false,
+        name: `${n.toString().padStart(2, '0')}`,
         level: exists.level,
         ram: exists.ram,
         cores: exists.cores,
       };
+      node.maxed = this.hacknetMaxed(node);
       nodes.push(node);
     }
     if (nodeCount < this.nodesTargetCount) {
@@ -58,6 +78,7 @@ export default class Network {
           id: null,
           exists: false,
           name: '~',
+          maxed: false,
           level: this.nodesTargetLevel,
           ram: this.nodesTargetRAM,
           cores: this.nodesTargetCores,
@@ -67,6 +88,20 @@ export default class Network {
     }
     this.hacknet = nodes;
     return nodes;
+  }
+
+  get serverCount(): number {
+    return this.ns.getPurchasedServers().length;
+  }
+
+  get serverDone(): any {
+    return this.servers
+      .filter((node: any) => node.maxed)
+      .reduce((total) => total + 1, 0);
+  }
+
+  serverMaxed(node: any): boolean {
+    return node.ram >= this.serversTargetRAM;
   }
 
   updateServers(): any {
@@ -79,8 +114,10 @@ export default class Network {
         id: s,
         exists: true,
         name: server.hostname,
+        maxed: false,
         ram: server.ram.max,
       };
+      node.maxed = this.serverMaxed(node);
       nodes.push(node);
     }
     if (serverCount < this.serversTargetCount) {
@@ -90,6 +127,7 @@ export default class Network {
           id: null,
           exists: false,
           name: '~',
+          maxed: false,
           ram: this.serversTargetRAM,
         };
         nodes.push(node);
