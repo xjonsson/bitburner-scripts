@@ -4,7 +4,9 @@ import { configs } from './configs.js';
 import Player from './zPlayer.js';
 import Network from './zNetwork.js';
 import Display from './zDisplay.js';
+import Server from './zServer.js';
 import Shop from './zShop.js';
+import { numCycleForGrowthCorrected } from './zCalc.js';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -65,14 +67,14 @@ export async function main(ns: NS) {
 
       if (controller.cShopHacknet) {
         xmon.displayShopHacknet();
-        if (xnet.hacknetDone === xnet.nodesTargetCount) {
+        if (xnet.hacknetDone >= xnet.nodesTargetCount) {
           controller.cShopHacknet = false;
         }
       }
 
       if (controller.cShopServers) {
         xmon.displayShopServers();
-        if (xnet.serverDone === xnet.serversTargetCount) {
+        if (xnet.serverDone >= xnet.serversTargetCount) {
           controller.cShopServers = false;
         }
       }
@@ -99,22 +101,26 @@ export async function main(ns: NS) {
     // return msg;
   }
 
-  function updateDisplay() {
-    ns.clearLog();
-    updateStats();
+  function updateTargets() {
+    const { targets } = xnet;
+    const { bots } = xnet;
+    xnet.updateRing();
+    // bots.forEach((bot: any) => hash.set(bot.hostname, bot.ram.now));
+    // bots.sort((a: any, b: any) => a.home - b.home);
+    // targets.sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW);
+    // const targetsReady = targets.filter((target: any) => target.nodeReady);
+    // const targetsPending = targets.filter((target: any) => !target.nodeReady);
 
-    // updateHome();
-    // updateNetwork();
-
-    // if (controller.reclaim) {
-    //   reclaimNetwork();
-    // }
-
-    // updateTargets();
+    ns.print(`[Targets] ${targets.length}`);
+    ns.print(`[Bots] ${bots.length}`);
+    // ns.print(targetsReady);
+    // ns.print(targetsPending);
   }
 
   while (true) {
-    updateDisplay();
+    ns.clearLog();
+    updateStats();
+    updateTargets();
     await ns.sleep(flags.refresh as number);
   }
 }
