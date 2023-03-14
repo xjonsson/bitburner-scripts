@@ -11,12 +11,11 @@ Add image of logic flow here
 | Script     | RAM     | Purpose                                                 | Logic                                               |
 | ---------- | ------- | ------------------------------------------------------- | --------------------------------------------------- |
 | Start      | 2.7GB   | Controls the start of the run                           | ![Start](docs/Module-Start.jpg?raw=true)            |
-| Configs    | X.XXGB  | Global configuration options                            | -                                                   |
-| Minimal    | 7.70GB  | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true)        |
-| Controller | X.XXGB  | Manages game loop with ram                              | - TBD                                               |
-| Network    | 12.00GB | Handles ring and networking                             | - TBD                                               |
+| Configs    | 1.60GB  | Global configuration options                            | -                                                   |
+| Minimal    | 7.20GB  | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true)        |
+| Controller | 14.90GB | Manages game loop with ram                              | -                                                   |
+| Network    | 12.00GB | Handles ring and networking                             | -                                                   |
 | Focus      | X.XXGB  | Handles targeting and distribution                      | - TBD                                               |
-| Shop       | X.XXGB  | Handles shopping and flow                               | - TBD                                               |
 | Monitor    | 4.15GB  | Monitors a server for security, money, threads and time | ![Monitor](docs/Module-Monitor.png?raw=true)        |
 | Minideploy | 4.65GB  | Script to help % targeting on home                      | ![Mini Deploy](docs/Module-Minideploy.png?raw=true) |
 | xmin       | 2.40GB  | Minimal Hack, Weak, Grow on single target               | ![xmin](docs/Module-xmin.jpg?raw=true)              |
@@ -25,7 +24,9 @@ Add image of logic flow here
 | xgrow      | 1.80GB  | Distributable grow script                               | -                                                   |
 | zPlayer    | 2.25GB  | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
 | zServer    | 5.55GB  | Servers home, ring, hacknet, servers, bots and targets  | -                                                   |
+| zShop      | 10.75GB | Handles shopping and flow (Nodes and Servers)           | -                                                   |
 | zCalc      | 2.10GB  | Calculation functions numCycleForGrowthCorrected        | -                                                   |
+| zDisplay   | 5.60GB  | Used to handle printing and styling                     | -                                                   |
 | uDoor      | 29.50GB | Auto backdoors all servers without singularity api      | -                                                   |
 | uRoute     | 1.80GB  | Utility to provide route to server                      | -                                                   |
 
@@ -33,6 +34,7 @@ Add image of logic flow here
 
 ### Notes
 
+- RAM usage is guidelines only if you were to run them individually. Eg, Controller uses many of the classes but only totals 14.90GB as RAM usage is only counted once per function.
 - uDoor.js - Needs to be run while looking at terminal (InjectHTML limitation)
 - uDoor.js - If using 'Do something else' can cause script to stop injecting, kill, refresh, start fixes it
 

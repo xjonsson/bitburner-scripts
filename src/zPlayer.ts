@@ -1,5 +1,7 @@
-/* eslint-disable-next-line */
+/* eslint-disable */
 import { NS } from '@ns';
+import { configs } from './configs.js';
+/* eslint-enable */
 
 export default class Player {
   ns: NS;
@@ -35,6 +37,38 @@ export default class Player {
     return Object.keys(this.programs)
       .filter((prog) => this.programs[prog] && prog !== 'tor')
       .reduce((total) => total + 1, 0);
+  }
+
+  get bitnode(): number {
+    return this.data.bitNodeN;
+  }
+
+  get reserve(): number {
+    if (!this.programs.tor) {
+      return configs.softwareCost.tor;
+    }
+
+    if (!this.programs.ssh) {
+      return configs.softwareCost.ssh;
+    }
+
+    if (!this.programs.ftp) {
+      return configs.softwareCost.ftp;
+    }
+
+    if (!this.programs.smtp) {
+      return configs.softwareCost.smtp;
+    }
+
+    if (!this.programs.http) {
+      return configs.softwareCost.http;
+    }
+
+    if (!this.programs.sql) {
+      return configs.softwareCost.sql;
+    }
+
+    return 0;
   }
 }
 
