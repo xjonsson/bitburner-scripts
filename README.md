@@ -2,81 +2,58 @@
 
 Collection of scripts while trying out Bitburner
 
-Everything below this is from the Remote File API for auto copy pasta
+## Logic
+
+Add image of logic flow here
+
+### Scripts
+
+| Script     | RAM     | Purpose                                                 | Logic                                               |
+| ---------- | ------- | ------------------------------------------------------- | --------------------------------------------------- |
+| Start      | 2.7GB   | Controls the start of the run                           | ![Start](docs/Module-Start.jpg?raw=true)            |
+| Configs    | 1.60GB  | Global configuration options                            | -                                                   |
+| Minimal    | 7.20GB  | Handles basic gameplay with no ram                      | ![Minimal](docs/Module-Minimal.jpg?raw=true)        |
+| Controller | 14.90GB | Manages game loop with ram                              | -                                                   |
+| Network    | 12.00GB | Handles ring and networking                             | -                                                   |
+| Focus      | X.XXGB  | Handles targeting and distribution                      | - TBD                                               |
+| Monitor    | 4.15GB  | Monitors a server for security, money, threads and time | ![Monitor](docs/Module-Monitor.png?raw=true)        |
+| Minideploy | 4.65GB  | Script to help % targeting on home                      | ![Mini Deploy](docs/Module-Minideploy.png?raw=true) |
+| xmin       | 2.40GB  | Minimal Hack, Weak, Grow on single target               | ![xmin](docs/Module-xmin.jpg?raw=true)              |
+| xhack      | 1.75GB  | Distributable hack script                               | -                                                   |
+| xweak      | 1.80GB  | Distributable weak script                               | -                                                   |
+| xgrow      | 1.80GB  | Distributable grow script                               | -                                                   |
+| zPlayer    | 2.25GB  | Handles player data, skill, programs, money, ports      | ![Player](docs/Module-Player.jpg?raw=true)          |
+| zServer    | 5.55GB  | Servers home, ring, hacknet, servers, bots and targets  | -                                                   |
+| zShop      | 10.75GB | Handles shopping and flow (Nodes and Servers)           | -                                                   |
+| zCalc      | 2.10GB  | Calculation functions numCycleForGrowthCorrected        | -                                                   |
+| zDisplay   | 5.60GB  | Used to handle printing and styling                     | -                                                   |
+| uDoor      | 29.50GB | Auto backdoors all servers without singularity api      | -                                                   |
+| uRoute     | 1.80GB  | Utility to provide route to server                      | -                                                   |
 
 ---
 
-# Typescript template for Bitburner's Remote File API
+### Notes
 
-The official template for synchronizing Typescript/Javascript from your computer to the game.
+- RAM usage is guidelines only if you were to run them individually. Eg, Controller uses many of the classes but only totals 14.90GB as RAM usage is only counted once per function.
+- uDoor.js - Needs to be run while looking at terminal (InjectHTML limitation)
+- uDoor.js - If using 'Do something else' can cause script to stop injecting, kill, refresh, start fixes it
 
-[Step by step install](BeginnersGuide.md)
+---
 
-[Learn more about Typescript](https://www.typescriptlang.org/docs/)
+### Resources
 
-## About
+- [Bitburner Remote File API](zRemoteAPI.md)
+- [Step by step install](zBeginnersGuide.md)
+- [Bitburner Official Github - Typescript Template for Remote API](https://github.com/bitburner-official/typescript-template)
+- [Bitburner Official Documentation - Remote API](https://bitburner-official.readthedocs.io/en/latest/remoteapi.html)
+- [Bitburner Official Documentation - Netscript](https://bitburner-official.readthedocs.io/en/latest/netscript.html)
+- [Bitburner Official Github - Netscript Interface](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.md)
 
-This template uses the Typescript compiler and the Remote File API system to synchronize Typescript to your game.
-Due to the usage of the RFA system, it works with Web and Electron versions of the game.
+---
 
-## Prerequisites
+### Credit
 
-[Node.js](https://nodejs.org/en/download/) is needed for compiling typescript and installing dependencies
-
-[See here for step by step installation](BeginnersGuide.md) if you'd like help with installing Node and/or connecting to the game.
-
-## Quick start
-
-Download the template to your computer and install everything it requires:
-
-```
-git clone https://github.com/bitburner-official/typescript-template
-cd typescript-template
-npm i
-```
-
-### How to use this template
-
-Write all your typescript source code in the `/src` directory
-
-To autocompile and send changed files as you save, run `npm run watch` in a terminal.
-Have it running in the background so that it all happens automatically.
-
-For Bitburner to receive any files, you need to enter the port `npm run watch` logs to the terminal
-in the Remote API section of the game settings, and press the connect button.
-
-[See here for step by step installation](BeginnersGuide.md) if you'd like help with installing Node and/or connecting to the game.
-
-## Advanced
-
-### Imports
-
-To ensure both the game and typescript have no issues with import paths, your import statements should follow a few formatting rules:
-
-- Paths must be absolute from the root of `src/`, which will be equivalent to the root directory of your home drive
-- Paths must contain no leading slash
-- Paths must end with no file extension
-
-#### Examples:
-
-To import `helperFunction` from the file `helpers.ts` located in the directory `src/lib/`:
-
-```js
-import { helperFunction } from 'lib/helpers';
-```
-
-To import all functions from the file `helpers.ts` located in the `src/lib/` directory as the namespace `helpers`:
-
-```js
-import * as helpers from 'lib/helpers';
-```
-
-To import `someFunction` from the file `main.ts` located in the `src/` directory:
-
-```js
-import { someFunction } from 'main';
-```
-
-### Debugging
-
-For debugging bitburner on Steam you will need to enable a remote debugging port. This can be done by rightclicking bitburner in your Steam library and selecting properties. There you need to add `--remote-debugging-port=9222` [Thanks @DarkMio]
+- Remote API and wrapper thanks to the [Typescript Template repo](https://bitburner-official.readthedocs.io/en/latest/remoteapi.html) and hydroflame, Hoekstraa, based on work by SlyCedix
+- Minimal.js borrows from [Official Getting Started Guide](https://bitburner-official.readthedocs.io/en/latest/guidesandtips/gettingstartedguideforbeginnerprogrammers.html)
+- Hacknet payback time borrows from [@grimley517](https://gist.github.com/grimley517/c2d531976db057cede4ac8e367418971)
+- HWGW Algorithm borrows from [@trhr](https://github.com/trhr/lets-play-bitburner/blob/ep7/hwgw.js)

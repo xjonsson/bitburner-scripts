@@ -3,12 +3,7 @@
     "browser": true,
     "es2021": true
   },
-  "extends": [
-    "eslint:recommended",
-    // "plugin:@typescript-eslint/recommended",
-    "airbnb-base",
-    "wesbos"
-  ],
+  "extends": ["plugin:@typescript-eslint/recommended", "airbnb-base", "wesbos"],
   "overrides": [],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -20,17 +15,21 @@
     "node_modules/**",
     "build/**",
     "dist/**",
-    "NetscriptDefinitions.d.ts"
+    "NetscriptDefinitions.d.ts",
+    "tsconfig.json"
   ],
   "rules": {
     "no-console": "warn",
     "no-debugger": "warn",
+    "no-constant-condition": 0,
+    "@typescript-eslint/no-explicit-any": 0,
+    "lines-between-class-members": 0,
     "prettier/prettier": [
       "error",
       {
         "trailingComma": "es5",
         "singleQuote": true,
-        "printWidth": 100,
+        "printWidth": 80,
         "tabWidth": 2
       }
     ]
