@@ -254,9 +254,15 @@ export async function main(ns: NS) {
     });
 
     // FIXME: Adjust this with a filtered list with the top 10 results
+    // xnet.targets
+    //   .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+    //   .filter((t: any, index) => index < 10)
+    //   .forEach((t: any) => {
+    //     const targetNode = xmap.get(t.hostname);
+    //     updateTargets(targetNode);
+    //   });
     xnet.targets
       .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
-      .filter((t: any, index) => index < 10)
       .forEach((t: any) => {
         const targetNode = xmap.get(t.hostname);
         updateTargets(targetNode);

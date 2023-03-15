@@ -278,66 +278,68 @@ export default class Display {
     )[0];
     targets.sort((a: any, b: any) => b.money.max - a.money.max);
 
-    const rows =
-      ' %3s | %4s | %6s | %8s | %8s | %8s | %8s | %8s | %6s | %-12s ';
+    if (targets.length > 0) {
+      const rows =
+        ' %3s | %4s | %6s | %8s | %8s | %8s | %8s | %8s | %6s | %-12s ';
 
-    this.ns.print('\n');
-    this.ns.printf(
-      ' %-5s %-18s %5s | %8s | %8s | %8s | %8s            %-12s ',
-      'Focus',
-      tFocus.hostname,
-      'Money',
-      'Max',
-      'Hack',
-      'Weak',
-      'Grow',
-      'Server'
-    );
-    this.ns.printf(
-      rows,
-      'CRD',
-      'HWGW',
-      'Sec',
-      this.ns.formatNumber(this.xnet.targetsValueNow, 2),
-      this.ns.formatNumber(this.xnet.targetsValue, 2),
-      '',
-      '',
-      '',
-      'Action',
-      targets.length
-    );
-    this.ns.printf(
-      rows,
-      '---',
-      '----',
-      '------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '------',
-      '------------'
-    );
-    targets.forEach((t: any) => {
-      const mCRD = `${t.root ? '  ' : t.challenge + t.root}${
-        !t.door ? 'D' : ' '
-      }`;
-
+      this.ns.print('\n');
+      this.ns.printf(
+        ' %-5s %-18s %5s | %8s | %8s | %8s | %8s            %-12s ',
+        'Focus',
+        tFocus.hostname,
+        'Money',
+        'Max',
+        'Hack',
+        'Weak',
+        'Grow',
+        'Server'
+      );
       this.ns.printf(
         rows,
-        mCRD,
-        // t.level,
-        t.nodeValueHWGW.toFixed(2),
-        `+${(t.sec.now - t.sec.min).toFixed(2)}`,
-        `${((t.money.now / t.money.max) * 100).toFixed(2)}%`,
-        `${this.ns.formatNumber(t.money.max, 2)}`,
-        t.getHackThreads,
-        t.getWeakThreads,
-        t.getGrowThreads,
-        t.nodeReady ? 'Hack' : 'Prep',
-        t.hostname
+        'CRD',
+        'HWGW',
+        'Sec',
+        this.ns.formatNumber(this.xnet.targetsValueNow, 2),
+        this.ns.formatNumber(this.xnet.targetsValue, 2),
+        '',
+        '',
+        '',
+        'Action',
+        targets.length
       );
-    });
+      this.ns.printf(
+        rows,
+        '---',
+        '----',
+        '------',
+        '--------',
+        '--------',
+        '--------',
+        '--------',
+        '--------',
+        '------',
+        '------------'
+      );
+      targets.forEach((t: any) => {
+        const mCRD = `${t.root ? '  ' : t.challenge + t.root}${
+          !t.door ? 'D' : ' '
+        }`;
+
+        this.ns.printf(
+          rows,
+          mCRD,
+          // t.level,
+          t.nodeValueHWGW.toFixed(2),
+          `+${(t.sec.now - t.sec.min).toFixed(2)}`,
+          `${((t.money.now / t.money.max) * 100).toFixed(2)}%`,
+          `${this.ns.formatNumber(t.money.max, 2)}`,
+          t.getHackThreads,
+          t.getWeakThreads,
+          t.getGrowThreads,
+          t.nodeReady ? 'Hack' : 'Prep',
+          t.hostname
+        );
+      });
+    }
   }
 }
