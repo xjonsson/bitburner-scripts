@@ -2,20 +2,34 @@
 import { NS } from '@ns';
 import { configs } from './configs.js';
 import Player from './zPlayer.js';
+import Server from './zServer.js';
 import Network from './zNetwork.js';
 /* eslint-enable */
 
 const cellsMax = 4;
+const scriptHack = 'xhack.js';
+const scriptWeak = 'xweak.js';
+const scriptGrow = 'xgrow.js';
+
+function threadsCount(availableRAM: number, scriptRAM: number) {
+  return Math.floor(availableRAM / scriptRAM);
+}
 
 export default class Display {
   ns: NS;
   p: Player;
   xnet: Network;
+  scriptHackRAM: number;
+  scriptWeakRAM: number;
+  scriptGrowRAM: number;
 
   constructor(ns: NS, player: Player, network: Network) {
     this.ns = ns;
     this.p = player;
     this.xnet = network;
+    this.scriptHackRAM = ns.getScriptRam(scriptHack);
+    this.scriptWeakRAM = ns.getScriptRam(scriptWeak);
+    this.scriptGrowRAM = ns.getScriptRam(scriptGrow);
   }
 
   displayStats(bShort = false) {
@@ -131,5 +145,130 @@ export default class Display {
         }
       }
     });
+  }
+
+  displayNetwork() {
+    const home = new Server(this.ns, 'home');
+    const { reclaim } = this.xnet;
+
+    const totalRAM =
+      home.ram.now + this.xnet.serverRAM + this.xnet.reclaimedRAM;
+    const totalThreads = threadsCount(totalRAM, this.scriptGrowRAM);
+    const totalHack = threadsCount(totalRAM, this.scriptHackRAM);
+    const totalWeak = threadsCount(totalRAM, this.scriptWeakRAM);
+    const totalGrow = threadsCount(totalRAM, this.scriptGrowRAM);
+
+    const rows = ' %-7s %5s | %8s | %8s | %8s | %8s | %8s | %-12s ';
+    this.ns.printf(
+      ' %-7s  %5s  %8s | %8s | %8s | %8s | %8s  %-12s ',
+      '',
+      '',
+      'RAM',
+      'Threads',
+      'Hack',
+      'Weak',
+      'Grow',
+      ''
+    );
+    this.ns.printf(
+      rows,
+      'Net',
+      `${this.xnet.networkOwnership}/${this.xnet.networkCount}`,
+      this.ns.formatRam(totalRAM),
+      totalThreads,
+      totalHack,
+      totalWeak,
+      totalGrow,
+      'Hostname'
+    );
+    this.ns.printf(
+      rows,
+      '-------',
+      '-----',
+      '--------',
+      '--------',
+      '--------',
+      '--------',
+      '--------',
+      '--------'
+    );
+    this.ns.printf(
+      rows,
+      `Home`,
+      `1`,
+      this.ns.formatRam(home.ram.now, 2),
+      threadsCount(home.ram.now, this.scriptGrowRAM),
+      threadsCount(home.ram.now, this.scriptHackRAM),
+      threadsCount(home.ram.now, this.scriptWeakRAM),
+      threadsCount(home.ram.now, this.scriptGrowRAM),
+      ''
+    );
+    this.ns.printf(
+      rows,
+      `Servers`,
+      this.xnet.serverCount,
+      this.ns.formatRam(this.xnet.serverRAM, 2),
+      threadsCount(this.xnet.serverRAM, this.scriptGrowRAM),
+      threadsCount(this.xnet.serverRAM, this.scriptHackRAM),
+      threadsCount(this.xnet.serverRAM, this.scriptWeakRAM),
+      threadsCount(this.xnet.serverRAM, this.scriptGrowRAM),
+      ''
+    );
+    this.ns.printf(
+      rows,
+      `Taken`,
+      this.xnet.reclaimedCount,
+      this.ns.formatRam(this.xnet.reclaimedRAM, 2),
+      threadsCount(this.xnet.reclaimedRAM, this.scriptGrowRAM),
+      threadsCount(this.xnet.reclaimedRAM, this.scriptHackRAM),
+      threadsCount(this.xnet.reclaimedRAM, this.scriptWeakRAM),
+      threadsCount(this.xnet.reclaimedRAM, this.scriptGrowRAM),
+      ''
+    );
+    if (reclaim.length > 0) {
+      this.ns.printf(
+        rows,
+        `Reclaim`,
+        this.xnet.reclaimCount,
+        `~${this.ns.formatRam(this.xnet.reclaimRAM, 2)}`
+      );
+      this.ns.printf(
+        rows,
+        '-------',
+        '-----',
+        '--------',
+        '--------',
+        '--------',
+        '--------',
+        '--------',
+        '--------'
+      );
+      reclaim
+        .sort((a: any, b: any) => a.challenge - b.challenge)
+        .forEach((r: any) => {
+          this.ns.printf(
+            rows,
+            'Reclaim',
+            r.challenge,
+            this.ns.formatRam(r.ram.max, 2),
+            '',
+            '',
+            '',
+            '',
+            r.hostname
+          );
+        });
+    }
+    this.ns.printf(
+      rows,
+      `Bots`,
+      this.xnet.botCount,
+      this.ns.formatRam(this.xnet.botsRAM, 2),
+      threadsCount(this.xnet.botsRAM, this.scriptGrowRAM),
+      threadsCount(this.xnet.botsRAM, this.scriptHackRAM),
+      threadsCount(this.xnet.botsRAM, this.scriptWeakRAM),
+      threadsCount(this.xnet.botsRAM, this.scriptGrowRAM),
+      ''
+    );
   }
 }
