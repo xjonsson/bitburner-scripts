@@ -13,6 +13,7 @@ export default class Network {
   nodesTargetCores: number;
   serversTargetCount: number;
   serversTargetRAM: number;
+  networkCount: number;
   hacknet: Array<object>;
   servers: Array<object>;
   bots: Array<object>;
@@ -28,6 +29,7 @@ export default class Network {
     this.nodesTargetCores = configs.nodesTargetCores;
     this.serversTargetCount = configs.serversTargetCount;
     this.serversTargetRAM = configs.serversTargetRAM;
+    this.networkCount = 0;
     this.hacknet = [];
     this.servers = [];
     this.bots = [];
@@ -172,6 +174,7 @@ export default class Network {
         t.push(node);
       }
     });
+    this.networkCount = ring.length;
     this.bots = b;
     this.reclaim = r;
     this.doors = d;
