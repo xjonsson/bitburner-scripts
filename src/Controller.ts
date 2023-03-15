@@ -6,12 +6,14 @@ import Network from './zNetwork.js';
 import Display from './zDisplay.js';
 import Server from './zServer.js';
 import Shop from './zShop.js';
+// import Focus from './zFocus.js';
 import { numCycleForGrowthCorrected } from './zCalc.js';
+import { reclaimBot } from './uReclaim.js';
 /* eslint-enable */
 
 export async function main(ns: NS) {
   const flags = ns.flags([
-    ['refresh', 1000],
+    ['refresh', 500],
     ['help', false],
   ]);
 
@@ -23,8 +25,14 @@ export async function main(ns: NS) {
 
   const p = new Player(ns);
   const xnet = new Network(ns);
-  const xmon = new Display(ns, p, xnet);
   const xshop = new Shop(ns, p, xnet);
+  // const xfocus = new Focus(ns, p, xnet);
+  const xmon = new Display(ns, p, xnet);
+  const xmap = new Map();
+  const xmin = configs.xMin;
+  const xhack = configs.xHack;
+  const xweak = configs.xWeak;
+  const xgrow = configs.xGrow;
   const controller = {
     cHacking: 0,
     cMoney: 0,
@@ -35,6 +43,11 @@ export async function main(ns: NS) {
     displayChallenge: true,
     displayHacknet: true,
     displayServers: true,
+    ramMin: ns.getScriptRam(configs.xMin),
+    ramHack: ns.getScriptRam(configs.xHack),
+    ramWeak: ns.getScriptRam(configs.xWeak),
+    ramGrow: ns.getScriptRam(configs.xGrow),
+    deploy: '',
   };
 
   ns.tail();
@@ -51,11 +64,11 @@ export async function main(ns: NS) {
       xmon.displayStats(true);
     }
 
-    if (p.hacking > controller.cHacking) {
-      // Updating hacking functions
-      ns.print('We would do some hacking here');
-      controller.cHacking = p.hacking;
-    }
+    // if (p.hacking > controller.cHacking) {
+    //   // Updating hacking functions
+    //   ns.print('We would do some hacking here');
+    //   controller.cHacking = p.hacking;
+    // }
 
     if (controller.cShopping) {
       if (controller.cShopPrograms) {
@@ -64,6 +77,9 @@ export async function main(ns: NS) {
           controller.cShopPrograms = false;
         }
       }
+
+      xshop.updateShopping();
+      xshop.buyNext();
 
       if (controller.cShopHacknet) {
         xmon.displayShopHacknet();
@@ -79,9 +95,6 @@ export async function main(ns: NS) {
         }
       }
 
-      xshop.updateShopping();
-      xshop.buyNext();
-
       if (
         !controller.cShopPrograms &&
         !controller.cShopHacknet &&
@@ -90,37 +103,172 @@ export async function main(ns: NS) {
         controller.cShopping = false;
       }
     }
-
-    // if (hacking > stats.hacking) {
-    //   stats.hacking = hacking;
-    //   xnet.updateRing();
-    //   xnet.updateServers();
-    // }
-
-    // msg = `BitNode ${mBitNode}    Ports  ${controller.challenge}  Hacking ${mHacking}  Money $${mMoney}`;
-    // return msg;
   }
 
-  function updateTargets() {
-    const { targets } = xnet;
-    const { bots } = xnet;
+  function updateNetwork() {
     xnet.updateRing();
-    // bots.forEach((bot: any) => hash.set(bot.hostname, bot.ram.now));
-    // bots.sort((a: any, b: any) => a.home - b.home);
-    // targets.sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW);
-    // const targetsReady = targets.filter((target: any) => target.nodeReady);
-    // const targetsPending = targets.filter((target: any) => !target.nodeReady);
+    xmon.displayNetwork();
+    xmon.displayTargets();
+  }
 
-    ns.print(`[Targets] ${targets.length}`);
-    ns.print(`[Bots] ${bots.length}`);
-    // ns.print(targetsReady);
-    // ns.print(targetsPending);
+  function updateBots() {
+    const { reclaim } = xnet;
+    // const { bots } = xnet;
+
+    if (reclaim.length > 0) {
+      reclaim.forEach((node: any) => {
+        reclaimBot(ns, node);
+      });
+    }
+  }
+
+  function work(
+    action: string,
+    amount = 1,
+    target = 'n00dles',
+    source: 'home'
+  ) {
+    // ns.print(`[Deploying] ${action} from ${source} on '${target}'`);
+    ns.scp([xmin, xhack, xweak, xgrow], source, 'home');
+    switch (action) {
+      case 'hack': {
+        ns.exec(xhack, source, amount, target);
+        break;
+      }
+
+      case 'weak': {
+        ns.exec(xweak, source, amount, target);
+        break;
+      }
+
+      case 'grow': {
+        ns.exec(xgrow, source, amount, target);
+        break;
+      }
+      case 'min': {
+        ns.exec(xmin, source, amount, target);
+        break;
+      }
+      default: {
+        ns.print('Nothing to do but wait');
+      }
+    }
+  }
+
+  function prepareTarget(targetNode: any, bot: any) {
+    if (targetNode.weakR > 0 && bot.ram.now > controller.ramWeak) {
+      if (targetNode.weakP < targetNode.weakR) {
+        let batch = targetNode.weakR - targetNode.weakP;
+        const maxThreads = bot.nodeThreads(controller.ramWeak);
+        if (maxThreads > batch) {
+          targetNode.weakP += batch;
+          work('weak', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.weakP += batch;
+          work('weak', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.weakT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.weakT + performance.now() + 1000;
+        }
+      }
+    } else if (targetNode.growR > 0 && bot.ram.now > controller.ramGrow) {
+      if (targetNode.growP < targetNode.growR) {
+        let batch = targetNode.growR - targetNode.growP;
+        const maxThreads = bot.nodeThreads(controller.ramGrow);
+        if (maxThreads > batch) {
+          targetNode.growP += batch;
+          work('grow', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.growP += batch;
+          work('grow', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.growT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.growT + performance.now() + 1000;
+        }
+      }
+    }
+  }
+
+  function attackTarget(targetNode: any, bot: any) {
+    if (targetNode.hackR > 0 && bot.ram.now > controller.ramHack) {
+      if (targetNode.hackP < targetNode.hackR) {
+        let batch = targetNode.hackR - targetNode.hackP;
+        const maxThreads = bot.nodeThreads(controller.ramHack);
+        if (maxThreads > batch) {
+          targetNode.hackP += batch;
+          work('hack', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.hackP += batch;
+          work('hack', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.hackT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.hackT + performance.now() + 1000;
+        }
+      }
+    }
+  }
+
+  function updateTargets(targetNode: any) {
+    const home = new Server(ns, 'home');
+    if (!targetNode.ready) {
+      xnet.bots.forEach((bot: any) => {
+        prepareTarget(targetNode, bot);
+      });
+      prepareTarget(targetNode, home);
+    } else if (targetNode.ready) {
+      xnet.bots.forEach((bot: any) => {
+        attackTarget(targetNode, bot);
+        attackTarget(targetNode, home);
+      });
+    }
+  }
+
+  function updateFocus() {
+    xnet.targets.forEach((t: any) => {
+      const previous = xmap.get(t.hostname);
+      const update = {
+        hostname: t.hostname,
+        ready: t.nodeReady,
+        focus: false,
+        hackR: t.getHackThreads,
+        hackP: 0,
+        hackT: t.getHackTime,
+        weakR: t.getWeakThreads,
+        weakP: 0,
+        weakT: t.getWeakTime,
+        growR: t.getGrowThreads,
+        growP: 0,
+        growT: t.getGrowTime,
+        recheck: performance.now() + 1000,
+      };
+      if (previous && previous.recheck >= performance.now()) {
+        update.hackP = previous.hackP;
+        update.weakP = previous.weakP;
+        update.growP = previous.growP;
+        update.recheck = previous.recheck;
+      }
+      xmap.set(t.hostname, update);
+    });
+
+    // FIXME: Adjust this with a filtered list with the top 10 results
+    xnet.targets
+      .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+      .filter((t: any, index) => index < 10)
+      .forEach((t: any) => {
+        const targetNode = xmap.get(t.hostname);
+        updateTargets(targetNode);
+      });
   }
 
   while (true) {
     ns.clearLog();
     updateStats();
-    updateTargets();
+    updateNetwork();
+    updateBots();
+    updateFocus();
     await ns.sleep(flags.refresh as number);
   }
 }
