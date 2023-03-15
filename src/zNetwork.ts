@@ -137,6 +137,14 @@ export default class Network {
     return nodes;
   }
 
+  get targetsValue() {
+    return this.targets.reduce((total, node: any) => total + node.money.max, 0);
+  }
+
+  get targetsValueNow() {
+    return this.targets.reduce((total, node: any) => total + node.money.now, 0);
+  }
+
   updateRing(): any {
     const p = new Player(this.ns);
     const b: any = [];

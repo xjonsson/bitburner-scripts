@@ -136,7 +136,7 @@ export default class Server {
   }
 
   get nodeValueBatch(): any {
-    // const home = new HackableBaseServer(ns, 'home');
+    const homeCores = this.ns.getServer('home').cpuCores;
     const hackThreads = Math.floor(
       this.ns.hackAnalyzeThreads(
         this.hostname,
@@ -148,7 +148,7 @@ export default class Server {
       this.ns.getServer(this.hostname),
       this.money.max,
       this.money.max * (1 - this.hackPercent),
-      1, // home.cores
+      homeCores,
       this.ns.getPlayer()
     );
 
@@ -168,6 +168,28 @@ export default class Server {
       nvb.hack * 1.75 + nvb.grow * 1.8 + nvb.weak1 * 1.8 + nvb.weak2 * 1.8;
     const seconds = this.ns.getHackTime(this.hostname) * 4.0;
     return dollars / (ram * seconds);
+  }
+
+  nodeBatchReduced(amount: number): any {
+    const homeCores = this.ns.getServer('home').cpuCores;
+    const hackThreads = Math.floor(
+      this.ns.hackAnalyzeThreads(this.hostname, this.money.max * amount)
+    );
+    const growThreads = numCycleForGrowthCorrected(
+      this.ns,
+      this.ns.getServer(this.hostname),
+      this.money.max,
+      this.money.max * (1 - amount),
+      homeCores,
+      this.ns.getPlayer()
+    );
+
+    return {
+      hack: hackThreads,
+      grow: growThreads,
+      weak1: Math.ceil(hackThreads / 25),
+      weak2: Math.ceil(growThreads / 12.5),
+    };
   }
 }
 

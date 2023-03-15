@@ -33,7 +33,7 @@ export async function main(ns: NS) {
     ns.run('minimal.js');
   } else {
     ns.print(`  [Using] Controller`);
-    ns.run('controller.js');
+    ns.run('controller.jss');
   }
 
   await ns.sleep(10000);

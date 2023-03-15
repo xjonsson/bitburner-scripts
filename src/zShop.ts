@@ -35,7 +35,9 @@ export default class Shop {
 
       if (this.p.money - this.p.reserve >= next.cost) {
         this.ns.print(
-          `Buying ${next.type} | ${this.ns.formatNumber(next.cost, 2)}`
+          ` Buying [${next.id ? next.id : 'New'}] ${
+            next.text
+          } | ${this.ns.formatNumber(next.cost, 2)}`
         );
         switch (next.type) {
           case 'serverNew': {
@@ -66,6 +68,12 @@ export default class Shop {
             this.ns.print('Could not detect type of purchase');
           }
         }
+      } else {
+        this.ns.print(
+          ` Saving [${next.id ? next.id : 'New'}] ${
+            next.text
+          } | ${this.ns.formatNumber(next.cost, 2)}`
+        );
       }
     }
   }
@@ -113,6 +121,7 @@ export default class Shop {
           id: null,
           cost: this.ns.getPurchasedServerCost(this.levelRAM),
           type: 'serverNew',
+          text: `server (${this.levelRAM})`,
         });
       }
 
@@ -133,6 +142,7 @@ export default class Shop {
             ),
             ram: existing.ram,
             type: 'serverRAM',
+            text: `server RAM (${existing.ram * 2})`,
           });
         });
     }
@@ -145,6 +155,7 @@ export default class Shop {
           id: null,
           cost: this.ns.hacknet.getPurchaseNodeCost(),
           type: 'hnetNew',
+          text: `hacknet Node (1)`,
         });
       }
 
@@ -163,6 +174,7 @@ export default class Shop {
             cost: this.ns.hacknet.getLevelUpgradeCost(existingNode.id, 1),
             level: existingNode.level,
             type: 'hnetLevel',
+            text: `hacknet node level (${existingNode.level + 1})`,
           });
         }
 
@@ -172,6 +184,7 @@ export default class Shop {
             cost: this.ns.hacknet.getRamUpgradeCost(existingNode.id, 1),
             ram: existingNode.ram,
             type: 'hnetRAM',
+            text: `hacknet node RAM (${existingNode.ram + 1})`,
           });
         }
 
@@ -181,6 +194,7 @@ export default class Shop {
             cost: this.ns.hacknet.getCoreUpgradeCost(existingNode.id, 1),
             cores: existingNode.cores,
             type: 'hnetCores',
+            text: `hacknet node core (${existingNode.cores + 1})`,
           });
         }
       }
