@@ -6,7 +6,7 @@ import Network from './zNetwork.js';
 import Display from './zDisplay.js';
 import Server from './zServer.js';
 import Shop from './zShop.js';
-import Focus from './zFocus.js';
+// import Focus from './zFocus.js';
 import { numCycleForGrowthCorrected } from './zCalc.js';
 import { reclaimBot } from './uReclaim.js';
 /* eslint-enable */
@@ -26,7 +26,7 @@ export async function main(ns: NS) {
   const p = new Player(ns);
   const xnet = new Network(ns);
   const xshop = new Shop(ns, p, xnet);
-  const xfocus = new Focus(ns, p, xnet);
+  // const xfocus = new Focus(ns, p, xnet);
   const xmon = new Display(ns, p, xnet);
   const xmap = new Map();
   const xmin = configs.xMin;
@@ -64,11 +64,11 @@ export async function main(ns: NS) {
       xmon.displayStats(true);
     }
 
-    if (p.hacking > controller.cHacking) {
-      // Updating hacking functions
-      ns.print('We would do some hacking here');
-      controller.cHacking = p.hacking;
-    }
+    // if (p.hacking > controller.cHacking) {
+    //   // Updating hacking functions
+    //   ns.print('We would do some hacking here');
+    //   controller.cHacking = p.hacking;
+    // }
 
     if (controller.cShopping) {
       if (controller.cShopPrograms) {
@@ -103,15 +103,6 @@ export async function main(ns: NS) {
         controller.cShopping = false;
       }
     }
-
-    // if (hacking > stats.hacking) {
-    //   stats.hacking = hacking;
-    //   xnet.updateRing();
-    //   xnet.updateServers();
-    // }
-
-    // msg = `BitNode ${mBitNode}    Ports  ${controller.challenge}  Hacking ${mHacking}  Money $${mMoney}`;
-    // return msg;
   }
 
   function updateNetwork() {
@@ -129,12 +120,6 @@ export async function main(ns: NS) {
         reclaimBot(ns, node);
       });
     }
-
-    // const focus = xnet.targets.sort(
-    //   (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
-    // )[0];
-
-    // deployBot(focus);
   }
 
   function work(
@@ -173,12 +158,9 @@ export async function main(ns: NS) {
   function prepareTarget(targetNode: any, bot: any) {
     if (targetNode.weakR > 0 && bot.ram.now > controller.ramWeak) {
       if (targetNode.weakP < targetNode.weakR) {
-        // ns.print('No weakens happening');
-        // ns.print('[Deploy] WEAKEN');
         let batch = targetNode.weakR - targetNode.weakP;
         const maxThreads = bot.nodeThreads(controller.ramWeak);
         if (maxThreads > batch) {
-          // ns.print('We could do a whole batch');
           targetNode.weakP += batch;
           work('weak', batch, targetNode.hostname, bot.hostname);
         } else if (maxThreads > 0) {
@@ -191,14 +173,10 @@ export async function main(ns: NS) {
         }
       }
     } else if (targetNode.growR > 0 && bot.ram.now > controller.ramGrow) {
-      // ns.print('we need to grow it');
       if (targetNode.growP < targetNode.growR) {
-        // ns.print('No grows happening');
-        // ns.print('[SIMULATE] GROW');
         let batch = targetNode.growR - targetNode.growP;
         const maxThreads = bot.nodeThreads(controller.ramGrow);
         if (maxThreads > batch) {
-          // ns.print('We could do a whole batch');
           targetNode.growP += batch;
           work('grow', batch, targetNode.hostname, bot.hostname);
         } else if (maxThreads > 0) {
@@ -219,7 +197,6 @@ export async function main(ns: NS) {
         let batch = targetNode.hackR - targetNode.hackP;
         const maxThreads = bot.nodeThreads(controller.ramHack);
         if (maxThreads > batch) {
-          // ns.print('We could do a whole batch');
           targetNode.hackP += batch;
           work('hack', batch, targetNode.hostname, bot.hostname);
         } else if (maxThreads > 0) {
@@ -237,13 +214,11 @@ export async function main(ns: NS) {
   function updateTargets(targetNode: any) {
     const home = new Server(ns, 'home');
     if (!targetNode.ready) {
-      // ns.print(`Not ready`);
       xnet.bots.forEach((bot: any) => {
         prepareTarget(targetNode, bot);
       });
       prepareTarget(targetNode, home);
     } else if (targetNode.ready) {
-      // ns.print('Its ready, go for it');
       xnet.bots.forEach((bot: any) => {
         attackTarget(targetNode, bot);
         attackTarget(targetNode, home);
@@ -252,13 +227,6 @@ export async function main(ns: NS) {
   }
 
   function updateFocus() {
-    // Give it a set of targets
-    // ns.print(xfocus.ramScripts, xfocus.ram);
-    // ns.print(`[Targets Ready] ${xfocus.targetsReady.length}`);
-    // xfocus.targetsReady.forEach((tr: any) => {
-    //   ns.print(tr.hostname);
-    // });
-
     xnet.targets.forEach((t: any) => {
       const previous = xmap.get(t.hostname);
       const update = {
@@ -293,31 +261,7 @@ export async function main(ns: NS) {
         const targetNode = xmap.get(t.hostname);
         updateTargets(targetNode);
       });
-
-    // const home = new Server(ns, 'home');
-    const test = xmap.get('harakiri-sushi');
-    ns.print(test);
-
-    // ns.print(xfocus.focusMap.get('harakiri-sushi'));
-    // ns.print(`[Targets Prepping] ${xfocus.targetsPrep.length}`);
-    // xfocus.targetsPrep.forEach((tp: any) => {
-    //   ns.print(tp.hostname);
-    // });
-    // Get a set of actions to take from targets
   }
-
-  // FIXME: Later
-  // function deployBot(target: any) {
-  //   if (controller.deploy !== target.hostname) {
-  //     xnet.bots.forEach((node: any) => {
-  //       ns.scp(xmin, node.hostname, 'home');
-  //       ns.kill(xmin, node.hostname, target.hostname);
-  //       const maxThreads = Math.floor(node.ram.max / controller.ramHack);
-  //       ns.exec(xmin, node.hostname, maxThreads, target.hostname);
-  //     });
-  //     controller.deploy = target.hostname;
-  //   }
-  // }
 
   while (true) {
     ns.clearLog();
@@ -325,7 +269,6 @@ export async function main(ns: NS) {
     updateNetwork();
     updateBots();
     updateFocus();
-    // work('hack');
     await ns.sleep(flags.refresh as number);
   }
 }
