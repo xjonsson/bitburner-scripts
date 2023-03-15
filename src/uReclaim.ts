@@ -2,23 +2,27 @@
 import { NS } from '@ns';
 /* eslint-enable */
 
-export function reclaim(ns: NS, node: any) {
-  if (node.numOpenPortsRequired >= 5) {
+export function reclaimBot(ns: NS, node: any) {
+  if (!node.challenge) {
+    node.challenge = node.numOpenPortsRequired;
+  }
+  ns.print(`[Reclaiming] [${node.challenge}] ${node.hostname}`);
+  if (node.challenge >= 5) {
     ns.sqlinject(node.hostname);
   }
-  if (node.numOpenPortsRequired >= 4) {
+  if (node.challenge >= 4) {
     ns.httpworm(node.hostname);
   }
-  if (node.numOpenPortsRequired >= 3) {
+  if (node.challenge >= 3) {
     ns.relaysmtp(node.hostname);
   }
-  if (node.numOpenPortsRequired >= 2) {
+  if (node.challenge >= 2) {
     ns.ftpcrack(node.hostname);
   }
-  if (node.numOpenPortsRequired >= 1) {
+  if (node.challenge >= 1) {
     ns.brutessh(node.hostname);
   }
-  if (node.numOpenPortsRequired >= 0) {
+  if (node.challenge >= 0) {
     ns.nuke(node.hostname);
   }
 }
@@ -39,7 +43,7 @@ export async function main(ns: NS) {
   ns.disableLog('disableLog');
 
   ns.print(`[Running] ${target}`);
-  reclaim(ns, node);
+  reclaimBot(ns, node);
 
   await ns.sleep(1000);
 
