@@ -13,10 +13,13 @@ export default class Network {
   nodesTargetCores: number;
   serversTargetCount: number;
   serversTargetRAM: number;
+  networkOwnership: number;
+  networkCount: number;
   hacknet: Array<object>;
   servers: Array<object>;
   bots: Array<object>;
   reclaim: Array<object>;
+  reclaimed: Array<object>;
   doors: Array<object>;
   targets: Array<object>;
 
@@ -28,10 +31,13 @@ export default class Network {
     this.nodesTargetCores = configs.nodesTargetCores;
     this.serversTargetCount = configs.serversTargetCount;
     this.serversTargetRAM = configs.serversTargetRAM;
+    this.networkOwnership = 0;
+    this.networkCount = 0;
     this.hacknet = [];
     this.servers = [];
     this.bots = [];
     this.reclaim = [];
+    this.reclaimed = [];
     this.doors = [];
     this.targets = [];
   }
@@ -90,8 +96,19 @@ export default class Network {
     return nodes;
   }
 
+  // get networkOwnership(): number {
+  //   return this.
+  // }
+
   get serverCount(): number {
     return this.ns.getPurchasedServers().length;
+  }
+
+  get serverRAM(): number {
+    return this.servers
+      .filter((s: any) => s.exists)
+      .map((s: any) => new Server(this.ns, s.name))
+      .reduce((total: any, s: any) => total + s.ram.now, 0);
   }
 
   get serverDone(): any {
@@ -137,10 +154,51 @@ export default class Network {
     return nodes;
   }
 
+  get botCount(): number {
+    return this.bots.length;
+  }
+
+  get botsRAM(): number {
+    return this.bots.reduce((total, s: any) => total + s.ram.now, 0);
+  }
+
+  get botsRAMMax(): number {
+    return this.bots.reduce((total, s: any) => total + s.ram.max, 0);
+  }
+
+  get reclaimedCount(): number {
+    return this.reclaimed.length;
+  }
+
+  get reclaimedRAM(): number {
+    return this.reclaimed.reduce((total, s: any) => total + s.ram.now, 0);
+  }
+
+  get reclaimCount(): number {
+    return this.reclaim.length;
+  }
+
+  get reclaimRAM(): number {
+    return this.reclaim.reduce((total, s: any) => total + s.ram.max, 0);
+  }
+
+  get targetCount(): number {
+    return this.targets.length;
+  }
+
+  get targetsValue() {
+    return this.targets.reduce((total, node: any) => total + node.money.max, 0);
+  }
+
+  get targetsValueNow() {
+    return this.targets.reduce((total, node: any) => total + node.money.now, 0);
+  }
+
   updateRing(): any {
     const p = new Player(this.ns);
     const b: any = [];
     const r: any = [];
+    const rd: any = [];
     const d: any = [];
     const t: any = [];
     const ring = this.ringScan('home')
@@ -156,6 +214,10 @@ export default class Network {
         r.push(node);
       }
 
+      if (node.reclaimed) {
+        rd.push(node);
+      }
+
       if (!node.door && node.canDoor(p.hacking)) {
         d.push(node);
       }
@@ -164,8 +226,11 @@ export default class Network {
         t.push(node);
       }
     });
+    this.networkOwnership = ring.filter((n) => n.root).length + 1;
+    this.networkCount = ring.length;
     this.bots = b;
     this.reclaim = r;
+    this.reclaimed = rd;
     this.doors = d;
     this.targets = t;
     return ring;

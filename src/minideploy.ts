@@ -1,6 +1,7 @@
-/* eslint-disable-next-line */
+/* eslint-disable */
 import { NS } from '@ns';
 import { configs } from './configs.js';
+/* eslint-enable */
 
 export async function main(ns: NS) {
   ns.tail();
@@ -9,7 +10,7 @@ export async function main(ns: NS) {
 
   const pLimit = (ns.args[0] as number) || 100;
   const pHack = ns.getPlayer().skills.hacking;
-  const xcode = 'xmin.js';
+  const xcode = configs.xMin;
   const xRAM = ns.getScriptRam(xcode) + 0.1;
   const hRAM = ns.getServerMaxRam('home');
   const hRAMReserve = configs.reserveRAM;
