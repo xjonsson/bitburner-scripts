@@ -107,7 +107,8 @@ export default class Network {
   get serverRAM(): number {
     return this.servers
       .filter((s: any) => s.exists)
-      .reduce((total, s: any) => total + s.ram, 0);
+      .map((s: any) => new Server(this.ns, s.name))
+      .reduce((total: any, s: any) => total + s.ram.now, 0);
   }
 
   get serverDone(): any {
@@ -159,6 +160,10 @@ export default class Network {
 
   get botsRAM(): number {
     return this.bots.reduce((total, s: any) => total + s.ram.now, 0);
+  }
+
+  get botsRAMMax(): number {
+    return this.bots.reduce((total, s: any) => total + s.ram.max, 0);
   }
 
   get reclaimedCount(): number {

@@ -6,8 +6,9 @@ import Network from './zNetwork.js';
 import Display from './zDisplay.js';
 import Server from './zServer.js';
 import Shop from './zShop.js';
-import Monitor from './monitor.js';
+import Focus from './zFocus.js';
 import { numCycleForGrowthCorrected } from './zCalc.js';
+import { reclaimBot } from './uReclaim.js';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -24,9 +25,14 @@ export async function main(ns: NS) {
 
   const p = new Player(ns);
   const xnet = new Network(ns);
-  const xmon = new Display(ns, p, xnet);
   const xshop = new Shop(ns, p, xnet);
-  const xcode = 'xmin.js';
+  const xfocus = new Focus(ns, p, xnet);
+  const xmon = new Display(ns, p, xnet);
+  const xmap = new Map();
+  const xmin = configs.xMin;
+  const xhack = configs.xHack;
+  const xweak = configs.xWeak;
+  const xgrow = configs.xGrow;
   const controller = {
     cHacking: 0,
     cMoney: 0,
@@ -37,7 +43,10 @@ export async function main(ns: NS) {
     displayChallenge: true,
     displayHacknet: true,
     displayServers: true,
-    scriptRAM: ns.getScriptRam(xcode),
+    ramMin: ns.getScriptRam(configs.xMin),
+    ramHack: ns.getScriptRam(configs.xHack),
+    ramWeak: ns.getScriptRam(configs.xWeak),
+    ramGrow: ns.getScriptRam(configs.xGrow),
     deploy: '',
   };
 
@@ -105,171 +114,218 @@ export async function main(ns: NS) {
     // return msg;
   }
 
-  function reclaimBot(node: any) {
-    if (node.numOpenPortsRequired >= 5) {
-      ns.sqlinject(node.hostname);
-    }
-    if (node.numOpenPortsRequired >= 4) {
-      ns.httpworm(node.hostname);
-    }
-    if (node.numOpenPortsRequired >= 3) {
-      ns.relaysmtp(node.hostname);
-    }
-    if (node.numOpenPortsRequired >= 2) {
-      ns.ftpcrack(node.hostname);
-    }
-    if (node.numOpenPortsRequired >= 1) {
-      ns.brutessh(node.hostname);
-    }
-    if (node.numOpenPortsRequired >= 0) {
-      ns.nuke(node.hostname);
-    }
-  }
-
-  // FIXME: Later
-  function deployBot(target: any) {
-    if (controller.deploy !== target.hostname) {
-      xnet.bots.forEach((node: any) => {
-        ns.scp(xcode, node.hostname, 'home');
-        ns.kill(xcode, node.hostname, target.hostname);
-        const maxThreads = Math.floor(node.ram.max / controller.scriptRAM);
-        ns.exec(xcode, node.hostname, maxThreads, target.hostname);
-      });
-      controller.deploy = target.hostname;
-    }
+  function updateNetwork() {
+    xnet.updateRing();
+    xmon.displayNetwork();
+    xmon.displayTargets();
   }
 
   function updateBots() {
     const { reclaim } = xnet;
-    const { bots } = xnet;
+    // const { bots } = xnet;
 
-    reclaim.forEach((node: any) => {
-      reclaimBot(node);
-    });
-
-    const focus = xnet.targets.sort(
-      (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
-    )[0];
-
-    deployBot(focus);
-  }
-
-  function updateTargets() {
-    const { targets } = xnet;
-    const { bots } = xnet;
-    // bots.forEach((bot: any) => hash.set(bot.hostname, bot.ram.now));
-    // bots.sort((a: any, b: any) => a.home - b.home);
-    targets.sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW);
-    // targets.sort((a: any, b: any) => b.money.max - a.money.max);
-    // const targetsReady = targets.filter((target: any) => target.nodeReady);
-    // const targetsPending = targets.filter((target: any) => !target.nodeReady);
-
-    // ns.print(`[Bots] ${bots.length}`);
-    // ns.print(targetsReady);
-    // ns.print(targetsPending);
-
-    const tMonitorRow =
-      ' %4s | %3s | %4s | %6s | %8s | %8s | %8s | %8s | %8s | %-12s ';
-
-    ns.printf(
-      tMonitorRow,
-      'Type',
-      'CRD',
-      'Lvl',
-      'Sec',
-      'Money',
-      'Max',
-      'Hack',
-      'Weak',
-      'Grow',
-      'Server'
-    );
-    ns.printf(
-      tMonitorRow,
-      '',
-      '',
-      '',
-      '',
-      ns.formatNumber(xnet.targetsValueNow, 2),
-      ns.formatNumber(xnet.targetsValue, 2),
-      '',
-      '',
-      '',
-      targets.length
-    );
-    ns.printf(
-      tMonitorRow,
-      '----',
-      '---',
-      '----',
-      '------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '------------'
-    );
-    targets.forEach((t: any) => {
-      const tmon = new Monitor(ns, t.hostname);
-      const mH = t.home ? 'H' : ' ';
-      const mS = t.server ? 'S' : ' ';
-      const mB = t.bot ? 'B' : ' ';
-      const mT = t.target ? '$' : ' ';
-      const mC = t.challenge;
-      const mR = t.root ? 'R' : ' ';
-      const mD = t.door ? 'D' : ' ';
-
-      ns.printf(
-        tMonitorRow,
-        `${mH}${mS}${mB}${mT}`,
-        `${mC}${mR}${mD}`,
-        t.level,
-        `+${(tmon.getSec - tmon.getSecMin).toFixed(2)}`,
-        `${((tmon.getMoneyAvailable / tmon.getMoneyMax) * 100).toFixed(2)}%`,
-        `${ns.formatNumber(tmon.getMoneyMax, 2)}`,
-        `${tmon.getHackThreads}`,
-        `${tmon.getWeakThreads}`,
-        `${tmon.getGrowThreads}`,
-        t.hostname
-      );
-    });
-
-    bots
-      .filter((b: any) => b.bot && !b.target)
-      .forEach((t: any) => {
-        const tmon = new Monitor(ns, t.hostname);
-        const mH = t.home ? 'H' : ' ';
-        const mS = t.server ? 'S' : ' ';
-        const mB = t.bot ? 'B' : ' ';
-        const mT = t.target ? '$' : ' ';
-        const mC = t.challenge;
-        const mR = t.root ? 'R' : ' ';
-        const mD = t.door ? 'D' : ' ';
-
-        ns.printf(
-          tMonitorRow,
-          `${mH}${mS}${mB}${mT}`,
-          `${mC}${mR}${mD}`,
-          t.level,
-          `+${(tmon.getSec - tmon.getSecMin).toFixed(2)}`,
-          `${((tmon.getMoneyAvailable / tmon.getMoneyMax) * 100).toFixed(2)}%`,
-          `${ns.formatNumber(tmon.getMoneyMax, 2)}`,
-          `${tmon.getHackThreads}`,
-          `${tmon.getWeakThreads}`,
-          `${tmon.getGrowThreads}`,
-          t.hostname
-        );
+    if (reclaim.length > 0) {
+      reclaim.forEach((node: any) => {
+        reclaimBot(ns, node);
       });
+    }
+
+    // const focus = xnet.targets.sort(
+    //   (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
+    // )[0];
+
+    // deployBot(focus);
   }
+
+  function work(
+    action: string,
+    amount = 1,
+    target = 'n00dles',
+    source: 'home'
+  ) {
+    // ns.print(`[Deploying] ${action} from ${source} on '${target}'`);
+    ns.scp([xmin, xhack, xweak, xgrow], source, 'home');
+    switch (action) {
+      case 'hack': {
+        ns.exec(xhack, source, amount, target);
+        break;
+      }
+
+      case 'weak': {
+        ns.exec(xweak, source, amount, target);
+        break;
+      }
+
+      case 'grow': {
+        ns.exec(xgrow, source, amount, target);
+        break;
+      }
+      case 'min': {
+        ns.exec(xmin, source, amount, target);
+        break;
+      }
+      default: {
+        ns.print('Nothing to do but wait');
+      }
+    }
+  }
+
+  function prepareTarget(targetNode: any, bot: any) {
+    if (targetNode.weakR > 0 && bot.ram.now > controller.ramWeak) {
+      if (targetNode.weakP < targetNode.weakR) {
+        // ns.print('No weakens happening');
+        // ns.print('[Deploy] WEAKEN');
+        let batch = targetNode.weakR - targetNode.weakP;
+        const maxThreads = bot.nodeThreads(controller.ramWeak);
+        if (maxThreads > batch) {
+          // ns.print('We could do a whole batch');
+          targetNode.weakP += batch;
+          work('weak', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.weakP += batch;
+          work('weak', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.weakT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.weakT + performance.now() + 1000;
+        }
+      }
+    } else if (targetNode.growR > 0 && bot.ram.now > controller.ramGrow) {
+      // ns.print('we need to grow it');
+      if (targetNode.growP < targetNode.growR) {
+        // ns.print('No grows happening');
+        // ns.print('[SIMULATE] GROW');
+        let batch = targetNode.growR - targetNode.growP;
+        const maxThreads = bot.nodeThreads(controller.ramGrow);
+        if (maxThreads > batch) {
+          // ns.print('We could do a whole batch');
+          targetNode.growP += batch;
+          work('grow', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.growP += batch;
+          work('grow', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.growT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.growT + performance.now() + 1000;
+        }
+      }
+    }
+  }
+
+  function attackTarget(targetNode: any, bot: any) {
+    if (targetNode.hackR > 0 && bot.ram.now > controller.ramHack) {
+      if (targetNode.hackP < targetNode.hackR) {
+        let batch = targetNode.hackR - targetNode.hackP;
+        const maxThreads = bot.nodeThreads(controller.ramHack);
+        if (maxThreads > batch) {
+          // ns.print('We could do a whole batch');
+          targetNode.hackP += batch;
+          work('hack', batch, targetNode.hostname, bot.hostname);
+        } else if (maxThreads > 0) {
+          batch = maxThreads;
+          targetNode.hackP += batch;
+          work('hack', batch, targetNode.hostname, bot.hostname);
+        }
+        if (targetNode.hackT + performance.now() > targetNode.recheck) {
+          targetNode.recheck = targetNode.hackT + performance.now() + 1000;
+        }
+      }
+    }
+  }
+
+  function updateTargets(targetNode: any) {
+    const home = new Server(ns, 'home');
+    if (!targetNode.ready) {
+      // ns.print(`Not ready`);
+      xnet.bots.forEach((bot: any) => {
+        prepareTarget(targetNode, bot);
+      });
+      prepareTarget(targetNode, home);
+    } else if (targetNode.ready) {
+      // ns.print('Its ready, go for it');
+      xnet.bots.forEach((bot: any) => {
+        attackTarget(targetNode, bot);
+        attackTarget(targetNode, home);
+      });
+    }
+  }
+
+  function updateFocus() {
+    // Give it a set of targets
+    // ns.print(xfocus.ramScripts, xfocus.ram);
+    // ns.print(`[Targets Ready] ${xfocus.targetsReady.length}`);
+    // xfocus.targetsReady.forEach((tr: any) => {
+    //   ns.print(tr.hostname);
+    // });
+
+    xnet.targets.forEach((t: any) => {
+      const previous = xmap.get(t.hostname);
+      const update = {
+        hostname: t.hostname,
+        ready: t.nodeReady,
+        focus: false,
+        hackR: t.getHackThreads,
+        hackP: 0,
+        hackT: t.getHackTime,
+        weakR: t.getWeakThreads,
+        weakP: 0,
+        weakT: t.getWeakTime,
+        growR: t.getGrowThreads,
+        growP: 0,
+        growT: t.getGrowTime,
+        recheck: performance.now() + 1000,
+      };
+      if (previous && previous.recheck >= performance.now()) {
+        update.hackP = previous.hackP;
+        update.weakP = previous.weakP;
+        update.growP = previous.growP;
+        update.recheck = previous.recheck;
+      }
+      xmap.set(t.hostname, update);
+    });
+
+    // FIXME: Adjust this with a filtered list with the top 10 results
+    xnet.targets
+      .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+      .filter((t: any, index) => index < 10)
+      .forEach((t: any) => {
+        const targetNode = xmap.get(t.hostname);
+        updateTargets(targetNode);
+      });
+
+    // const home = new Server(ns, 'home');
+    const test = xmap.get('harakiri-sushi');
+    ns.print(test);
+
+    // ns.print(xfocus.focusMap.get('harakiri-sushi'));
+    // ns.print(`[Targets Prepping] ${xfocus.targetsPrep.length}`);
+    // xfocus.targetsPrep.forEach((tp: any) => {
+    //   ns.print(tp.hostname);
+    // });
+    // Get a set of actions to take from targets
+  }
+
+  // FIXME: Later
+  // function deployBot(target: any) {
+  //   if (controller.deploy !== target.hostname) {
+  //     xnet.bots.forEach((node: any) => {
+  //       ns.scp(xmin, node.hostname, 'home');
+  //       ns.kill(xmin, node.hostname, target.hostname);
+  //       const maxThreads = Math.floor(node.ram.max / controller.ramHack);
+  //       ns.exec(xmin, node.hostname, maxThreads, target.hostname);
+  //     });
+  //     controller.deploy = target.hostname;
+  //   }
+  // }
 
   while (true) {
     ns.clearLog();
     updateStats();
-
-    xnet.updateRing();
+    updateNetwork();
     updateBots();
-    updateTargets();
+    updateFocus();
+    // work('hack');
     await ns.sleep(flags.refresh as number);
   }
 }

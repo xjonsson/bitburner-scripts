@@ -7,9 +7,6 @@ import Network from './zNetwork.js';
 /* eslint-enable */
 
 const cellsMax = 4;
-const scriptHack = 'xhack.js';
-const scriptWeak = 'xweak.js';
-const scriptGrow = 'xgrow.js';
 
 function threadsCount(availableRAM: number, scriptRAM: number) {
   return Math.floor(availableRAM / scriptRAM);
@@ -27,9 +24,9 @@ export default class Display {
     this.ns = ns;
     this.p = player;
     this.xnet = network;
-    this.scriptHackRAM = ns.getScriptRam(scriptHack);
-    this.scriptWeakRAM = ns.getScriptRam(scriptWeak);
-    this.scriptGrowRAM = ns.getScriptRam(scriptGrow);
+    this.scriptHackRAM = ns.getScriptRam(configs.xHack);
+    this.scriptWeakRAM = ns.getScriptRam(configs.xWeak);
+    this.scriptGrowRAM = ns.getScriptRam(configs.xGrow);
   }
 
   displayStats(bShort = false) {
@@ -79,6 +76,7 @@ export default class Display {
     let cellCount = 0;
     const cells: any = ['', '', '', ''];
     const rows = ' %15s | %15s | %15s | %15s ';
+    this.ns.print('\n');
     this.ns.printf(
       ' %-15s | %15s | %15s | %15s ',
       `Hacknet ${this.xnet.hacknetDone}/${configs.nodesTargetCount}`,
@@ -337,7 +335,7 @@ export default class Display {
         t.getHackThreads,
         t.getWeakThreads,
         t.getGrowThreads,
-        t.nodeReady,
+        t.nodeReady ? 'Hack' : 'Prep',
         t.hostname
       );
     });
