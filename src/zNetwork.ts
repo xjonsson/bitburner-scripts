@@ -13,6 +13,7 @@ export default class Network {
   nodesTargetCores: number;
   serversTargetCount: number;
   serversTargetRAM: number;
+  networkOwnership: number;
   networkCount: number;
   hacknet: Array<object>;
   servers: Array<object>;
@@ -30,6 +31,7 @@ export default class Network {
     this.nodesTargetCores = configs.nodesTargetCores;
     this.serversTargetCount = configs.serversTargetCount;
     this.serversTargetRAM = configs.serversTargetRAM;
+    this.networkOwnership = 0;
     this.networkCount = 0;
     this.hacknet = [];
     this.servers = [];
@@ -94,6 +96,10 @@ export default class Network {
     return nodes;
   }
 
+  // get networkOwnership(): number {
+  //   return this.
+  // }
+
   get serverCount(): number {
     return this.ns.getPurchasedServers().length;
   }
@@ -149,6 +155,10 @@ export default class Network {
 
   get botCount(): number {
     return this.bots.length;
+  }
+
+  get botsRAM(): number {
+    return this.bots.reduce((total, s: any) => total + s.ram.now, 0);
   }
 
   get reclaimedCount(): number {
@@ -211,6 +221,7 @@ export default class Network {
         t.push(node);
       }
     });
+    this.networkOwnership = ring.filter((n) => n.root).length + 1;
     this.networkCount = ring.length;
     this.bots = b;
     this.reclaim = r;
