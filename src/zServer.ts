@@ -36,6 +36,10 @@ export default class Server {
     return this.open <= this.challenge && !this.root;
   }
 
+  get reclaimed(): boolean {
+    return !this.home && !this.server && this.root && this.ram.max > 0;
+  }
+
   canReclaim(programs: number) {
     return this.challenge <= programs;
   }

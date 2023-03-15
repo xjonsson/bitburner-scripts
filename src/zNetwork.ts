@@ -18,6 +18,7 @@ export default class Network {
   servers: Array<object>;
   bots: Array<object>;
   reclaim: Array<object>;
+  reclaimed: Array<object>;
   doors: Array<object>;
   targets: Array<object>;
 
@@ -34,6 +35,7 @@ export default class Network {
     this.servers = [];
     this.bots = [];
     this.reclaim = [];
+    this.reclaimed = [];
     this.doors = [];
     this.targets = [];
   }
@@ -96,6 +98,12 @@ export default class Network {
     return this.ns.getPurchasedServers().length;
   }
 
+  get serverRAM(): number {
+    return this.servers
+      .filter((s: any) => s.exists)
+      .reduce((total, s: any) => total + s.ram, 0);
+  }
+
   get serverDone(): any {
     return this.servers
       .filter((node: any) => node.maxed)
@@ -139,6 +147,30 @@ export default class Network {
     return nodes;
   }
 
+  get botCount(): number {
+    return this.bots.length;
+  }
+
+  get reclaimedCount(): number {
+    return this.reclaimed.length;
+  }
+
+  get reclaimedRAM(): number {
+    return this.reclaimed.reduce((total, s: any) => total + s.ram.now, 0);
+  }
+
+  get reclaimCount(): number {
+    return this.reclaim.length;
+  }
+
+  get reclaimRAM(): number {
+    return this.reclaim.reduce((total, s: any) => total + s.ram.max, 0);
+  }
+
+  get targetCount(): number {
+    return this.targets.length;
+  }
+
   get targetsValue() {
     return this.targets.reduce((total, node: any) => total + node.money.max, 0);
   }
@@ -151,6 +183,7 @@ export default class Network {
     const p = new Player(this.ns);
     const b: any = [];
     const r: any = [];
+    const rd: any = [];
     const d: any = [];
     const t: any = [];
     const ring = this.ringScan('home')
@@ -166,6 +199,10 @@ export default class Network {
         r.push(node);
       }
 
+      if (node.reclaimed) {
+        rd.push(node);
+      }
+
       if (!node.door && node.canDoor(p.hacking)) {
         d.push(node);
       }
@@ -177,6 +214,7 @@ export default class Network {
     this.networkCount = ring.length;
     this.bots = b;
     this.reclaim = r;
+    this.reclaimed = rd;
     this.doors = d;
     this.targets = t;
     return ring;
