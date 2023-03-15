@@ -119,6 +119,10 @@ export default class Server {
     };
   }
 
+  get cores(): number {
+    return this.data.cpuCores;
+  }
+
   get hackPercent(): number {
     return this.hackAmount;
   }
