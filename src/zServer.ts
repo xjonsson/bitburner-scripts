@@ -127,6 +127,41 @@ export default class Server {
     return this.data.cpuCores;
   }
 
+  get getHackThreads() {
+    return Math.ceil(
+      this.ns.hackAnalyzeThreads(
+        this.hostname,
+        this.money.max * this.hackAmount
+      )
+    );
+  }
+
+  get getHackThreadsNow() {
+    return Math.ceil(this.ns.hackAnalyzeThreads(this.hostname, this.money.now));
+  }
+
+  get getHackTime() {
+    return this.ns.getHackTime(this.hostname);
+  }
+
+  get getWeakThreads() {
+    return Math.ceil((this.sec.now - this.sec.min) * 20);
+  }
+
+  get getWeakTime() {
+    return this.ns.getWeakenTime(this.hostname);
+  }
+
+  get getGrowThreads() {
+    return Math.ceil(
+      this.ns.growthAnalyze(this.hostname, this.money.max / this.money.now)
+    );
+  }
+
+  get getGrowTime() {
+    return this.ns.getGrowTime(this.hostname);
+  }
+
   get hackPercent(): number {
     return this.hackAmount;
   }
