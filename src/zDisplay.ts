@@ -42,7 +42,7 @@ export default class Display {
         this.p.hacking,
         this.p.challenge,
         this.ns.formatNumber(this.p.reserve, 3),
-        this.ns.formatNumber(this.p.money, 3)
+        this.ns.formatNumber(this.p.money.real, 3)
       );
     } else {
       this.ns.printf(header, 'bNode', 'Hack', 'Money');
@@ -50,7 +50,7 @@ export default class Display {
         header,
         this.p.bitnode,
         this.p.hacking,
-        this.ns.formatNumber(this.p.money, 3)
+        this.ns.formatNumber(this.p.money.real, 3)
       );
     }
   }

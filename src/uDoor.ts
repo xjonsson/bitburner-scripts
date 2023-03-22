@@ -88,12 +88,7 @@ export async function main(ns: NS) {
       return node;
     })
     .filter((node) => {
-      if (
-        node.root &&
-        node.level <= ns.getPlayer().skills.hacking &&
-        !node.door &&
-        !node.server
-      ) {
+      if (node.root && node.level <= p.hacking && !node.door && !node.server) {
         return true;
       }
       return false;

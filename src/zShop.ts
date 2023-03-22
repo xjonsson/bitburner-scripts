@@ -33,7 +33,7 @@ export default class Shop {
     if (this.purchase.length > 0) {
       const next = this.purchase[0];
 
-      if (this.p.money - this.p.reserve >= next.cost) {
+      if (this.p.money.now >= next.cost) {
         this.ns.print(
           ` Buying [${next.id ? next.id : 'New'}] ${
             next.text
