@@ -110,7 +110,7 @@ export async function main(ns: NS) {
   function updateNetwork() {
     xnet.updateRing();
     xmon.displayNetwork();
-    xmon.displayTargets(25, xmap); // 25
+    xmon.displayTargets(configs.focusLimit, xmap); // 25
   }
 
   function updateBots() {
@@ -325,6 +325,7 @@ export async function main(ns: NS) {
     //   });
     xnet.targets
       .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+      .filter((t: any, index) => index < configs.focusLimit)
       .forEach((t: any) => {
         const targetNode = xmap.get(t.hostname);
         updateTargets(targetNode);

@@ -1,6 +1,7 @@
 export const configs: any = {
   hackAmount: 0.1, // 10%
-  focusAmount: 125, // 10
+  focusAmount: 125, // Batch 125 hack, weak, grow, weak
+  focusLimit: 25, // Only work on 25 servers
   reserve: 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
