@@ -24,6 +24,7 @@ export async function main(ns: NS) {
   }
 
   const p = new Player(ns);
+  const home = new Server(ns, 'home');
   const xnet = new Network(ns);
   const xshop = new Shop(ns, p, xnet);
   // const xfocus = new Focus(ns, p, xnet);
@@ -33,6 +34,7 @@ export async function main(ns: NS) {
   const xhack = configs.xHack;
   const xweak = configs.xWeak;
   const xgrow = configs.xGrow;
+  const xshare = configs.xShare;
   const controller = {
     cHacking: 0,
     cMoney: 0,
@@ -47,6 +49,7 @@ export async function main(ns: NS) {
     ramHack: ns.getScriptRam(configs.xHack),
     ramWeak: ns.getScriptRam(configs.xWeak),
     ramGrow: ns.getScriptRam(configs.xGrow),
+    ramShare: ns.getScriptRam(configs.xShare),
     deploy: '',
   };
 
@@ -134,7 +137,7 @@ export async function main(ns: NS) {
     delay = 0
   ) {
     // ns.print(`[Deploying] ${action} from ${source} on '${target}'`);
-    ns.scp([xmin, xhack, xweak, xgrow], source, 'home');
+    ns.scp([xmin, xhack, xweak, xgrow, xshare], source, 'home');
     switch (action) {
       case 'hack': {
         ns.exec(xhack, source, amount, target, repeat, delay);
@@ -266,7 +269,6 @@ export async function main(ns: NS) {
   }
 
   function updateTargets(targetNode: any) {
-    const home = new Server(ns, 'home');
     if (!targetNode.ready) {
       xnet.bots.forEach((bot: any) => {
         prepareTarget(targetNode, bot);
@@ -332,12 +334,27 @@ export async function main(ns: NS) {
       });
   }
 
+  function updateShares() {
+    xnet.bots
+      .filter((b: any) => b.ram.now > controller.ramShare)
+      .forEach((b: any) => {
+        ns.scp(xshare, b.hostname, 'home');
+        const maxThreads = b.nodeThreads(controller.ramShare);
+        ns.exec(xshare, b.hostname, maxThreads);
+      });
+    if (home.ram.now > controller.ramShare) {
+      const maxThreads = home.nodeThreads(controller.ramShare);
+      ns.exec(xshare, home.hostname, maxThreads);
+    }
+  }
+
   while (true) {
     ns.clearLog();
     updateStats();
     updateNetwork();
     updateBots();
     updateFocus();
+    updateShares();
     await ns.sleep(flags.refresh as number);
   }
 }

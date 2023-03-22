@@ -29,6 +29,7 @@ export const configs: any = {
   xHack: 'xhack.js',
   xWeak: 'xweak.js',
   xGrow: 'xgrow.js',
+  xShare: 'xshare.js',
 };
 
 /* 
