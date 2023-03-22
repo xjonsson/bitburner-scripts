@@ -52,6 +52,8 @@ export async function main(ns: NS) {
 
   ns.tail();
   ns.clearLog();
+  // ns.disableLog('scan');
+  // ns.disableLog('getServerMaxRam');
   ns.disableLog('ALL');
 
   function updateStats() {
@@ -108,7 +110,7 @@ export async function main(ns: NS) {
   function updateNetwork() {
     xnet.updateRing();
     xmon.displayNetwork();
-    xmon.displayTargets();
+    xmon.displayTargets(25, xmap); // 25
   }
 
   function updateBots() {
@@ -118,6 +120,7 @@ export async function main(ns: NS) {
     if (reclaim.length > 0) {
       reclaim.forEach((node: any) => {
         reclaimBot(ns, node);
+        ns.scp([xmin, xhack, xweak, xgrow], node.hostname, 'home');
       });
     }
   }
@@ -126,27 +129,29 @@ export async function main(ns: NS) {
     action: string,
     amount = 1,
     target = 'n00dles',
-    source: 'home'
+    source: 'home',
+    repeat = false,
+    delay = 0
   ) {
     // ns.print(`[Deploying] ${action} from ${source} on '${target}'`);
     ns.scp([xmin, xhack, xweak, xgrow], source, 'home');
     switch (action) {
       case 'hack': {
-        ns.exec(xhack, source, amount, target);
+        ns.exec(xhack, source, amount, target, repeat, delay);
         break;
       }
 
       case 'weak': {
-        ns.exec(xweak, source, amount, target);
+        ns.exec(xweak, source, amount, target, repeat, delay);
         break;
       }
 
       case 'grow': {
-        ns.exec(xgrow, source, amount, target);
+        ns.exec(xgrow, source, amount, target, repeat, delay);
         break;
       }
       case 'min': {
-        ns.exec(xmin, source, amount, target);
+        ns.exec(xmin, source, amount, target, repeat, delay);
         break;
       }
       default: {
@@ -162,11 +167,11 @@ export async function main(ns: NS) {
         const maxThreads = bot.nodeThreads(controller.ramWeak);
         if (maxThreads > batch) {
           targetNode.weakP += batch;
-          work('weak', batch, targetNode.hostname, bot.hostname);
+          work('weak', batch, targetNode.hostname, bot.hostname, false, 0);
         } else if (maxThreads > 0) {
           batch = maxThreads;
           targetNode.weakP += batch;
-          work('weak', batch, targetNode.hostname, bot.hostname);
+          work('weak', batch, targetNode.hostname, bot.hostname, false, 0);
         }
         if (targetNode.weakT + performance.now() > targetNode.recheck) {
           targetNode.recheck = targetNode.weakT + performance.now() + 1000;
@@ -178,11 +183,11 @@ export async function main(ns: NS) {
         const maxThreads = bot.nodeThreads(controller.ramGrow);
         if (maxThreads > batch) {
           targetNode.growP += batch;
-          work('grow', batch, targetNode.hostname, bot.hostname);
+          work('grow', batch, targetNode.hostname, bot.hostname, false, 0);
         } else if (maxThreads > 0) {
           batch = maxThreads;
           targetNode.growP += batch;
-          work('grow', batch, targetNode.hostname, bot.hostname);
+          work('grow', batch, targetNode.hostname, bot.hostname, false, 0);
         }
         if (targetNode.growT + performance.now() > targetNode.recheck) {
           targetNode.recheck = targetNode.growT + performance.now() + 1000;
@@ -211,6 +216,55 @@ export async function main(ns: NS) {
     }
   }
 
+  function attackTargetBatch(targetNode: any, bot: any) {
+    const target = new Server(ns, targetNode.hostname);
+    const thHack = target.getHackThreads;
+    const thWeak1 = Math.ceil(thHack / 25);
+    const thGrow = target.getGrowThreadsCorrected(bot.cores);
+    const thWeak2 = Math.ceil(thGrow / 12.5);
+    const tWeak = target.getWeakTime;
+    // const tGrow = target.getGrowTime;
+    const now = performance.now();
+    const next = now + tWeak + 3000;
+    const batch = {
+      hack: thHack,
+      weak1: thWeak1,
+      grow: thGrow,
+      weak2: thWeak2,
+    };
+
+    let ramRequired = controller.ramHack * batch.hack;
+    ramRequired += controller.ramWeak * batch.weak1;
+    ramRequired += controller.ramGrow * batch.grow;
+    ramRequired += controller.ramWeak * batch.weak2;
+
+    if (bot.ram.now > ramRequired && targetNode.focus < configs.focusAmount) {
+      targetNode.focus += 1;
+      work('hack', batch.hack, target.hostname, bot.hostname, false, next);
+      work(
+        'weak',
+        batch.weak1,
+        target.hostname,
+        bot.hostname,
+        false,
+        next + 40
+      );
+      work('grow', batch.grow, target.hostname, bot.hostname, false, next + 80);
+      work(
+        'weak',
+        batch.weak2,
+        target.hostname,
+        bot.hostname,
+        false,
+        next + 120
+      );
+
+      if (next > targetNode.recheck) {
+        targetNode.recheck = next + 1000;
+      }
+    }
+  }
+
   function updateTargets(targetNode: any) {
     const home = new Server(ns, 'home');
     if (!targetNode.ready) {
@@ -218,11 +272,18 @@ export async function main(ns: NS) {
         prepareTarget(targetNode, bot);
       });
       prepareTarget(targetNode, home);
-    } else if (targetNode.ready) {
+    } else if (targetNode.ready && targetNode.focus < configs.focusAmount) {
       xnet.bots.forEach((bot: any) => {
-        attackTarget(targetNode, bot);
-        attackTarget(targetNode, home);
+        attackTargetBatch(targetNode, bot);
       });
+      attackTargetBatch(targetNode, home);
+
+      // if (!controller.attackBatch) {
+      //   // xnet.bots.forEach((bot: any) => {
+      //   //   attackTarget(targetNode, bot);
+      //   // });
+      //   attackTarget(targetNode, home);
+      // }
     }
   }
 
@@ -232,7 +293,7 @@ export async function main(ns: NS) {
       const update = {
         hostname: t.hostname,
         ready: t.nodeReady,
-        focus: false,
+        focus: 0,
         hackR: t.getHackThreads,
         hackP: 0,
         hackT: t.getHackTime,
@@ -245,6 +306,7 @@ export async function main(ns: NS) {
         recheck: performance.now() + 1000,
       };
       if (previous && previous.recheck >= performance.now()) {
+        update.focus = previous.focus;
         update.hackP = previous.hackP;
         update.weakP = previous.weakP;
         update.growP = previous.growP;

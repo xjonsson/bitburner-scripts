@@ -1,5 +1,6 @@
 export const configs: any = {
   hackAmount: 0.1, // 10%
+  focusAmount: 125, // 10
   reserve: 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
@@ -9,7 +10,7 @@ export const configs: any = {
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
-  serversTargetRAM: 1024, // L10 (1024) L20 (1048576) (Pow2 2, 4, 8)
+  serversTargetRAM: 32768, // L10 (1024) L15 (32768) L20 (1048576) (Pow2 2, 4, 8)
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K

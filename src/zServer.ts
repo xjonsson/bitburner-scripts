@@ -158,6 +158,19 @@ export default class Server {
     );
   }
 
+  getGrowThreadsCorrected(cores: number) {
+    const growThreads = numCycleForGrowthCorrected(
+      this.ns,
+      this.ns.getServer(this.hostname),
+      this.money.max,
+      this.money.max * (1 - this.hackPercent),
+      cores,
+      this.ns.getPlayer()
+    );
+
+    return growThreads;
+  }
+
   get getGrowTime() {
     return this.ns.getGrowTime(this.hostname);
   }
