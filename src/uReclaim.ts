@@ -3,26 +3,24 @@ import { NS } from '@ns';
 /* eslint-enable */
 
 export function reclaimBot(ns: NS, node: any) {
-  if (!node.challenge) {
-    node.challenge = node.numOpenPortsRequired;
-  }
-  ns.print(`[Reclaiming] [${node.challenge}] ${node.hostname}`);
-  if (node.challenge >= 5) {
+  const challenge = node.challenge || 0;
+  ns.print(`[Reclaiming] [${challenge}] ${node.hostname}`);
+  if (challenge >= 5) {
     ns.sqlinject(node.hostname);
   }
-  if (node.challenge >= 4) {
+  if (challenge >= 4) {
     ns.httpworm(node.hostname);
   }
-  if (node.challenge >= 3) {
+  if (challenge >= 3) {
     ns.relaysmtp(node.hostname);
   }
-  if (node.challenge >= 2) {
+  if (challenge >= 2) {
     ns.ftpcrack(node.hostname);
   }
-  if (node.challenge >= 1) {
+  if (challenge >= 1) {
     ns.brutessh(node.hostname);
   }
-  if (node.challenge >= 0) {
+  if (challenge >= 0) {
     ns.nuke(node.hostname);
   }
 }

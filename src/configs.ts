@@ -1,15 +1,17 @@
 export const configs: any = {
   hackAmount: 0.1, // 10%
+  focusAmount: 125, // Batch 125 hack, weak, grow, weak
+  focusLimit: 25, // Only work on 25 servers
   reserve: 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
-  reserveRAM: 24, // However much you want to keep available for other scripts
+  reserveRAM: 64, // However much you want to keep available for other scripts
   nodesTargetCount: 24, // 24 Soft Max (Real Max Infinity)
   nodesTargetLevel: 200, // 200 Max
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
-  serversTargetRAM: 1024, // L10 (1024) L20 (1048576) (Pow2 2, 4, 8)
+  serversTargetRAM: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K
@@ -27,6 +29,7 @@ export const configs: any = {
   xHack: 'xhack.js',
   xWeak: 'xweak.js',
   xGrow: 'xgrow.js',
+  xShare: 'xshare.js',
 };
 
 /* 

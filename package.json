@@ -1,6 +1,6 @@
 {
   "name": "bitburner-xjonsson",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Bitburner Game Scripts",
   "author": "xjonsson, extends hydroflame, Hoekstraa, based on work by SlyCedix",
   "private": true,

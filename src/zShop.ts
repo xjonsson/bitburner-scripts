@@ -30,51 +30,52 @@ export default class Shop {
   }
 
   buyNext() {
-    if (this.purchase.length > 0) {
-      const next = this.purchase[0];
-
-      if (this.p.money - this.p.reserve >= next.cost) {
-        this.ns.print(
-          ` Buying [${next.id ? next.id : 'New'}] ${
-            next.text
-          } | ${this.ns.formatNumber(next.cost, 2)}`
-        );
-        switch (next.type) {
-          case 'serverNew': {
-            this.buyServer();
-            break;
-          }
-          case 'serverRAM': {
-            this.buyServerRAM(next);
-            break;
-          }
-          case 'hnetNew': {
-            this.buyNode();
-            break;
-          }
-          case 'hnetLevel': {
-            this.buyNodeLevel(next);
-            break;
-          }
-          case 'hnetRAM': {
-            this.buyNodeRAM(next);
-            break;
-          }
-          case 'hnetCores': {
-            this.buyNodeCores(next);
-            break;
-          }
-          default: {
-            this.ns.print('Could not detect type of purchase');
+    if (this.purchase.length > 0 && this.p.money.now > this.purchase[0].cost) {
+      this.purchase.forEach((next: any) => {
+        if (this.p.money.now >= next.cost) {
+          this.ns.print(
+            ` Buying [${next.id ? next.id : 'New'}] ${
+              next.text
+            } | ${this.ns.formatNumber(next.cost, 2)}`
+          );
+          switch (next.type) {
+            case 'serverNew': {
+              this.buyServer();
+              break;
+            }
+            case 'serverRAM': {
+              this.buyServerRAM(next);
+              break;
+            }
+            case 'hnetNew': {
+              this.buyNode();
+              break;
+            }
+            case 'hnetLevel': {
+              this.buyNodeLevel(next);
+              break;
+            }
+            case 'hnetRAM': {
+              this.buyNodeRAM(next);
+              break;
+            }
+            case 'hnetCores': {
+              this.buyNodeCores(next);
+              break;
+            }
+            default: {
+              this.ns.print('Could not detect type of purchase');
+            }
           }
         }
-      } else {
-        this.ns.print(
-          ` Saving [${next.id ? next.id : 'New'}] ${
-            next.text
-          } | ${this.ns.formatNumber(next.cost, 2)}`
-        );
-      }
+      });
+    } else if (this.purchase.length > 0) {
+      const next = this.purchase[0];
+      this.ns.print(
+        ` Saving [${next.id ? next.id : 'New'}] ${
+          next.text
+        } | ${this.ns.formatNumber(next.cost, 2)}`
+      );
     }
   }
 
