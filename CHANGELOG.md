@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/xjonsson/bitburner-scripts/compare/v0.1.4...v0.1.5) (2023-03-23)
+
+
+### Features
+
+* **controller:** added batching and focus controller ([1343840](https://github.com/xjonsson/bitburner-scripts/commit/1343840eba49142634102938447d6a757706820c))
+* **share:** added share function for work ([23b3ca8](https://github.com/xjonsson/bitburner-scripts/commit/23b3ca8fca4537fc031d6d0a64e1ccfdd64e9e47))
+* **shop:** added flow to loop through all purchases ([f330024](https://github.com/xjonsson/bitburner-scripts/commit/f33002489db503cf4ea30894fba2b711dbb078cd)), closes [#2](https://github.com/xjonsson/bitburner-scripts/issues/2)
+* **utilities:** added rep calculation for purchase ([1f525e8](https://github.com/xjonsson/bitburner-scripts/commit/1f525e8c7c0f867875dd408d21ae515c4a6513bd))
+
+
+### Bug Fixes
+
+* **controller:** fixed issue when no challenge on node ([b15bcef](https://github.com/xjonsson/bitburner-scripts/commit/b15bcefb4ea095d060797bc2ec76bce196a0fcfa))
+* **controller:** moved scp to reclaim where it should have been ([756e66a](https://github.com/xjonsson/bitburner-scripts/commit/756e66ae8bcbadc1ae91454afa614bf5e9d5f1cd))
+
 ### 0.1.4 (2023-03-15)
 
 
