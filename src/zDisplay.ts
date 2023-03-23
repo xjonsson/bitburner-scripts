@@ -42,7 +42,7 @@ export default class Display {
         this.p.hacking,
         this.p.challenge,
         this.ns.formatNumber(this.p.reserve, 3),
-        this.ns.formatNumber(this.p.money, 3)
+        this.ns.formatNumber(this.p.money.real, 3)
       );
     } else {
       this.ns.printf(header, 'bNode', 'Hack', 'Money');
@@ -50,7 +50,7 @@ export default class Display {
         header,
         this.p.bitnode,
         this.p.hacking,
-        this.ns.formatNumber(this.p.money, 3)
+        this.ns.formatNumber(this.p.money.real, 3)
       );
     }
   }
@@ -271,73 +271,98 @@ export default class Display {
     );
   }
 
-  displayTargets() {
+  displayTargets(limit = -1, xmap: any) {
     const { targets } = this.xnet;
     const tFocus: any = targets.sort(
       (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
     )[0];
     targets.sort((a: any, b: any) => b.money.max - a.money.max);
 
-    const rows =
-      ' %3s | %4s | %6s | %8s | %8s | %8s | %8s | %8s | %6s | %-12s ';
+    if (targets.length > 0) {
+      const rows =
+        ' %3s | %5s | %6s | %8s | %8s | %12s | %12s | %12s | %6s |  %-7s | %-12s ';
 
-    this.ns.print('\n');
-    this.ns.printf(
-      ' %-5s %-18s %5s | %8s | %8s | %8s | %8s            %-12s ',
-      'Focus',
-      tFocus.hostname,
-      'Money',
-      'Max',
-      'Hack',
-      'Weak',
-      'Grow',
-      'Server'
-    );
-    this.ns.printf(
-      rows,
-      'CRD',
-      'HWGW',
-      'Sec',
-      this.ns.formatNumber(this.xnet.targetsValueNow, 2),
-      this.ns.formatNumber(this.xnet.targetsValue, 2),
-      '',
-      '',
-      '',
-      'Action',
-      targets.length
-    );
-    this.ns.printf(
-      rows,
-      '---',
-      '----',
-      '------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '--------',
-      '------',
-      '------------'
-    );
-    targets.forEach((t: any) => {
-      const mCRD = `${t.root ? '  ' : t.challenge + t.root}${
-        !t.door ? 'D' : ' '
-      }`;
-
+      this.ns.print('\n');
+      this.ns.printf(
+        ' %-5s %-19s %5s | %8s | %12s | %12s | %12s             %-7s | %-12s ',
+        'Focus',
+        tFocus.hostname,
+        'Money',
+        'Max',
+        'Hack',
+        'Weak',
+        'Grow',
+        '',
+        'Server'
+      );
       this.ns.printf(
         rows,
-        mCRD,
-        // t.level,
-        t.nodeValueHWGW.toFixed(2),
-        `+${(t.sec.now - t.sec.min).toFixed(2)}`,
-        `${((t.money.now / t.money.max) * 100).toFixed(2)}%`,
-        `${this.ns.formatNumber(t.money.max, 2)}`,
-        t.getHackThreads,
-        t.getWeakThreads,
-        t.getGrowThreads,
-        t.nodeReady ? 'Hack' : 'Prep',
-        t.hostname
+        'CRD',
+        'HWGW',
+        'Sec',
+        this.ns.formatNumber(this.xnet.targetsValueNow, 2),
+        this.ns.formatNumber(this.xnet.targetsValue, 2),
+        '',
+        '',
+        '',
+        'Action',
+        'Update',
+        targets.length
       );
-    });
+      this.ns.printf(
+        rows,
+        '---',
+        '-----',
+        '------',
+        '--------',
+        '--------',
+        '------------',
+        '------------',
+        '------------',
+        '------',
+        '-------',
+        '------------'
+      );
+      targets.forEach((t: any, index) => {
+        const x = xmap.get(t.hostname);
+        const mUpdate = this.ns
+          .tFormat((x?.recheck || 0) - performance.now())
+          .replace(' minutes', 'm')
+          .replace(' minute', 'm')
+          .replace(' seconds', 's')
+          .replace(' second', 's');
+        const mCRD = `${t.root ? '  ' : t.challenge + t.root}${
+          !t.door ? 'D' : ' '
+        }`;
+
+        const mHackP = x?.hackP > 0 ? ` (${x?.hackP})` : '';
+        const mHack =
+          t.getHackThreads > 0 ? `${t.getHackThreads}${mHackP}` : '0';
+        const mWeakP = x?.weakP > 0 ? ` (${x?.weakP})` : '';
+        const mWeak =
+          t.getWeakThreads > 0 ? `${t.getWeakThreads}${mWeakP}` : '0';
+        const mGrowP = x?.growP > 0 ? ` (${x?.growP})` : '';
+        const mGrow =
+          t.getGrowThreads > 0 ? `${t.getGrowThreads}${mGrowP}` : '0';
+
+        if (index < limit || limit < 0) {
+          this.ns.printf(
+            rows,
+            x?.focus,
+            // t.level,
+            t.nodeValueHWGW.toFixed(1),
+            `+${(t.sec.now - t.sec.min).toFixed(1)}`,
+            `${((t.money.now / t.money.max) * 100).toFixed(2)}%`,
+            `${this.ns.formatNumber(t.money.max, 2)}`,
+            mHack,
+            mWeak,
+            mGrow,
+            t.nodeReady ? 'Hack' : 'Prep',
+            mUpdate,
+            t.hostname
+          );
+        }
+      });
+    }
   }
 }
