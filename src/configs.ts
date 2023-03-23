@@ -11,7 +11,7 @@ export const configs: any = {
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
-  serversTargetRAM: 32768, // L10 (1024) L15 (32768) L20 (1048576) (Pow2 2, 4, 8)
+  serversTargetRAM: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K

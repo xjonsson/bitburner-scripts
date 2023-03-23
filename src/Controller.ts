@@ -123,7 +123,7 @@ export async function main(ns: NS) {
     if (reclaim.length > 0) {
       reclaim.forEach((node: any) => {
         reclaimBot(ns, node);
-        ns.scp([xmin, xhack, xweak, xgrow], node.hostname, 'home');
+        ns.scp([xmin, xhack, xweak, xgrow, xshare], node.hostname, 'home');
       });
     }
   }
@@ -137,7 +137,7 @@ export async function main(ns: NS) {
     delay = 0
   ) {
     // ns.print(`[Deploying] ${action} from ${source} on '${target}'`);
-    ns.scp([xmin, xhack, xweak, xgrow, xshare], source, 'home');
+    // ns.scp([xmin, xhack, xweak, xgrow, xshare], source, 'home');
     switch (action) {
       case 'hack': {
         ns.exec(xhack, source, amount, target, repeat, delay);
@@ -277,8 +277,10 @@ export async function main(ns: NS) {
     } else if (targetNode.ready && targetNode.focus < configs.focusAmount) {
       xnet.bots.forEach((bot: any) => {
         attackTargetBatch(targetNode, bot);
+        // attackTarget(targetNode, bot);
       });
       attackTargetBatch(targetNode, home);
+      // attackTarget(targetNode, home);
 
       // if (!controller.attackBatch) {
       //   // xnet.bots.forEach((bot: any) => {
@@ -338,7 +340,7 @@ export async function main(ns: NS) {
     xnet.bots
       .filter((b: any) => b.ram.now > controller.ramShare)
       .forEach((b: any) => {
-        ns.scp(xshare, b.hostname, 'home');
+        // ns.scp(xshare, b.hostname, 'home');
         const maxThreads = b.nodeThreads(controller.ramShare);
         ns.exec(xshare, b.hostname, maxThreads);
       });
