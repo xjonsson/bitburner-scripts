@@ -6,7 +6,7 @@ export const configs: any = {
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
   reserveRAM: 64, // However much you want to keep available for other scripts
-  nodesTargetCount: 24, // 24 Soft Max (Real Max Infinity)
+  nodesTargetCount: 23, // 24 Soft Max (Real Max Infinity)
   nodesTargetLevel: 200, // 200 Max
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
