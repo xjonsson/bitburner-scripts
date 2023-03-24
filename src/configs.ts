@@ -1,5 +1,7 @@
 export const configs: any = {
   hackAmount: 0.1, // 10%
+  hackBuffer: 50, // Time in ms between scripts
+  hackDelay: 3000, // Delay in between batches
   focusAmount: 125, // Batch 125 hack, weak, grow, weak
   focusLimit: 25, // Only work on 25 servers
   reserve: 1000000, // 1000000 1 Million

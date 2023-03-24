@@ -2,6 +2,9 @@
 import { NS } from '@ns';
 import { configs } from './configs.js';
 import Player from './zPlayer.js';
+import { CONSTANTS } from './zCalc.js';
+import { growthAnalyzeAccurate } from './zCalc.js';
+import { timeFormat } from './zUtils.js';
 /* eslint-enable */
 
 export default class Server {
@@ -49,7 +52,7 @@ export default class Server {
 
   // ******** Decision
   get canReclaim(): boolean {
-    return this.open <= this.p.challenge;
+    return this.challenge <= this.p.challenge;
   }
 
   get canDoor(): boolean {
@@ -66,7 +69,24 @@ export default class Server {
   }
 
   get canAttack(): boolean {
-    return this.money.now === this.money.max && this.sec.now === this.sec.min;
+    return (
+      this.money.now === this.money.max &&
+      this.sec.now === this.sec.min &&
+      this.hackChance === 1
+    );
+  }
+
+  get action(): string {
+    if (this.canAttack) {
+      return 'Hack';
+    }
+    if (this.sec.now > this.sec.min) {
+      return 'Weak';
+    }
+    if (this.money.now < this.money.max) {
+      return 'Grow';
+    }
+    return '';
   }
 
   // ******** Computed
@@ -76,17 +96,70 @@ export default class Server {
   threads(scriptRam: number): number {
     return Math.floor(this.ram.now / scriptRam);
   }
-  // TODO: get hackThreads
-  // TODO: get hackTime
-  // TODO: get hackChance
-  // TODO: get hackAmount
-  // TODO: get hackSec
-  // TODO: get weakThreads
-  // TODO: get weakTime
-  // TODO: get weakSec?
-  // TODO: get growThreads
-  // TODO: get growTime
-  // TODO: get growSec
+
+  get hackAmountSingle(): number {
+    return this.ns.hackAnalyze(this.hostname);
+  }
+
+  get hackThreads(): number {
+    return Math.ceil(
+      this.ns.hackAnalyzeThreads(
+        this.hostname,
+        this.money.max * configs.hackAmount
+      )
+    );
+  }
+
+  get hackTime(): number {
+    return this.ns.getHackTime(this.hostname);
+  }
+
+  get hackChance(): number {
+    return this.ns.hackAnalyzeChance(this.hostname);
+  }
+
+  get hackSecInc(): number {
+    return this.ns.hackAnalyzeSecurity(this.hackThreads, this.hostname);
+  }
+
+  get weakThreads(): number {
+    return Math.ceil(
+      (this.sec.now - this.sec.min) / CONSTANTS.ServerWeakenAmount
+    );
+  }
+
+  weakThreadsAfterGrow(cores = 1) {
+    return Math.ceil(this.growThreads(cores) / 12.5);
+  }
+
+  get weakTime(): number {
+    return this.ns.getWeakenTime(this.hostname);
+  }
+
+  growThreads(cores = 1): number {
+    return growthAnalyzeAccurate(
+      this.ns,
+      this.p,
+      this.sec.now,
+      this.money.growth,
+      this.money.max,
+      this.money.now,
+      this.money.max,
+      cores
+    );
+  }
+
+  get growTime(): number {
+    return this.ns.getGrowTime(this.hostname);
+  }
+
+  growSecInc(cores = 1): number {
+    return this.ns.growthAnalyzeSecurity(
+      this.growThreads(cores),
+      this.hostname,
+      cores
+    );
+  }
 
   // ******** Details
   get ip(): string {
@@ -208,16 +281,16 @@ export async function main(ns: NS) {
       mRoot,
       `O${xserver.open}${!xserver.root && xserver.canReclaim ? '*' : ''}`,
       `${xserver.door ? 'D' : 'X'}${
-        !xserver.root && xserver.canDoor ? '*' : ''
+        !xserver.door && xserver.canDoor ? '*' : ''
       }`,
       'V1000',
       ns.formatNumber(xserver.money.now, 2),
       ns.formatNumber(xserver.money.max, 2),
       `${((xserver.money.now / xserver.money.max) * 100).toFixed(2)}%`,
-      'B500\n'
+      `${(xserver.hackChance * 100).toFixed(2)}% chance\n`
     );
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s | %-32s ',
+      ' %-5s %2s %-3s %-5s | %8s %8s %8s %8s | %-32s ',
       'Type',
       '',
       '',
@@ -225,10 +298,11 @@ export async function main(ns: NS) {
       'Hack',
       'Weak',
       'Grow',
+      'Weak',
       'Share'
     );
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s | %-32s ',
+      ' %-5s %2s %-3s %-5s | %8s %8s %8s %8s | %-32s ',
       'Bot',
       '',
       '',
@@ -236,23 +310,47 @@ export async function main(ns: NS) {
       xserver.threads(ramHack),
       xserver.threads(ramWeak),
       xserver.threads(ramGrow),
-      xserver.threads(ramShare),
-      ''
+      xserver.threads(ramWeak),
+      xserver.threads(ramShare)
+    );
+    const homeCores = ns.getServer('home').cpuCores;
+    const mGrowThreads = xserver.growThreads();
+    const mGrowThreadsH = xserver.growThreads(homeCores);
+    const mWeakThreadsAfter = xserver.weakThreadsAfterGrow();
+    const mWeakThreadsAfterH = xserver.growThreads(homeCores);
+    ns.printf(
+      ' %-5s %6s %-5s | %8s %8s %8s %8s ',
+      'Prey',
+      `+${(xserver.sec.now - xserver.sec.min).toFixed(2)}`,
+      xserver.action,
+      xserver.canAttack ? xserver.hackThreads : '',
+      xserver.weakThreads > 0 ? xserver.weakThreads : '',
+      `${mGrowThreads > 0 ? mGrowThreads : ''} ${
+        mGrowThreadsH > 0 ? `H${mGrowThreadsH}` : ''
+      }`,
+      `${mWeakThreadsAfter > 0 ? mWeakThreadsAfter : ''} ${
+        mWeakThreadsAfterH > 0 ? `H${mWeakThreadsAfterH}` : ''
+      }`
     );
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s | %-32s ',
-      'Prey',
+      '  %-6s %10s | %8s %8s %8s %8s | ',
+      'Time',
+      'VT9999',
+      timeFormat(ns, xserver.hackTime),
+      timeFormat(ns, xserver.weakTime),
+      timeFormat(ns, xserver.growTime),
+      timeFormat(ns, xserver.weakTime)
+    );
+    ns.printf(
+      '  %-6s %10s | %8s %8s %8s %8s | ',
+      'Sec',
+      'Vt9999',
+      xserver.canAttack ? xserver.hackSecInc : '',
       '',
-      '',
-      '',
-      xserver.threads(ramHack),
-      xserver.threads(ramWeak),
-      xserver.threads(ramGrow),
-      xserver.threads(ramShare),
+      xserver.growThreads() > 0 ? xserver.growSecInc() : '',
       ''
     );
-
-    // Root (R)	5*	D*	V9999	$25.00M	$50.00M	50.00%
+    ns.printf('  %-6s %10s | %8s %8s %8s %8s | ', 'Effort', 'VE9999');
   }
 
   while (true) {
