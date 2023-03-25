@@ -393,28 +393,28 @@ export async function main(ns: NS) {
     );
     ns.printf('  %-6s %10s | %8s %8s %8s %8s | ', 'Effort', 'VE9999');
 
-    const now = performance.now();
-    ns.print(`[Now] ${now}`);
-    ns.print(
-      `[HackT] ${xserver.batch().hackDeploy} (${
-        xserver.batch().hackDeploy - now
-      })`
-    );
-    ns.print(
-      `[WeakT] ${xserver.batch().weakDeploy} (${
-        xserver.batch().weakDeploy - now
-      })`
-    );
-    ns.print(
-      `[GrowT] ${xserver.batch().growDeploy} (${
-        xserver.batch().growDeploy - now
-      })`
-    );
-    ns.print(
-      `[WeakT] ${xserver.batch().weakDeployAfterGrow} (${
-        xserver.batch().weakDeployAfterGrow - now
-      })`
-    );
+    // const now = performance.now();
+    // ns.print(`[Now] ${now}`);
+    // ns.print(
+    //   `[HackT] ${xserver.batch().hackDeploy} (${
+    //     xserver.batch().hackDeploy - now
+    //   })`
+    // );
+    // ns.print(
+    //   `[WeakT] ${xserver.batch().weakDeploy} (${
+    //     xserver.batch().weakDeploy - now
+    //   })`
+    // );
+    // ns.print(
+    //   `[GrowT] ${xserver.batch().growDeploy} (${
+    //     xserver.batch().growDeploy - now
+    //   })`
+    // );
+    // ns.print(
+    //   `[WeakT] ${xserver.batch().weakDeployAfterGrow} (${
+    //     xserver.batch().weakDeployAfterGrow - now
+    //   })`
+    // );
   }
 
   while (true) {
