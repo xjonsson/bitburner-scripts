@@ -1,6 +1,6 @@
 export const configs: any = {
-  hackAmount: 0.1, // 10%
-  hackBuffer: 50, // Time in ms between scripts
+  hackAmount: 0.05, // 10%
+  hackBuffer: 250, // Time in ms between scripts
   hackDelay: 3000, // Delay in between batches
   focusAmount: 125, // Batch 125 hack, weak, grow, weak
   focusLimit: 25, // Only work on 25 servers
@@ -13,11 +13,11 @@ export const configs: any = {
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
-  serversTargetRAM: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+  serversTargetRAM: 1024, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K
-    ftp: 1500000, // 1.5 Million
+    ftp: 150000000, // 1.5 Million
     smtp: 5000000, // 5 Million
     http: 30000000, // 30 Million
     sql: 250000000, // 250 Million

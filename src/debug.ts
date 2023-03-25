@@ -1,225 +1,65 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { configs } from './configs';
 import Player from './zPlayer';
-import Server from './zServer';
+import { configs } from './configs';
+import Network from './zNetwork';
+import Server from './server';
 /* eslint-enable */
 
+const { xMin, xHack, xWeak, xGrow, xShare } = configs;
+
 export async function main(ns: NS) {
+  const p = new Player(ns);
   ns.tail();
   ns.clearLog();
   ns.disableLog('disableLog');
+  ns.disableLog('scan');
   ns.disableLog('sleep');
-  // ns.disableLog('ALL');
-  const p = new Player(ns);
-  // ns.print(ns.getPurchasedServers());
-  const s = ns.getServer('n00dles');
-  ns.print(s);
+
+  const target = new Server(ns, p, 'n00dles');
+  const source = new Server(ns, p, 'ps-0');
+  ns.scp([xMin, xHack, xWeak, xGrow, xShare], source.hostname, 'home');
+  ns.print(performance.now());
+  while (true) {
+    const batch = target.batch(ns.getServer('home').cpuCores);
+    // ns.print(batch);
+    if (source.ram.now > batch.batchRam && target.canAttack) {
+      ns.exec(
+        'xhack.js',
+        source.hostname,
+        batch.hackThreads,
+        target.hostname,
+        false,
+        batch.hackDeploy
+      );
+
+      ns.exec(
+        'xweak.js',
+        source.hostname,
+        batch.weakThreads,
+        target.hostname,
+        false,
+        batch.weakDeploy
+      );
+
+      ns.exec(
+        'xgrow.js',
+        source.hostname,
+        batch.growThreads,
+        target.hostname,
+        false,
+        batch.growDeploy
+      );
+
+      ns.exec(
+        'xweak.js',
+        source.hostname,
+        batch.weakThreadsAfterGrow,
+        target.hostname,
+        false,
+        batch.weakDeployAfterGrow
+      );
+    }
+    await ns.sleep(3000);
+  }
 }
-
-// const sample = {
-//   hp: { current: 10, max: 10 },
-//   skills: {
-//     hacking: 1206,
-//     strength: 2,
-//     defense: 1,
-//     dexterity: 2,
-//     agility: 1,
-//     charisma: 2,
-//     intelligence: 0,
-//   },
-//   exp: {
-//     hacking: 98453962.91900802,
-//     strength: 0,
-//     defense: 0,
-//     dexterity: 0,
-//     agility: 0,
-//     charisma: 0,
-//     intelligence: 0,
-//   },
-//   mults: {
-//     hacking_chance: 2.032353267024972,
-//     hacking_speed: 2.022203093529755,
-//     hacking_money: 3.395980295603446,
-//     hacking_grow: 2.033764699726582,
-//     hacking: 3.101896444837534,
-//     strength: 2.2452762284981462,
-//     defense: 1.9524141117375187,
-//     dexterity: 2.593294043915359,
-//     agility: 1.708362347770329,
-//     charisma: 2.1476555229112706,
-//     hacking_exp: 4.095178678665241,
-//     strength_exp: 2.058169876123301,
-//     defense_exp: 2.058169876123301,
-//     dexterity_exp: 2.058169876123301,
-//     agility_exp: 2.058169876123301,
-//     charisma_exp: 2.058169876123301,
-//     company_rep: 2.716784236482757,
-//     faction_rep: 2.058169876123301,
-//     crime_money: 1.6270117597812657,
-//     crime_success: 1.6270117597812657,
-//     hacknet_node_money: 4.103476190520832,
-//     hacknet_node_purchase_cost: 0.4581503455759973,
-//     hacknet_node_ram_cost: 0.5988893406222188,
-//     hacknet_node_core_cost: 0.5988893406222188,
-//     hacknet_node_level_cost: 0.509055939528886,
-//     work_money: 1.7897129357593924,
-//     bladeburner_max_stamina: 1,
-//     bladeburner_stamina_gain: 1,
-//     bladeburner_analysis: 1,
-//     bladeburner_success_chance: 1,
-//   },
-//   numPeopleKilled: 0,
-//   money: 4161292969560.33,
-//   city: 'Sector-12',
-//   location: 'Alpha Enterprises',
-//   bitNodeN: 1,
-//   totalPlaytime: 1740283800,
-//   playtimeSinceLastAug: 7201000,
-//   playtimeSinceLastBitnode: 698549200,
-//   jobs: {},
-//   factions: [
-//     'BitRunners',
-//     'The Black Hand',
-//     'NiteSec',
-//     'Netburners',
-//     'CyberSec',
-//   ],
-//   entropy: 0,
-// };
-
-const sampleHome = {
-  contracts: [],
-  cpuCores: 6,
-  ftpPortOpen: false,
-  hasAdminRights: true,
-  hostname: 'home',
-  httpPortOpen: false,
-  ip: '10.5.4.9',
-  isConnectedTo: true,
-  maxRam: 262144,
-  messages: [],
-  organizationName: 'Home PC',
-  programs: [],
-  ramUsed: 262082.85,
-  runningScripts: [],
-  scripts: [],
-  serversOnNetwork: [],
-  smtpPortOpen: false,
-  sqlPortOpen: false,
-  sshPortOpen: true,
-  textFiles: [],
-  purchasedByPlayer: true,
-  backdoorInstalled: false,
-  baseDifficulty: 1,
-  hackDifficulty: 1,
-  minDifficulty: 1,
-  moneyAvailable: 0,
-  moneyMax: 0,
-  numOpenPortsRequired: 5,
-  openPortCount: 1,
-  requiredHackingSkill: 1,
-  serverGrowth: 1,
-};
-
-const sampleServer = {
-  contracts: [],
-  cpuCores: 1,
-  ftpPortOpen: false,
-  hasAdminRights: true,
-  hostname: 'ps-0',
-  httpPortOpen: false,
-  ip: '53.5.3.0',
-  isConnectedTo: false,
-  maxRam: 1048576,
-  messages: [],
-  organizationName: '',
-  programs: [],
-  ramUsed: 1048574.4,
-  runningScripts: [],
-  scripts: [],
-  serversOnNetwork: [],
-  smtpPortOpen: false,
-  sqlPortOpen: false,
-  sshPortOpen: false,
-  textFiles: [],
-  purchasedByPlayer: true,
-  backdoorInstalled: false,
-  baseDifficulty: 1,
-  hackDifficulty: 1,
-  minDifficulty: 1,
-  moneyAvailable: 0,
-  moneyMax: 0,
-  numOpenPortsRequired: 5,
-  openPortCount: 0,
-  requiredHackingSkill: 1,
-  serverGrowth: 1,
-};
-
-const sampleBot = {
-  contracts: [],
-  cpuCores: 1,
-  ftpPortOpen: false,
-  hasAdminRights: true,
-  hostname: 'n00dles',
-  httpPortOpen: false,
-  ip: '76.2.4.1',
-  isConnectedTo: false,
-  maxRam: 4,
-  messages: [],
-  organizationName: 'Noodle Bar',
-  programs: [],
-  ramUsed: 3.6,
-  runningScripts: [],
-  scripts: [],
-  serversOnNetwork: [],
-  smtpPortOpen: false,
-  sqlPortOpen: false,
-  sshPortOpen: false,
-  textFiles: [],
-  purchasedByPlayer: false,
-  backdoorInstalled: true,
-  baseDifficulty: 1,
-  hackDifficulty: 1.036,
-  minDifficulty: 1,
-  moneyAvailable: 1553928,
-  moneyMax: 1750000,
-  numOpenPortsRequired: 0,
-  openPortCount: 0,
-  requiredHackingSkill: 1,
-  serverGrowth: 3000,
-};
-
-const sampleMegacorp = {
-  contracts: [],
-  cpuCores: 1,
-  ftpPortOpen: true,
-  hasAdminRights: true,
-  hostname: 'megacorp',
-  httpPortOpen: true,
-  ip: '37.5.1.8',
-  isConnectedTo: false,
-  maxRam: 0,
-  messages: [],
-  organizationName: 'MegaCorp',
-  programs: [],
-  ramUsed: 0,
-  runningScripts: [],
-  scripts: [],
-  serversOnNetwork: [],
-  smtpPortOpen: true,
-  sqlPortOpen: true,
-  sshPortOpen: true,
-  textFiles: [],
-  purchasedByPlayer: false,
-  backdoorInstalled: false,
-  baseDifficulty: 99,
-  hackDifficulty: 33,
-  minDifficulty: 33,
-  moneyAvailable: 1048988748350,
-  moneyMax: 1048988748350,
-  numOpenPortsRequired: 5,
-  openPortCount: 5,
-  requiredHackingSkill: 1196,
-  serverGrowth: 99,
-};

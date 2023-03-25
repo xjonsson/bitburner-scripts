@@ -7,6 +7,11 @@ import { growthAnalyzeAccurate } from './zCalc.js';
 import { timeFormat } from './zUtils.js';
 /* eslint-enable */
 
+const hackRamR = 1.71;
+const weakRamR = 1.76;
+const growRamR = 1.76;
+const shareRamR = 4.3;
+
 export default class Server {
   ns: NS;
   p: Player;
@@ -97,6 +102,42 @@ export default class Server {
     return Math.floor(this.ram.now / scriptRam);
   }
 
+  batch(cores = 1): any {
+    const buffer = configs.hackBuffer;
+    const deployStart = performance.now() + configs.hackDelay;
+    const deployEnd = deployStart + this.weakTime + buffer;
+    const weakDeployAfterGrow = deployEnd - (this.weakTime + buffer);
+    const growDeploy = deployEnd - buffer * 1 - (this.growTime + buffer);
+    const weakDeploy = deployEnd - buffer * 2 - (this.weakTime + buffer);
+    const hackDeploy = deployEnd - buffer * 3 - (this.hackTime + buffer);
+
+    const { hackThreads } = this;
+    const weakThreads = Math.ceil(hackThreads / 25);
+    const growThreads = this.growThreads(cores, true);
+    const weakThreadsAfterGrow = this.weakThreadsAfterGrow(cores, true);
+
+    const batch = {
+      deployStart,
+      batchRam: -1,
+      hackThreads,
+      hackRam: hackThreads * hackRamR,
+      hackDeploy,
+      weakThreads,
+      weakRam: weakThreads * weakRamR,
+      weakDeploy,
+      growThreads,
+      growRam: growThreads * growRamR,
+      growDeploy,
+      weakThreadsAfterGrow,
+      weakAfterGrowRam: weakThreadsAfterGrow * weakRamR,
+      weakDeployAfterGrow,
+      deployEnd,
+    };
+    batch.batchRam =
+      batch.hackRam + batch.weakRam + batch.growRam + batch.weakAfterGrowRam;
+    return batch;
+  }
+
   get hackAmountSingle(): number {
     return this.ns.hackAnalyze(this.hostname);
   }
@@ -128,22 +169,22 @@ export default class Server {
     );
   }
 
-  weakThreadsAfterGrow(cores = 1) {
-    return Math.ceil(this.growThreads(cores) / 12.5);
+  weakThreadsAfterGrow(cores = 1, batch = false): number {
+    return Math.ceil(this.growThreads(cores, batch) / 12.5);
   }
 
   get weakTime(): number {
     return this.ns.getWeakenTime(this.hostname);
   }
 
-  growThreads(cores = 1): number {
+  growThreads(cores = 1, batch = false): number {
     return growthAnalyzeAccurate(
       this.ns,
       this.p,
       this.sec.now,
       this.money.growth,
       this.money.max,
-      this.money.now,
+      batch ? this.money.max * (1 - configs.hackAmount) : this.money.now,
       this.money.max,
       cores
     );
@@ -351,6 +392,29 @@ export async function main(ns: NS) {
       ''
     );
     ns.printf('  %-6s %10s | %8s %8s %8s %8s | ', 'Effort', 'VE9999');
+
+    const now = performance.now();
+    ns.print(`[Now] ${now}`);
+    ns.print(
+      `[HackT] ${xserver.batch().hackDeploy} (${
+        xserver.batch().hackDeploy - now
+      })`
+    );
+    ns.print(
+      `[WeakT] ${xserver.batch().weakDeploy} (${
+        xserver.batch().weakDeploy - now
+      })`
+    );
+    ns.print(
+      `[GrowT] ${xserver.batch().growDeploy} (${
+        xserver.batch().growDeploy - now
+      })`
+    );
+    ns.print(
+      `[WeakT] ${xserver.batch().weakDeployAfterGrow} (${
+        xserver.batch().weakDeployAfterGrow - now
+      })`
+    );
   }
 
   while (true) {
