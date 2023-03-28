@@ -6,6 +6,9 @@ export const CONSTANTS = {
   ServerMaxGrowthRate: 1.0035, // Maximum possible growth rate (max rate accounting for server security)
   ServerFortifyAmount: 0.002, // Amount by which server's security increases when its hacked/grown
   ServerWeakenAmount: 0.05, // Amount by which server's security decreases when weakened
+  TIME_HOUR: 60 * 60 * 1000,
+  TIME_MIN: 60 * 1000,
+  TIME_SEC: 1000,
 };
 
 export function numCycleForGrowthCorrected(

@@ -274,7 +274,8 @@ export default class Display {
   displayTargets(limit = -1, xmap: any) {
     const { targets } = this.xnet;
     const tFocus: any = targets.sort(
-      (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
+      // (a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW
+      (a: any, b: any) => b.value - a.value
     )[0];
     targets.sort((a: any, b: any) => b.money.max - a.money.max);
 
@@ -350,7 +351,8 @@ export default class Display {
             rows,
             x?.focus,
             // t.level,
-            t.nodeValueHWGW.toFixed(1),
+            // t.nodeValueHWGW.toFixed(1),
+            t.value.toFixed(1),
             `+${(t.sec.now - t.sec.min).toFixed(1)}`,
             `${((t.money.now / t.money.max) * 100).toFixed(2)}%`,
             `${this.ns.formatNumber(t.money.max, 2)}`,

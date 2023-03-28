@@ -226,6 +226,18 @@ export default class Server {
     return dollars / (ram * seconds);
   }
 
+  get value(): number {
+    const deployTime = this.ns.getHackTime(this.hostname) * 4;
+    const nvb = this.nodeValueBatch;
+    const batchRam =
+      nvb.hack * 1.75 + nvb.grow * 1.8 + nvb.weak1 * 1.8 + nvb.weak2 * 1.8;
+    const moneyPerBatch = this.money.max * configs.hackAmount;
+    const ramPerBatchSecond = batchRam * (deployTime / 1000);
+    const roiPerRamSecond =
+      moneyPerBatch / ramPerBatchSecond / (deployTime / 1000);
+    return roiPerRamSecond;
+  }
+
   nodeBatchReduced(amount: number): any {
     const homeCores = this.ns.getServer('home').cpuCores;
     const hackThreads = Math.floor(

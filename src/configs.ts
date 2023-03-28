@@ -1,10 +1,10 @@
 export const configs: any = {
-  hackAmount: 0.05, // 10%
+  hackAmount: 0.1, // 10%
   hackBuffer: 250, // Time in ms between scripts
   hackDelay: 3000, // Delay in between batches
-  focusAmount: 125, // Batch 125 hack, weak, grow, weak
+  focusAmount: 128, // Batch 125 hack, weak, grow, weak
   focusLimit: 25, // Only work on 25 servers
-  reserve: 1000000, // 1000000 1 Million
+  reserve: 0 * 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
   reserveRAM: 64, // However much you want to keep available for other scripts
@@ -17,7 +17,7 @@ export const configs: any = {
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K
-    ftp: 150000000, // 1.5 Million
+    ftp: 1500000, // 1.5 Million
     smtp: 5000000, // 5 Million
     http: 30000000, // 30 Million
     sql: 250000000, // 250 Million

@@ -328,7 +328,8 @@ export async function main(ns: NS) {
     //     updateTargets(targetNode);
     //   });
     xnet.targets
-      .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+      // .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
+      .sort((a: any, b: any) => b.value - a.value)
       .filter((t: any, index) => index < configs.focusLimit)
       .forEach((t: any) => {
         const targetNode = xmap.get(t.hostname);

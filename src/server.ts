@@ -98,6 +98,26 @@ export default class Server {
   // TODO: get value
   // TODO: get valueTime
   // TODO: get valueEffort
+  get value(): object {
+    const batch = this.batch(1);
+    const moneyPerBatch = this.money.max * configs.hackAmount;
+    const ramPerBatchSecond = batch.batchRam * (batch.deployTime / 1000);
+    const roiPerRamSecond =
+      moneyPerBatch / ramPerBatchSecond / (batch.deployTime / 1000);
+    return {
+      total: roiPerRamSecond,
+      time: batch.deployTime,
+      effort: ramPerBatchSecond,
+      hackRam: batch.hackRam,
+      weakRam: batch.weakRam,
+      growRam: batch.growRam,
+      batchTime: batch.batchTime,
+      moneyMax: this.money.max,
+      hackamount: configs.hackAmount,
+      weakAfterGrowRam: batch.weakAfterGrowRam,
+    };
+  }
+
   threads(scriptRam: number): number {
     return Math.floor(this.ram.now / scriptRam);
   }
@@ -106,6 +126,7 @@ export default class Server {
     const buffer = configs.hackBuffer;
     const deployStart = performance.now() + configs.hackDelay;
     const deployEnd = deployStart + this.weakTime + buffer;
+    const deployTime = deployEnd - deployStart;
     const weakDeployAfterGrow = deployEnd - (this.weakTime + buffer);
     const growDeploy = deployEnd - buffer * 1 - (this.growTime + buffer);
     const weakDeploy = deployEnd - buffer * 2 - (this.weakTime + buffer);
@@ -119,6 +140,7 @@ export default class Server {
     const batch = {
       deployStart,
       batchRam: -1,
+      deployTime,
       hackThreads,
       hackRam: hackThreads * hackRamR,
       hackDeploy,
@@ -392,6 +414,13 @@ export async function main(ns: NS) {
       ''
     );
     ns.printf('  %-6s %10s | %8s %8s %8s %8s | ', 'Effort', 'VE9999');
+    ns.print(xserver.value);
+    ns.print(xserver.money.growth);
+    ns.print(
+      `[Min] ${xserver.sec.min} [Now] ${xserver.sec.now} [+] ${
+        xserver.sec.now - xserver.sec.min
+      }`
+    );
 
     // const now = performance.now();
     // ns.print(`[Now] ${now}`);
@@ -463,3 +492,15 @@ export function autocomplete(data: any, args: any) {
 //   requiredHackingSkill: 58,
 //   serverGrowth: 1,
 // };
+
+const sample = {
+  total: 0.08812339788039224,
+  time: 5.141119032342083,
+  effort: 992.9258528905301,
+  hackRam: 51.3,
+  weakRam: 3.52,
+  growRam: 1.76,
+  moneyMax: 1750000,
+  hackamount: 0.05,
+  weakAfterGrowRam: 1.76,
+};

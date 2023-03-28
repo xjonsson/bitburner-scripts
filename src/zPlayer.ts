@@ -62,30 +62,30 @@ export default class Player {
 
   get reserve(): number {
     if (!this.programs.tor) {
-      return configs.softwareCost.tor;
+      return configs.softwareCost.tor + configs.reserve;
     }
 
     if (!this.programs.ssh) {
-      return configs.softwareCost.ssh;
+      return configs.softwareCost.ssh + configs.reserve;
     }
 
     if (!this.programs.ftp) {
-      return configs.softwareCost.ftp;
+      return configs.softwareCost.ftp + configs.reserve;
     }
 
     if (!this.programs.smtp) {
-      return configs.softwareCost.smtp;
+      return configs.softwareCost.smtp + configs.reserve;
     }
 
     if (!this.programs.http) {
-      return configs.softwareCost.http;
+      return configs.softwareCost.http + configs.reserve;
     }
 
     if (!this.programs.sql) {
-      return configs.softwareCost.sql;
+      return configs.softwareCost.sql + configs.reserve;
     }
 
-    return 0;
+    return configs.reserve;
   }
 }
 

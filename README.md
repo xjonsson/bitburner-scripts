@@ -57,3 +57,4 @@ Add image of logic flow here
 - Minimal.js borrows from [Official Getting Started Guide](https://bitburner-official.readthedocs.io/en/latest/guidesandtips/gettingstartedguideforbeginnerprogrammers.html)
 - Hacknet payback time borrows from [@grimley517](https://gist.github.com/grimley517/c2d531976db057cede4ac8e367418971)
 - HWGW Algorithm borrows from [@trhr](https://github.com/trhr/lets-play-bitburner/blob/ep7/hwgw.js)
+- Contracts solver is straight from [@jjclark1982](https://github.com/jjclark1982/bitburner-scripts/tree/main/contracts)

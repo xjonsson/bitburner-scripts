@@ -6,7 +6,7 @@ import Player from './zPlayer.js';
 // NOTE: You must be on the terminal tab for injection to work.
 
 const terminalInput = document.getElementById('terminal-input');
-const handler = Object.keys(terminalInput)[1];
+const handler = Object?.keys(terminalInput)[1];
 
 function routeScan(
   ns: NS,
