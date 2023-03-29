@@ -1,34 +1,34 @@
 /* eslint-disable */
 import { NS } from '@ns';
+import Player from './zPlayer';
 /* eslint-enable */
 
-export function reclaimBot(ns: NS, node: any) {
+export function reclaimBot(ns: NS, p: Player, node: any) {
   const challenge = node.challenge || 0;
   ns.print(`[Reclaiming] [${challenge}] ${node.hostname}`);
-  if (challenge >= 5) {
+  if (p.programs.sql) {
     ns.sqlinject(node.hostname);
   }
-  if (challenge >= 4) {
+  if (p.programs.http) {
     ns.httpworm(node.hostname);
   }
-  if (challenge >= 3) {
+  if (p.programs.smtp) {
     ns.relaysmtp(node.hostname);
   }
-  if (challenge >= 2) {
+  if (p.programs.ftp) {
     ns.ftpcrack(node.hostname);
   }
-  if (challenge >= 1) {
+  if (p.programs.ssh) {
     ns.brutessh(node.hostname);
   }
-  if (challenge >= 0) {
-    ns.nuke(node.hostname);
-  }
+  ns.nuke(node.hostname);
 }
 
 export async function main(ns: NS) {
   const flags = ns.flags([['help', false]]);
   const target = ns.args[0] as string;
   const node = ns.getServer(target);
+  const p = new Player(ns);
 
   if (!target || flags.help) {
     ns.tprint('Single server nuker');
@@ -41,7 +41,7 @@ export async function main(ns: NS) {
   ns.disableLog('disableLog');
 
   ns.print(`[Running] ${target}`);
-  reclaimBot(ns, node);
+  reclaimBot(ns, p, node);
 
   await ns.sleep(1000);
 
