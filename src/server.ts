@@ -122,7 +122,7 @@ export default class Server {
     return Math.floor(this.ram.now / scriptRam);
   }
 
-  batch(cores = 1): any {
+  batch(cores = 1, partial = true): any {
     const buffer = configs.hackBuffer;
     const deployStart = performance.now() + configs.hackDelay;
     const deployEnd = deployStart + this.weakTime + buffer;
@@ -134,12 +134,12 @@ export default class Server {
 
     const { hackThreads } = this;
     const weakThreads = Math.ceil(hackThreads / 25);
-    const growThreads = this.growThreads(cores, true);
-    const weakThreadsAfterGrow = this.weakThreadsAfterGrow(cores, true);
+    const growThreads = this.growThreads(cores, partial);
+    const weakThreadsAfterGrow = this.weakThreadsAfterGrow(cores, partial);
 
     const batch = {
       deployStart,
-      batchRam: -1,
+      batchRam: 0,
       deployTime,
       hackThreads,
       hackRam: hackThreads * hackRamR,
