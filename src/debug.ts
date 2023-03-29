@@ -40,59 +40,56 @@ export async function main(ns: NS) {
   ns.print(recheck);
 
   function flow(now: number, source: any, target: Server, partial = false) {
-    if (!partial) {
-      const batch = target.batch(source.cores, partial);
-      // ns.print(batch);
-      if (source.ram.now > batch.batchRam && now >= recheck) {
-        if (batch.weakThreads > 0) {
-          ns.exec(
-            'xweak.js',
-            source.hostname,
-            batch.weakThreads,
-            target.hostname,
-            false,
-            batch.weakDeploy
-          );
-          tWeak = batch.weakDeploy;
-          tWeakN = batch.weakThreads;
-        }
+    const batch = target.batch(source.cores, partial);
+    if (source.ram.now > batch.batchRam && now >= recheck) {
+      if (batch.weakThreads > 0) {
+        ns.exec(
+          xWeak,
+          source.hostname,
+          batch.weakThreads,
+          target.hostname,
+          false,
+          batch.weakDeploy
+        );
+        tWeak = batch.weakDeploy;
+        tWeakN = batch.weakThreads;
+      }
 
-        if (batch.growThreads > 0) {
-          ns.exec(
-            'xgrow.js',
-            source.hostname,
-            batch.growThreads,
-            target.hostname,
-            false,
-            batch.growDeploy
-          );
-          tGrow = batch.growDeploy;
-          tGrowN = batch.growThreads;
-        }
+      if (batch.growThreads > 0) {
+        ns.exec(
+          xGrow,
+          source.hostname,
+          batch.growThreads,
+          target.hostname,
+          false,
+          batch.growDeploy
+        );
+        tGrow = batch.growDeploy;
+        tGrowN = batch.growThreads;
+      }
 
-        if (batch.weakThreadsAfterGrow > 0) {
-          ns.exec(
-            'xweak.js',
-            source.hostname,
-            batch.weakThreadsAfterGrow,
-            target.hostname,
-            false,
-            batch.weakDeployAfterGrow
-          );
-          tWeakAfterGrow = batch.weakDeployAfterGrow;
-          tWeakAfterGrowN = batch.weakThreads;
-        }
+      if (batch.weakThreadsAfterGrow > 0) {
+        ns.exec(
+          xWeak,
+          source.hostname,
+          batch.weakThreadsAfterGrow,
+          target.hostname,
+          false,
+          batch.weakDeployAfterGrow
+        );
+        tWeakAfterGrow = batch.weakDeployAfterGrow;
+        tWeakAfterGrowN = batch.weakThreads;
+      }
 
-        if (recheck < batch.deployEnd) {
-          recheck = batch.deployEnd;
-        }
+      if (recheck < batch.deployEnd) {
+        recheck = batch.deployEnd;
       }
     } else {
       switch (target.action) {
         case 'Weak': {
           if (now >= recheck && target.weakThreads > 0) {
             ns.exec(
-              'xweak.js',
+              xWeak,
               source.hostname,
               target.weakThreads,
               target.hostname
@@ -107,7 +104,7 @@ export async function main(ns: NS) {
         case 'Grow': {
           if (now >= recheck && target.growThreads(source.cores) > 0) {
             ns.exec(
-              'xweak.js',
+              xWeak,
               source.hostname,
               target.growThreads(source.cores),
               target.hostname
@@ -120,63 +117,62 @@ export async function main(ns: NS) {
           break;
         }
         case 'Hack': {
-          const batch = target.batch(source.cores);
-          // ns.print(batch);
-          if (source.ram.now > batch.batchRam && target.canAttack) {
+          const batchPart = target.batch(source.cores);
+          if (source.ram.now > batchPart.batchRam && target.canAttack) {
             if (batch.hackThreads > 0) {
               ns.exec(
-                'xhack.js',
+                xHack,
                 source.hostname,
-                batch.hackThreads,
+                batchPart.hackThreads,
                 target.hostname,
                 false,
-                batch.hackDeploy
+                batchPart.hackDeploy
               );
-              tHackN = batch.hackThreads;
+              tHackN = batchPart.hackThreads;
             }
 
-            if (batch.weakThreads > 0) {
+            if (batchPart.weakThreads > 0) {
               ns.exec(
-                'xweak.js',
+                xWeak,
                 source.hostname,
-                batch.weakThreads,
+                batchPart.weakThreads,
                 target.hostname,
                 false,
-                batch.weakDeploy
+                batchPart.weakDeploy
               );
-              tWeakN = batch.weakThreads;
+              tWeakN = batchPart.weakThreads;
             }
 
-            if (batch.growThreads > 0) {
+            if (batchPart.growThreads > 0) {
               ns.exec(
-                'xgrow.js',
+                xGrow,
                 source.hostname,
-                batch.growThreads,
+                batchPart.growThreads,
                 target.hostname,
                 false,
-                batch.growDeploy
+                batchPart.growDeploy
               );
-              tGrowN = batch.growThreads;
+              tGrowN = batchPart.growThreads;
             }
 
-            if (batch.weakThreadsAfterGrow > 0) {
+            if (batchPart.weakThreadsAfterGrow > 0) {
               ns.exec(
-                'xweak.js',
+                xWeak,
                 source.hostname,
-                batch.weakThreadsAfterGrow,
+                batchPart.weakThreadsAfterGrow,
                 target.hostname,
                 false,
-                batch.weakDeployAfterGrow
+                batchPart.weakDeployAfterGrow
               );
-              tWeakAfterGrowN = batch.weakThreadsAfterGrow;
+              tWeakAfterGrowN = batchPart.weakThreadsAfterGrow;
             }
 
-            if (recheck < batch.deployEnd) {
-              recheck = batch.deployEnd;
-              tHack = batch.hackDeploy;
-              tWeak = batch.weakDeploy;
-              tGrow = batch.growDeploy;
-              tWeakAfterGrow = batch.weakDeployAfterGrow;
+            if (recheck < batchPart.deployEnd) {
+              recheck = batchPart.deployEnd;
+              tHack = batchPart.hackDeploy;
+              tWeak = batchPart.weakDeploy;
+              tGrow = batchPart.growDeploy;
+              tWeakAfterGrow = batchPart.weakDeployAfterGrow;
             }
           }
           break;
@@ -195,7 +191,7 @@ export async function main(ns: NS) {
     // });
     flow(now, machine, focus, false);
 
-    ns.clearLog();
+    // ns.clearLog();
     ns.print(focus.hostname);
     ns.print(`[Now] ${now}`);
     ns.print(`[Recheck] ${recheck}`);

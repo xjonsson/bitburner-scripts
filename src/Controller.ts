@@ -13,7 +13,7 @@ import { reclaimBot } from './uReclaim.js';
 
 export async function main(ns: NS) {
   const flags = ns.flags([
-    ['refresh', 500],
+    ['refresh', 1000],
     ['help', false],
   ]);
 
@@ -69,11 +69,10 @@ export async function main(ns: NS) {
       xmon.displayStats(true);
     }
 
-    // if (p.hacking > controller.cHacking) {
-    //   // Updating hacking functions
-    //   ns.print('We would do some hacking here');
-    //   controller.cHacking = p.hacking;
-    // }
+    if (p.hacking > controller.cHacking) {
+      controller.cHacking = p.hacking;
+      xnet.updateRing();
+    }
 
     if (controller.cShopping) {
       if (controller.cShopPrograms) {
@@ -111,7 +110,7 @@ export async function main(ns: NS) {
   }
 
   function updateNetwork() {
-    xnet.updateRing();
+    // xnet.updateRing();
     xmon.displayNetwork();
     xmon.displayTargets(configs.focusLimit, xmap); // 25
   }
@@ -122,7 +121,7 @@ export async function main(ns: NS) {
 
     if (reclaim.length > 0) {
       reclaim.forEach((node: any) => {
-        reclaimBot(ns, node);
+        reclaimBot(ns, p, node);
         ns.scp([xmin, xhack, xweak, xgrow, xshare], node.hostname, 'home');
       });
     }
@@ -330,7 +329,14 @@ export async function main(ns: NS) {
     xnet.targets
       // .sort((a: any, b: any) => b.nodeValueHWGW - a.nodeValueHWGW)
       .sort((a: any, b: any) => b.value - a.value)
-      .filter((t: any, index) => index < configs.focusLimit)
+      // .filter((t: any, index) => index < configs.focusLimit) // FIXME: Limit
+      .filter((t: any) => {
+        const previous = xmap.get(t.hostname);
+        if (previous.recheck) {
+          return previous.recheck <= performance.now() + 1000;
+        }
+        return true;
+      })
       .forEach((t: any) => {
         const targetNode = xmap.get(t.hostname);
         updateTargets(targetNode);
@@ -345,10 +351,10 @@ export async function main(ns: NS) {
         const maxThreads = b.nodeThreads(controller.ramShare);
         ns.exec(xshare, b.hostname, maxThreads);
       });
-    if (home.ram.now > controller.ramShare) {
-      const maxThreads = home.nodeThreads(controller.ramShare);
-      ns.exec(xshare, home.hostname, maxThreads);
-    }
+    // if (home.ram.now * configs.reserveX.ram.share > controller.ramShare) {
+    //   const maxThreads = home.nodeThreads(controller.ramShare);
+    //   ns.exec(xshare, home.hostname, maxThreads);
+    // }
   }
 
   while (true) {
@@ -357,7 +363,7 @@ export async function main(ns: NS) {
     updateNetwork();
     updateBots();
     updateFocus();
-    updateShares();
+    // updateShares();
     await ns.sleep(flags.refresh as number);
   }
 }

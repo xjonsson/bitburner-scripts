@@ -4,7 +4,14 @@ export const configs: any = {
   hackDelay: 3000, // Delay in between batches
   focusAmount: 128, // Batch 125 hack, weak, grow, weak
   focusLimit: 25, // Only work on 25 servers
-  reserve: 0 * 1000000, // 1000000 1 Million
+  reserveX: {
+    ram: {
+      home: 64, // How much to save on home
+      work: 0.5, // How much to use forwork (decimal %)
+      share: 0.25, // How much to use for shares (decimal %)
+    },
+  },
+  reserve: 0, // 100000 * 1000000, // 1000000 1 Million
   reserveServers: 5000000, // 5000000 5 Million
   reserveNodes: 6000000, // 6000000000 6 Billion
   reserveRAM: 64, // However much you want to keep available for other scripts
@@ -13,7 +20,7 @@ export const configs: any = {
   nodesTargetRAM: 64, // 64 Max
   nodesTargetCores: 16, // 16 Max
   serversTargetCount: 25, // 25 Max
-  serversTargetRAM: 1024, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+  serversTargetRAM: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   softwareCost: {
     tor: 200000, // 200 K
     ssh: 500000, // 500 K

@@ -89,9 +89,6 @@ export default class Server {
   }
 
   get action(): string {
-    if (this.hackChance < 1) {
-      return 'Luck';
-    }
     if (this.canAttack) {
       return 'Hack';
     }
