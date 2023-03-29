@@ -105,25 +105,25 @@ export default class Server {
   }
 
   // ******** Computed
-  // TODO: get value
-  // TODO: get valueTime
-  // TODO: get valueEffort
-  get value(): object {
+  get value(): any {
     const batch = this.batch(1);
     const moneyPerBatch = this.money.max * configs.hackAmount;
-    const ramPerBatchSecond = batch.batchRam * (batch.deployTime / 1000);
-    const roiPerRamSecond =
-      moneyPerBatch / ramPerBatchSecond / (batch.deployTime / 1000);
+    const deploySeconds = batch.deployTime / 1000;
+    const netGainPerSecond = moneyPerBatch / deploySeconds;
+    const investedRamPerSecond = batch.batchRam / deploySeconds;
+    const valuePerSecond = netGainPerSecond / investedRamPerSecond;
+
     return {
-      total: roiPerRamSecond,
-      time: batch.deployTime,
-      effort: ramPerBatchSecond,
+      total: valuePerSecond,
+      time: deploySeconds,
+      effort: investedRamPerSecond,
+      batchRam: batch.batchRam,
       hackRam: batch.hackRam,
       weakRam: batch.weakRam,
       growRam: batch.growRam,
       batchTime: batch.batchTime,
       moneyMax: this.money.max,
-      hackamount: configs.hackAmount,
+      hackAmount: configs.hackAmount,
       weakAfterGrowRam: batch.weakAfterGrowRam,
     };
   }
@@ -336,8 +336,23 @@ export async function main(ns: NS) {
     mHSBT += xserver.bot ? 'B' : ' ';
     mHSBT += xserver.target ? 'T' : ' ';
 
+    const rowHeader = ' %-5s %3s %-3s %-10s | %8s %8s %8s | %-32s ';
+    const rowType = ' %-5s %3s %-3s %-5s | %8s %8s %8s %8s | %-32s ';
+    const rowHeaderPrey = '  %-6s %11s | %8s %8s %8s %8s | ';
+    function spacer() {
+      ns.printf(
+        ' %19s | %8s %8s %8s %8s | ',
+        '-------------------',
+        '--------',
+        '--------',
+        '--------',
+        '--------'
+      );
+    }
+
+    // ******** General server stats
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s | %-32s ',
+      rowHeader,
       mHSBT,
       `P${xserver.challenge}`,
       `C${xserver.cores}`,
@@ -347,23 +362,29 @@ export async function main(ns: NS) {
       `${((xserver.ram.used / xserver.ram.max) * 100).toFixed(2)}%`,
       `${xserver.hostname} (${xserver.ip})`
     );
+
     let mRoot = xserver.root ? 'Root' : 'X';
     mRoot += !xserver.root && xserver.canReclaim ? '*' : '';
+
+    const { value } = xserver;
+
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s | %-32s ',
+      rowHeader,
       mRoot,
       `O${xserver.open}${!xserver.root && xserver.canReclaim ? '*' : ''}`,
       `${xserver.door ? 'D' : 'X'}${
         !xserver.door && xserver.canDoor ? '*' : ''
       }`,
-      'V1000',
+      value.total.toFixed(2),
       ns.formatNumber(xserver.money.now, 2),
       ns.formatNumber(xserver.money.max, 2),
       `${((xserver.money.now / xserver.money.max) * 100).toFixed(2)}%`,
       `${(xserver.hackChance * 100).toFixed(2)}% chance\n`
     );
+
+    // ******** Sections
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s %8s | %-32s ',
+      rowType,
       'Type',
       '',
       '',
@@ -374,8 +395,11 @@ export async function main(ns: NS) {
       'Weak',
       'Share'
     );
+    spacer();
+
+    // ******** Botting stats
     ns.printf(
-      ' %-5s %2s %-3s %-5s | %8s %8s %8s %8s | %-32s ',
+      rowType,
       'Bot',
       '',
       '',
@@ -386,76 +410,55 @@ export async function main(ns: NS) {
       xserver.threads(ramWeak),
       xserver.threads(ramShare)
     );
-    const homeCores = ns.getServer('home').cpuCores;
+    spacer();
+
+    // ******** Attack stats
     const mGrowThreads = xserver.growThreads();
-    const mGrowThreadsH = xserver.growThreads(homeCores);
     const mWeakThreadsAfter = xserver.weakThreadsAfterGrow();
-    const mWeakThreadsAfterH = xserver.growThreads(homeCores);
     ns.printf(
-      ' %-5s %6s %-5s | %8s %8s %8s %8s ',
+      ' %-5s %7s %-5s | %8s %8s %8s %8s | ',
       'Prey',
       `+${(xserver.sec.now - xserver.sec.min).toFixed(2)}`,
       xserver.action,
       xserver.canAttack ? xserver.hackThreads : '',
       xserver.weakThreads > 0 ? xserver.weakThreads : '',
-      `${mGrowThreads > 0 ? mGrowThreads : ''} ${
-        mGrowThreadsH > 0 ? `H${mGrowThreadsH}` : ''
-      }`,
-      `${mWeakThreadsAfter > 0 ? mWeakThreadsAfter : ''} ${
-        mWeakThreadsAfterH > 0 ? `H${mWeakThreadsAfterH}` : ''
-      }`
+      `${mGrowThreads > 0 ? mGrowThreads : ''}`,
+      `${mWeakThreadsAfter > 0 ? mWeakThreadsAfter : ''}`
     );
+    spacer();
+
     ns.printf(
-      '  %-6s %10s | %8s %8s %8s %8s | ',
+      rowHeaderPrey,
       'Time',
-      'VT9999',
+      timeFormat(ns, value.time * 1000),
       timeFormat(ns, xserver.hackTime),
       timeFormat(ns, xserver.weakTime),
       timeFormat(ns, xserver.growTime),
       timeFormat(ns, xserver.weakTime)
     );
+
     ns.printf(
-      '  %-6s %10s | %8s %8s %8s %8s | ',
+      rowHeaderPrey,
       'Sec',
-      'Vt9999',
-      xserver.canAttack ? xserver.hackSecInc : '',
       '',
-      xserver.growThreads() > 0 ? xserver.growSecInc() : '',
+      xserver.canAttack ? xserver.hackSecInc.toFixed(2) : '',
+      '',
+      xserver.growThreads() > 0 ? xserver.growSecInc().toFixed(2) : '',
       ''
     );
-    ns.printf('  %-6s %10s | %8s %8s %8s %8s | ', 'Effort', 'VE9999');
-    ns.print(xserver.value);
-    ns.print(xserver.money.growth);
-    ns.print(
-      `[Min] ${xserver.sec.min} [Now] ${xserver.sec.now} [+] ${
-        xserver.sec.now - xserver.sec.min
-      }`
-    );
 
-    // const now = performance.now();
-    // ns.print(`[Now] ${now}`);
-    // ns.print(
-    //   `[HackT] ${xserver.batch().hackDeploy} (${
-    //     xserver.batch().hackDeploy - now
-    //   })`
-    // );
-    // ns.print(
-    //   `[WeakT] ${xserver.batch().weakDeploy} (${
-    //     xserver.batch().weakDeploy - now
-    //   })`
-    // );
-    // ns.print(
-    //   `[GrowT] ${xserver.batch().growDeploy} (${
-    //     xserver.batch().growDeploy - now
-    //   })`
-    // );
-    // ns.print(
-    //   `[WeakT] ${xserver.batch().weakDeployAfterGrow} (${
-    //     xserver.batch().weakDeployAfterGrow - now
-    //   })`
-    // );
+    ns.printf(
+      rowHeaderPrey,
+      'Effort',
+      ns.formatRam(value.batchRam),
+      value.hackRam > 0 ? ns.formatRam(value.hackRam) : '',
+      value.weakRam > 0 ? ns.formatRam(value.weakRam) : '',
+      value.growRam > 0 ? ns.formatRam(value.growRam) : '',
+      value.weakAfterGrowRam > 0 ? ns.formatRam(value.weakAfterGrowRam) : ''
+    );
   }
 
+  // ******** Update loop
   while (true) {
     updateDisplay();
 
