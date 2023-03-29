@@ -7,6 +7,8 @@ import { growthAnalyzeAccurate } from './zCalc.js';
 import { timeFormat } from './zUtils.js';
 /* eslint-enable */
 
+const { xMin, xHack, xWeak, xGrow, xShare } = configs;
+
 const hackRamR = 1.71;
 const weakRamR = 1.76;
 const growRamR = 1.76;
@@ -25,6 +27,11 @@ export default class Server {
 
   get data(): any {
     return this.ns.getServer(this.hostname);
+  }
+
+  // ******** Actions
+  scripts(): any {
+    this.ns.scp([xMin, xHack, xWeak, xGrow, xShare], this.hostname, 'home');
   }
 
   // ******** Classification
@@ -82,6 +89,9 @@ export default class Server {
   }
 
   get action(): string {
+    if (this.hackChance < 1) {
+      return 'Luck';
+    }
     if (this.canAttack) {
       return 'Hack';
     }
@@ -493,14 +503,14 @@ export function autocomplete(data: any, args: any) {
 //   serverGrowth: 1,
 // };
 
-const sample = {
-  total: 0.08812339788039224,
-  time: 5.141119032342083,
-  effort: 992.9258528905301,
-  hackRam: 51.3,
-  weakRam: 3.52,
-  growRam: 1.76,
-  moneyMax: 1750000,
-  hackamount: 0.05,
-  weakAfterGrowRam: 1.76,
-};
+// const sample = {
+//   total: 0.08812339788039224,
+//   time: 5.141119032342083,
+//   effort: 992.9258528905301,
+//   hackRam: 51.3,
+//   weakRam: 3.52,
+//   growRam: 1.76,
+//   moneyMax: 1750000,
+//   hackamount: 0.05,
+//   weakAfterGrowRam: 1.76,
+// };
