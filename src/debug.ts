@@ -1,10 +1,10 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import Player from './zPlayer';
-import { configs } from './configs';
-import Network from './zNetwork';
-import Server from './server';
-import { timeFormat } from './zUtils';
+import Player from '/old/zPlayer';
+import { configs } from '/configs';
+import Network from '/old/zNetwork';
+import Server from '/old/server';
+import { timeFormat } from '/old/zUtils';
 /* eslint-enable */
 
 const { xMin, xHack, xWeak, xGrow, xShare } = configs;

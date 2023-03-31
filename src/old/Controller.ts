@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { configs } from './configs.js';
+import { configs } from '../configs.js';
 import Player from './zPlayer.js';
 import Network from './zNetwork.js';
 import Display from './zDisplay.js';
@@ -24,10 +24,9 @@ export async function main(ns: NS) {
   }
 
   const p = new Player(ns);
-  const home = new Server(ns, 'home');
+  const home = new Server(ns, p, 'home');
   const xnet = new Network(ns);
   const xshop = new Shop(ns, p, xnet);
-  // const xfocus = new Focus(ns, p, xnet);
   const xmon = new Display(ns, p, xnet);
   const xmap = new Map();
   const xmin = configs.xMin;

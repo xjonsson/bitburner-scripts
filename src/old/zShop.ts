@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { configs } from './configs.js';
+import { configs } from '../configs.js';
 import Player from './zPlayer.js';
 import Network from './zNetwork.js';
 import Display from './zDisplay.js';

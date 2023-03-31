@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { configs } from './configs';
+import { configs } from '../configs';
 import Player from './zPlayer';
 import Server from './zServer';
 /* eslint-enable */

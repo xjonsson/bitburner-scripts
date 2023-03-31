@@ -1,13 +1,13 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { configs } from './configs.js';
+import { configs } from '../configs.js';
 import Player from './zPlayer.js';
 import { CONSTANTS } from './zCalc.js';
 import { growthAnalyzeAccurate } from './zCalc.js';
 import { timeFormat } from './zUtils.js';
 /* eslint-enable */
 
-const { xMin, xHack, xWeak, xGrow, xShare } = configs;
+const { xMin, xHack, xWeak, xGrow, xShare } = configs.scripts;
 
 const hackRamR = 1.71;
 const weakRamR = 1.76;
@@ -103,8 +103,9 @@ export default class Server {
 
   // ******** Computed
   get value(): any {
+    const { skim } = configs.hacking;
     const batch = this.batch(1);
-    const moneyPerBatch = this.money.max * configs.hackAmount;
+    const moneyPerBatch = this.money.max * skim;
     const deploySeconds = batch.deployTime / 1000;
     const netGainPerSecond = moneyPerBatch / deploySeconds;
     const investedRamPerSecond = batch.batchRam / deploySeconds;
@@ -120,7 +121,7 @@ export default class Server {
       growRam: batch.growRam,
       batchTime: batch.batchTime,
       moneyMax: this.money.max,
-      hackAmount: configs.hackAmount,
+      hackAmount: skim,
       weakAfterGrowRam: batch.weakAfterGrowRam,
     };
   }
@@ -130,8 +131,8 @@ export default class Server {
   }
 
   batch(cores = 1, partial = true): any {
-    const buffer = configs.hackBuffer;
-    const deployStart = performance.now() + configs.hackDelay;
+    const { buffer, delay } = configs.hacking;
+    const deployStart = performance.now() + delay;
     const deployEnd = deployStart + this.weakTime + buffer;
     const deployTime = deployEnd - deployStart;
     const weakDeployAfterGrow = deployEnd - (this.weakTime + buffer);
@@ -175,7 +176,7 @@ export default class Server {
     return Math.ceil(
       this.ns.hackAnalyzeThreads(
         this.hostname,
-        this.money.max * configs.hackAmount
+        this.money.max * configs.hacking.skim
       )
     );
   }
@@ -213,7 +214,7 @@ export default class Server {
       this.sec.now,
       this.money.growth,
       this.money.max,
-      batch ? this.money.max * (1 - configs.hackAmount) : this.money.now,
+      batch ? this.money.max * (1 - configs.hacking.skim) : this.money.now,
       this.money.max,
       cores
     );
@@ -248,7 +249,7 @@ export default class Server {
         0,
         this.data.maxRam -
           this.data.ramUsed -
-          (this.data.hostname === 'home' ? configs.reserveRAM : 0)
+          (this.data.hostname === 'home' ? configs.reserve.ram.home : 0)
       ),
     };
   }
@@ -309,11 +310,11 @@ export async function main(ns: NS) {
   const hostname = ns.args[0] as string;
   const p = new Player(ns);
   const xserver = new Server(ns, p, hostname);
-  // const ramMin = ns.getScriptRam(configs.xMin);
-  const ramHack = ns.getScriptRam(configs.xHack);
-  const ramWeak = ns.getScriptRam(configs.xWeak);
-  const ramGrow = ns.getScriptRam(configs.xGrow);
-  const ramShare = ns.getScriptRam(configs.xShare);
+  // const ramMin = ns.getScriptRam(xMin);
+  const ramHack = ns.getScriptRam(xHack);
+  const ramWeak = ns.getScriptRam(xWeak);
+  const ramGrow = ns.getScriptRam(xGrow);
+  const ramShare = ns.getScriptRam(xShare);
 
   if (!hostname || flags.help) {
     ns.tprint('Server class');
