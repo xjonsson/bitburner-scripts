@@ -66,6 +66,16 @@ export const PATHS: any = {
   LOG: '/tmp',
 };
 
+export const CORE: any = {
+  LAUNCHER: '/launch.js',
+  MINIMAL: '/minimal.js',
+  CONTROL: '/control.js',
+};
+
+export const BITNODE: any = {
+  CURRENT: `${PATHS.TMP}/BitNodeCurrent.txt`,
+};
+
 export const PORTS: any = {
   LIST: [],
 };

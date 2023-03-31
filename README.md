@@ -2,6 +2,25 @@
 
 Collection of scripts while trying out Bitburner
 
+**Alias:**
+Launch the scripts
+
+```
+alias start="run /launch.js"
+```
+
+Buy software
+
+```
+alias exes="home;connect darkweb;buy BruteSSH.exe;buy FTPCrack.exe;buy relaySMTP.exe;buy HTTPWorm.exe;buy SQLInject.exe;buy ServerProfiler.exe;buy AutoLink.exe;buy DeepscanV1.exe;buy DeepscanV2.exe;home";
+```
+
+Route and door
+
+```
+alias door="home;run /old/uRoute.js";
+```
+
 ## Logic
 
 Add image of logic flow here
