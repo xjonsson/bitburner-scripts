@@ -1,53 +1,69 @@
-export const configs: any = {
-  reserve: {
-    money: {
+export const CONFIGS: any = {
+  money: {
+    reserve: {
       base: 0, // 100000 * 1000000, // 1000000 1 Million
-      hacknet: 6 * 1000000, // 6 Million
-      servers: 5 * 1000000, // 6 Million
+      hacknet: 0 * 1e6, // 1 Million (Min before hacknet purchases)
+      servers: 0 * 1e6, // 1 Million (Min before server purchases)
     },
-    ram: {
-      home: 64, // // However much you want to keep available for other scripts
-      work: 0.5, // How much to use forwork (decimal %)
-      share: 0.25, // How much to use for shares (decimal %)
+    ratio: {
+      // 50% 30% 20% (50% Essential, 30% life, 20% savings)
+      hacknet: 0.5, // 50% of money will be used on hacknet
+      servers: 0.3, // 50% of money will be used on servers
+      savings: 0.2, // 20% of money will be used for savings
+    },
+    shopping: {
+      tor: 200e3, // 200 K
+      ssh: 500e3, // 500 K
+      ftp: 1.5e6, // 1.5 Million (1500000)
+      smtp: 5e6, // 5 Million (5000000)
+      http: 30e6, // 30 Million (30000000)
+      sql: 250e6, // 250 Million (250000000)
+      serverProfiler: 500e3, // 500 K (500000)
+      deepscanV1: 500e3, // 500 K (500000)
+      deepscanV2: 25e6, // 25 Million (25000000)
+      autolink: 1e6, // 1 Million (1000000)
+      formulas: 5e9, // 5 Billion (5000000000)
+    },
+  },
+  ram: {
+    reserve: {
+      home: 0, // However much you want to keep available for other scripts
+    },
+    ratio: {
+      work: 0.6, // 60% of ram will be used for work
+      shares: 0.3, // 30% of ram will be used for shares
+      savings: 0.1, // 20% of ram will be used as reserve
     },
   },
   hacknet: {
-    count: 23, // 24 Soft Max (Real Max Infinity)
-    level: 200, // 200 Max
-    ram: 64, // 64 Max
-    cores: 16, // 16 Max
+    target: {
+      count: 20, // 20 Soft Max (Real Max Infinity)
+      level: 200, // 200 (Real Max)
+      ram: 64, // 64 (Real Max)
+      cores: 16, // 16 (Real Max)
+    },
   },
   servers: {
-    count: 25, // 25 Max
-    ram: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
-  },
-  shopping: {
-    tor: 200000, // 200 K
-    ssh: 500000, // 500 K
-    ftp: 1500000, // 1.5 Million
-    smtp: 5000000, // 5 Million
-    http: 30000000, // 30 Million
-    sql: 250000000, // 250 Million
-    serverProfiler: 500000, // 500 K
-    deepscanV1: 500000, // 500 K
-    deepscanV2: 25000000, // 25 Million
-    autolink: 1000000, // 1 Million
-    formulas: 5000000000, // 5 Billion
-  },
-  scripts: {
-    xMin: 'xmin.js', // Minimal script
-    xHack: 'xhack.js', // HWGW Hack script
-    xWeak: 'xweak.js', // HWGW Weak script
-    xGrow: 'xgrow.js', // HWGW Grow script
-    xShare: 'xshare.js', // Rep Share script
+    target: {
+      count: 25, // 25 (Real Max)
+      ram: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+    },
   },
   hacking: {
     skim: 0.1, // 10%
     buffer: 250, // Time in ms between scripts
-    delay: 3000, // Delay in between batches
-    batches: 128, // Batch 125 hack, weak, grow, weak
+    delay: 3000, // Delay in ms between batches
+    batches: 128, // Batch 128 hack, weak, grow, weak
     targets: 25, // Only work on 25 servers
   },
+};
+
+export const PATHS: any = {
+  DEPLOY: '/deploy',
+  UTILS: '/utils',
+  SYSTEM: '/system',
+  TMP: '/tmp',
+  LOG: '/tmp',
 };
 
 export const PORTS: any = {
@@ -60,6 +76,14 @@ export const PORTS: any = {
   PORTS.LIST[(PORTS.HACKNET = 3)] = 'hacknet';
   PORTS.LIST[(PORTS.SERVERS = 4)] = 'servers';
 })();
+
+export const DEPLOY: any = {
+  xMin: `${PATHS.DEPLOY}/xmin.js`, // Minimal script
+  xHack: `${PATHS.DEPLOY}/xhack.js`, // HWGW Hack script
+  xWeak: `${PATHS.DEPLOY}/xweak.js`, // HWGW Weak script
+  xGrow: `${PATHS.DEPLOY}/xgrow.js`, // HWGW Grow script
+  xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
+};
 
 /* 
   Server Target RAM
