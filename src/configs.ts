@@ -62,6 +62,8 @@ export const PATHS: any = {
   DEPLOY: '/deploy',
   UTILS: '/utils',
   SYSTEM: '/system',
+  CACHE: '/system/cache',
+  DATA: '/system/data',
   TMP: '/tmp',
   LOG: '/tmp',
 };
@@ -73,6 +75,9 @@ export const CORE: any = {
 };
 
 export const BITNODE: any = {
+  PORT: 2,
+  CACHE: `${PATHS.CACHE}/cacheBitNode.js`,
+  TMP: `${PATHS.TMP}`,
   CURRENT: `${PATHS.TMP}/BitNodeCurrent.txt`,
 };
 
@@ -80,11 +85,12 @@ export const PORTS: any = {
   LIST: [],
 };
 (function () {
-  PORTS.LIST[(PORTS.CONTROL = 0)] = 'control';
-  PORTS.LIST[(PORTS.PLAYER = 1)] = 'player';
-  PORTS.LIST[(PORTS.NETWORK = 2)] = 'network';
-  PORTS.LIST[(PORTS.HACKNET = 3)] = 'hacknet';
-  PORTS.LIST[(PORTS.SERVERS = 4)] = 'servers';
+  PORTS.LIST[(PORTS.CONTROL = 1)] = 'control';
+  PORTS.LIST[(PORTS.BITNODE = BITNODE.PORT)] = 'bitnode';
+  // PORTS.LIST[(PORTS.PLAYER = 3)] = 'player';
+  // PORTS.LIST[(PORTS.NETWORK = 4)] = 'network';
+  // PORTS.LIST[(PORTS.HACKNET = 5)] = 'hacknet';
+  // PORTS.LIST[(PORTS.SERVERS = 6)] = 'servers';
 })();
 
 export const DEPLOY: any = {

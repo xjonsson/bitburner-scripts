@@ -46,7 +46,7 @@ export async function main(ns: NS) {
   }
 
   ns.print(getRoute(ns, hostname));
-  ns.tprint(getRoute(ns, hostname));
+  ns.tprint(`${getRoute(ns, hostname)} backdoor;`);
 }
 
 /* eslint-disable-next-line */

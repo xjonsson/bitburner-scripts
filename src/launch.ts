@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { BITNODE, CORE } from './configs';
+import { Bitnode } from '/system/bitnode/BitNode';
 /* eslint-enable */
 
 // import { CORE_RUNTIMES, TEMP_F } from 'lib/Variables';
@@ -18,12 +19,20 @@ import { BITNODE, CORE } from './configs';
 //   }
 // }
 // max 32gb
+
+const launch = async (ns: NS, script: string, threads = 1, args = []) => {
+  const pid = ns.exec(script, 'home', threads, ...args);
+  await ns.asleep(100);
+  while (ns.isRunning(pid)) {
+    await ns.asleep(10);
+  }
+};
+
 export async function main(ns: NS) {
   const flags = ns.flags([['help', false]]);
-  const { args } = ns;
   const iBitNode = (ns.args[0] as string) || '';
-  const previous = ns.fileExists(BITNODE.CURRENT);
-  let currentNode = {
+  const currentSave = ns.fileExists(BITNODE.CURRENT);
+  let iNode = {
     node: parseInt(iBitNode.toString().split('.')[0]),
     level: parseInt(iBitNode.toString().split('.')[1]),
   };
@@ -55,21 +64,24 @@ export async function main(ns: NS) {
   // ns.print(`[Bitnode] ${iBitNode}`);
   // ns.print(currentNode);
   // ns.print(savedNode);
-  if (!currentNode.node) {
-    if (previous) {
+  if (!iNode.node) {
+    if (currentSave) {
       const savedNode = JSON.parse(ns.read(BITNODE.CURRENT));
       if (!savedNode.node) {
         ns.tprint('[ERROR] Bad BitNode File Relaunch with BitNode and Level');
         return;
       }
-      currentNode = savedNode;
-    } else if (!previous) {
+      iNode = savedNode;
+    } else if (!currentSave) {
       ns.tprint('[ERROR] Relaunch with current BitNode and Level');
       return;
     }
   }
 
-  await ns.write(BITNODE.CURRENT, JSON.stringify(currentNode), 'w');
+  const currentNode = new Bitnode(ns, iNode.node, iNode.level);
+
+  await ns.write(BITNODE.CURRENT, JSON.stringify(iNode), 'w');
+  await ns.write(currentNode.filename, JSON.stringify(currentNode), 'w');
 
   for (let portNum = 1; portNum <= 20; portNum += 1) {
     ns.clearPort(portNum);
@@ -90,6 +102,7 @@ export async function main(ns: NS) {
   // ]) {
   //   await launch_and_wait(ns, script);
   // }
+  launch(ns, BITNODE.CACHE);
 
   // MOTD.banner(ns);
 
@@ -102,8 +115,8 @@ export async function main(ns: NS) {
   const homeMaxMsg = `We have ${ns.formatRam(homeMax, 2)}`;
   if (homeMax >= 32) {
     ns.tprint(`${homeMaxMsg} using full control`);
-    // ns.spawn(CORE.CONTROL); // FIXME:
-    ns.spawn('debug.js');
+    ns.spawn(CORE.CONTROL); // FIXME:
+    // ns.spawn('debug.js');
   } else {
     ns.tprint(`${homeMaxMsg} using minimal`);
     ns.spawn(CORE.MINIMAL);

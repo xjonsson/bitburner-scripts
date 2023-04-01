@@ -1,21 +1,34 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import Player from '/old/zPlayer';
-import { CONFIGS, DEPLOY } from '/configs';
+import { PORTS } from '/configs';
 import Network from '/old/zNetwork';
 import Server from '/old/server';
 import { timeFormat } from '/old/zUtils';
+import { getBitNodeMultipliers } from '/system/data/sBitNode';
 /* eslint-enable */
 
-const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;
+// const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;
 
 export async function main(ns: NS) {
   ns.tail();
   ns.clearLog();
 
-  ns.print(CONFIGS);
-  ns.print(DEPLOY);
-  ns.print(ns.getScriptRam(xMin));
+  // const node = getBitNodeMultipliers(12, 12);
+  // ns.print(node);
+
+  // ns.print(CONFIGS);
+  // ns.print(DEPLOY);
+  // ns.print(ns.getScriptRam(xMin));
+  // if (data === 'NULL PORT DATA') {
+  //   data = new Map();
+  // }
+  while (true) {
+    ns.clearLog();
+    const data: any = ns.peek(PORTS.BITNODE);
+    ns.print(data);
+    await ns.sleep(1000);
+  }
 }
 
 // export async function main(ns: NS) {
