@@ -74,11 +74,13 @@ export const CORE: any = {
   CONTROL: '/control.js',
 };
 
+export const MINISAVE: any = {
+  FILE: `${PATHS.TMP}/Active.txt`,
+};
+
 export const BITNODE: any = {
   PORT: 2,
   CACHE: `${PATHS.CACHE}/cacheBitNode.js`,
-  TMP: `${PATHS.TMP}`,
-  CURRENT: `${PATHS.TMP}/BitNodeCurrent.txt`,
 };
 
 export const PORTS: any = {
