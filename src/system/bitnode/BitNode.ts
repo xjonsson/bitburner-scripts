@@ -2,7 +2,7 @@
 // import { Player } from '@player';
 import { NS } from '@ns';
 import { getBitNodeMultipliers } from '/system/data/sBitNode';
-import { BITNODE } from '/configs';
+import { PATHS } from '/configs';
 /* eslint-enable */
 
 export class Bitnode {
@@ -18,7 +18,7 @@ export class Bitnode {
     this.node = node;
     this.level = level;
     this.done = false;
-    this.filename = `${BITNODE.TMP}/BitNode_${node}_${level}.txt`;
+    this.filename = `${PATHS.TMP}/BitNode_${node}_${level}.txt`;
     const previous = ns.fileExists(this.filename);
     const saved = previous ? JSON.parse(ns.read(this.filename)) : false;
 

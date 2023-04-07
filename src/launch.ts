@@ -21,8 +21,9 @@ const launch = async (ns: NS, script: string, threads = 1, args = []) => {
 export async function main(ns: NS) {
   const flags = ns.flags([['help', false]]);
   const inputBNL = (ns.args[0] as string) || ''; // Check for Bitnode Input (1.1)
-  const minisave = ns.fileExists(MINISAVE.FILE); // Check for savefile
-  let active;
+  let minisave = ns.fileExists(MINISAVE.FILE)
+    ? await JSON.parse(ns.read(MINISAVE.FILE))
+    : false;
   const inputNodeLevel = {
     node: parseInt(inputBNL.toString().split('.')[0]),
     level: parseInt(inputBNL.toString().split('.')[1]),
@@ -30,6 +31,9 @@ export async function main(ns: NS) {
   };
 
   ns.clearLog();
+
+  ns.print(minisave);
+  ns.print(inputNodeLevel);
 
   // Quit if help is asked for
   if (flags.help) {
@@ -51,40 +55,34 @@ export async function main(ns: NS) {
     }
     // Theres input
     await ns.write(MINISAVE.FILE, JSON.stringify(inputNodeLevel), 'w');
-    active = inputNodeLevel;
-  } else {
-    active = await JSON.parse(ns.read(MINISAVE.FILE));
+    minisave = inputNodeLevel;
   }
 
   // Check for BitNode file
-  const bitnodeFilePath = `${PATHS.TMP}/BitNode_${active.node}_${active.level}.txt`;
+  const bitnodeFilePath = `${PATHS.TMP}/BitNode_${minisave.node}_${minisave.level}.txt`;
+  ns.print(bitnodeFilePath);
   const bitnodeFile = ns.fileExists(bitnodeFilePath)
-    ? // ns.tprint('Load bitnode file'); // FIXME: REMOVE
-      await JSON.parse(ns.read(bitnodeFilePath))
+    ? await JSON.parse(ns.read(bitnodeFilePath))
     : false;
+  ns.print(`BitnodeFile ${bitnodeFile}`);
+  const bitnode = bitnodeFile
+    ? new Bitnode(ns, bitnodeFile.node, bitnodeFile.level)
+    : new Bitnode(ns, minisave.node, minisave.level);
+
   if (!bitnodeFile) {
     ns.tprint('There is no bitnode file, creating it');
-  } else {
-    ns.tprint('Bitnode file exists, use it');
+    await ns.write(bitnode.filename, JSON.stringify(bitnode), 'w');
   }
-  // If it doenst exist create a new one
-  // If it exists read it
-
-  ns.tprint(`Load the BitnodeFile ${bitnodeFile}`);
 
   // Cache the bitnode file
-  ns.tprint('Cache bitnode data');
-
-  // const currentNode = new Bitnode(ns, iNode.node, iNode.level);
-
-  // await ns.write(currentNode.filename, JSON.stringify(currentNode), 'w');
+  // ns.tprint('Cache bitnode data test');
 
   for (let portNum = 1; portNum <= 20; portNum += 1) {
     ns.clearPort(portNum);
   }
 
   // logger.info(`Detected BitNode ${current_bitnode}`);
-  // ns.tprint(`[Bitnode] ${currentNode.node} Level ${currentNode.level}`);
+  ns.tprint(`[Bitnode] ${bitnode.node} Level ${bitnode.level}`);
 
   // for (const script of [
   //   CACHE_SCRIPTS.BITNODES,
@@ -98,7 +96,7 @@ export async function main(ns: NS) {
   // ]) {
   //   await launch_and_wait(ns, script);
   // }
-  // await launch(ns, BITNODE.CACHE);
+  await launch(ns, BITNODE.CACHE);
 
   // const homeMax = ns.getServerMaxRam('home');
   // const homeMaxMsg = `We have ${ns.formatRam(homeMax, 2)}`;
