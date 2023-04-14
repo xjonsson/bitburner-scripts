@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CORE, MINISAVE, CACHE, PATHS } from './configs';
+import { CORE, MINISAVE, CACHE, PATHS } from '/configs';
 import { Bitnode } from '/system/bitnode/Bitnode';
 /* eslint-enable */
 

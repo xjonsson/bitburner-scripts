@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { BitnodeDB, PlayerDB } from './system/cache/DB';
+import { BitnodeDB, PlayerDB } from '/system/cache/DB';
 import { CACHE } from '/configs';
 /* eslint-enable */
 
@@ -20,8 +20,10 @@ const init = async (ns: NS) => {
 const updatePlayer = async (ns: NS) => {
   while (true) {
     await launch(ns, CACHE.PLAYER);
-    const player = PlayerDB.read(ns, 'player');
-    ns.print(`[Player] ${player.data.playtimeSinceLastAug}`);
+    // LEAVE FOR DEBUGING
+    // const player = PlayerDB.read(ns, 'player');
+    // ns.clearLog();
+    // ns.print(player);
     await ns.asleep(1000);
   }
 };
