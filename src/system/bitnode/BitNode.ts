@@ -1,33 +1,27 @@
 /* eslint-disable */
 // import { Player } from '@player';
 import { NS } from '@ns';
-import { getBitNodeMultipliers } from '/system/data/sBitNode';
 import { PATHS } from '/configs';
+import { getBitNodeMultipliers } from '/system/data/sBitnode';
 /* eslint-enable */
 
 export class Bitnode {
+  id: string;
   node: number;
   level: number;
-  done: false;
+  done: boolean;
   filename: string;
   saved: any;
   data: any;
   mults: any;
 
-  constructor(ns: NS, node: number, level: number) {
+  constructor(ns: NS, node: number, level: number, done = false) {
+    this.id = 'bitnode';
     this.node = node;
     this.level = level;
-    this.done = false;
+    this.done = done;
     this.filename = `${PATHS.TMP}/BitNode_${node}_${level}.txt`;
-    const previous = ns.fileExists(this.filename);
-    const saved = previous ? JSON.parse(ns.read(this.filename)) : false;
-
-    if (this.saved) {
-      this.done = saved.done;
-      this.data = saved.data;
-    } else {
-      this.data = getBitNodeMultipliers(this.node, this.level);
-    }
+    this.data = getBitNodeMultipliers(this.node, this.level);
 
     this.mults = {
       player: {
@@ -118,6 +112,7 @@ export class Bitnode {
 }
 
 // const sample = {
+//   id = 'bitnode';
 //   node: 3,
 //   level: 1,
 //   done: false,

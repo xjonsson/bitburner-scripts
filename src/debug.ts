@@ -5,7 +5,7 @@ import { PORTS } from '/configs';
 import Network from '/old/zNetwork';
 import Server from '/old/server';
 import { timeFormat } from '/old/zUtils';
-import { getBitNodeMultipliers } from '/system/data/sBitNode';
+import { getBitNodeMultipliers } from '/system/data/sBitnode';
 /* eslint-enable */
 
 // const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;

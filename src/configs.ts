@@ -79,15 +79,16 @@ export const MINISAVE: any = {
 };
 
 export const BITNODE: any = {
-  PORT: 2,
-  CACHE: `${PATHS.CACHE}/cacheBitNode.js`,
+  PORT: 3,
+  CACHE: `${PATHS.CACHE}/cacheBitnode.js`,
 };
 
 export const PORTS: any = {
   LIST: [],
 };
 (function () {
-  PORTS.LIST[(PORTS.CONTROL = 1)] = 'control';
+  PORTS.LIST[(PORTS.SYSTEM = 1)] = 'system';
+  PORTS.LIST[(PORTS.CONTROL = 2)] = 'control';
   PORTS.LIST[(PORTS.BITNODE = BITNODE.PORT)] = 'bitnode';
   // PORTS.LIST[(PORTS.PLAYER = 3)] = 'player';
   // PORTS.LIST[(PORTS.NETWORK = 4)] = 'network';

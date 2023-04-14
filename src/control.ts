@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
+import { BitnodeDB } from './system/cache/DB';
 import { BITNODE } from '/configs';
 import Player from '/old/zPlayer';
 import { CONFIGS, DEPLOY } from '/configs';
@@ -17,6 +18,8 @@ import { timeFormat } from '/old/zUtils';
 // import { BitNodeCache } from 'modules/bitnodes/BitnodeCache';
 
 const init = async (ns: NS) => {
+  const bitnode = BitnodeDB.read(ns, 'bitnode');
+  ns.print(`[Bitnode] ${bitnode.node}:${bitnode.level} (${bitnode.done})`);
   // const BitNode = JSON.parse(ns.read(BITNODE.TMP));
   // ns.print(`[BitNode] ${BitNode.node}:${BitNode.level}`);
   // ns.print('BitNode: ', BitNodeCache.read(ns, 'current').number);
@@ -46,14 +49,14 @@ const launch = async (ns: NS, script: string, threads = 1, args = []) => {
   }
 };
 
-const updateBitNode = async (ns: NS) => {
-  while (true) {
-    // await launch_and_wait(ns, CACHE_SCRIPTS.PLAYERS);
-    ns.print('[Bitnode] Loop');
-    await launch(ns, BITNODE.CACHE);
-    await ns.asleep(1000);
-  }
-};
+// const updateBitNode = async (ns: NS) => {
+//   while (true) {
+//     // await launch_and_wait(ns, CACHE_SCRIPTS.PLAYERS);
+//     ns.print('[Bitnode] Loop');
+//     await launch(ns, BITNODE.CACHE);
+//     await ns.asleep(1000);
+//   }
+// };
 
 // const updatePlayer = async (ns: NS) => {
 //   while (true) {
@@ -79,7 +82,7 @@ export const main = async (ns: NS) => {
     )} milliseconds`
   );
   // updatePlayer(ns).catch(console.error);
-  updateBitNode(ns).catch(console.error);
+  // updateBitNode(ns).catch(console.error);
   // update_players(ns).catch(console.error);
   // update_servers(ns).catch(console.error);
   // update_augmentations(ns).catch(console.error);

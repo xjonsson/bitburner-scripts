@@ -33,11 +33,11 @@ export const DB = {
   },
 };
 
-export const BitNodeDB = {
+export const BitnodeDB = {
   all(ns: NS) {
     return DB.all(ns, PORTS.BITNODE);
   },
-  read(ns: NS, id: string) {
+  read(ns: NS, id: any) {
     return DB.read(ns, PORTS.BITNODE, id);
   },
   async update(ns: NS, obj: any) {
