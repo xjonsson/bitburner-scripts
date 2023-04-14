@@ -78,9 +78,9 @@ export const MINISAVE: any = {
   FILE: `${PATHS.TMP}/Active.txt`,
 };
 
-export const BITNODE: any = {
-  PORT: 3,
-  CACHE: `${PATHS.CACHE}/cacheBitnode.js`,
+export const CACHE: any = {
+  BITNODE: `${PATHS.CACHE}/cacheBitnode.js`,
+  PLAYER: `${PATHS.CACHE}/cachePlayer.js`,
 };
 
 export const PORTS: any = {
@@ -89,8 +89,8 @@ export const PORTS: any = {
 (function () {
   PORTS.LIST[(PORTS.SYSTEM = 1)] = 'system';
   PORTS.LIST[(PORTS.CONTROL = 2)] = 'control';
-  PORTS.LIST[(PORTS.BITNODE = BITNODE.PORT)] = 'bitnode';
-  // PORTS.LIST[(PORTS.PLAYER = 3)] = 'player';
+  PORTS.LIST[(PORTS.BITNODE = 3)] = 'bitnode';
+  PORTS.LIST[(PORTS.PLAYER = 4)] = 'player';
   // PORTS.LIST[(PORTS.NETWORK = 4)] = 'network';
   // PORTS.LIST[(PORTS.HACKNET = 5)] = 'hacknet';
   // PORTS.LIST[(PORTS.SERVERS = 6)] = 'servers';

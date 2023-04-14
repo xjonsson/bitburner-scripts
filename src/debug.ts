@@ -25,7 +25,7 @@ export async function main(ns: NS) {
   // }
   while (true) {
     ns.clearLog();
-    const data: any = ns.peek(PORTS.BITNODE);
+    const data: any = ns.peek(PORTS.PLAYER);
     ns.print(data);
     await ns.sleep(1000);
   }

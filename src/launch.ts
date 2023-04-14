@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CORE, MINISAVE, BITNODE, PATHS } from './configs';
+import { CORE, MINISAVE, CACHE, PATHS } from './configs';
 import { Bitnode } from '/system/bitnode/Bitnode';
 /* eslint-enable */
 
@@ -73,7 +73,14 @@ export async function main(ns: NS) {
   }
 
   // Start the cache
-  await launch(ns, BITNODE.CACHE, 1, [bitnode.filename]);
+  await launch(ns, CACHE.BITNODE, 1, [bitnode.filename]);
+  // CACHE_SCRIPTS.AUGMENTATIONS,
+  //   CACHE_SCRIPTS.FACTIONS,
+  await launch(ns, CACHE.PLAYER);
+  //   CACHE_SCRIPTS.SERVERS,
+  //   CACHE_SCRIPTS.CORPORATIONS,
+  //   CACHE_SCRIPTS.CRIMES,
+  //   CACHE_SCRIPTS.SLEEVES;
 
   const homeMax = ns.getServerMaxRam('home');
   const homeMaxMsg = `We have ${ns.formatRam(homeMax, 2)}`;

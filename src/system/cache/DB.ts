@@ -47,3 +47,18 @@ export const BitnodeDB = {
     return DB.delete(ns, PORTS.BITNODE, id);
   },
 };
+
+export const PlayerDB = {
+  all(ns: NS) {
+    return DB.all(ns, PORTS.PLAYER);
+  },
+  read(ns: NS, id: any) {
+    return DB.read(ns, PORTS.PLAYER, id);
+  },
+  async update(ns: NS, obj: any) {
+    return DB.update(ns, PORTS.PLAYER, obj);
+  },
+  async delete(ns: NS, id: string) {
+    return DB.delete(ns, PORTS.PLAYER, id);
+  },
+};
