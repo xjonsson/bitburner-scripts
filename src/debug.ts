@@ -1,252 +1,352 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import Player from '/old/zPlayer';
-import { PORTS } from '/configs';
-import Network from '/old/zNetwork';
-import Server from '/old/server';
-import { timeFormat } from '/old/zUtils';
-import { getBitNodeMultipliers } from '/system/data/sBitnode';
 /* eslint-enable */
 
-// const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;
+export class Player {
+  id: string;
+  data: any;
+  hp: { now: boolean; max: boolean };
+  programs: any;
+  challenge: number;
+  bitnode: number;
+  city: string;
+  location: string;
+  playtime: { total: number; aug: number; node: number };
+  money: number;
+  level: number;
+  levelRange: { min: number; max: number };
+  hack: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+      chance: number;
+      grow: number;
+      speed: number;
+      money: number;
+    };
+  };
+  hacknet: {
+    production: number;
+    node: number;
+    level: number;
+    ram: number;
+    cores: number;
+  };
+  int: {
+    level: number;
+    exp: number;
+  };
+  str: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  def: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  dex: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  agi: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  cha: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  work: {
+    jobs: any;
+    mults: {
+      money: number;
+    };
+  };
+  faction: {
+    factions: any;
+    mults: {
+      rep: number;
+    };
+  };
+  company: { mults: { rep: number } };
+  crime: {
+    kills: number;
+    mults: {
+      chance: number;
+      money: number;
+    };
+  };
+  bladeburner: {
+    mults: {
+      staminaMax: number;
+      staminaGain: number;
+      analysis: number;
+      chance: number;
+    };
+  };
+  entropy: number;
+
+  constructor(ns: NS) {
+    this.id = 'player';
+    this.data = ns.getPlayer();
+    this.hp = {
+      now: this.data.hp.current,
+      max: this.data.hp.max,
+    };
+
+    this.programs = {
+      tor: ns.hasTorRouter(),
+      ssh: ns.fileExists('BruteSSH.exe', 'home'),
+      ftp: ns.fileExists('FTPCrack.exe', 'home'),
+      smtp: ns.fileExists('relaySMTP.exe', 'home'),
+      http: ns.fileExists('HTTPWorm.exe', 'home'),
+      sql: ns.fileExists('SQLInject.exe', 'home'),
+    };
+
+    this.challenge = Object.keys(this.programs)
+      .filter((prog) => this.programs[prog] && prog !== 'tor')
+      .reduce((total) => total + 1, 0);
+
+    this.bitnode = this.data.bitNodeN; // FIXME: Deprecated Use ns.getResetInfo().currentNode instead
+    this.city = this.data.city;
+    this.location = this.data.location;
+    this.playtime = {
+      total: this.data.totalPlaytime,
+      aug: this.data.playtimeSinceLastAug, // FIXME: Deprecated Use ns.getResetInfo().lastAugReset instead
+      node: this.data.playtimeSinceLastBitnode, // FIXME: Deprecated Use ns.getResetInfo().lastNodeReset instead
+    };
+    this.money = this.data.money;
+    this.level = this.data.skills.hacking;
+    this.levelRange = {
+      min: this.level * 0.25 < 1 ? 1 : Math.ceil(this.level * 0.25),
+      max: Math.ceil(this.level * 0.8),
+    };
+
+    this.hack = {
+      level: this.data.skills.hacking,
+      exp: this.data.exp.hacking,
+      mults: {
+        level: this.data.mults.hacking,
+        exp: this.data.mults.hacking_exp,
+        chance: this.data.mults.hacking_chance,
+        grow: this.data.mults.hacking_grow,
+        speed: this.data.mults.hacking_speed,
+        money: this.data.mults.hacking_money,
+      },
+    };
+
+    this.hacknet = {
+      production: this.data.mults.hacknet_node_money,
+      node: this.data.mults.hacknet_node_purchase_cost,
+      level: this.data.mults.hacknet_node_level_cost,
+      ram: this.data.mults.hacknet_node_ram_cost,
+      cores: this.data.mults.hacknet_node_core_cost,
+    };
+
+    this.int = {
+      level: this.data.skills.intelligence,
+      exp: this.data.exp.intelligence,
+    };
+
+    this.str = {
+      level: this.data.skills.strength,
+      exp: this.data.exp.strength,
+      mults: {
+        level: this.data.mults.strength,
+        exp: this.data.mults.strength_exp,
+      },
+    };
+
+    this.def = {
+      level: this.data.skills.defense,
+      exp: this.data.exp.defense,
+      mults: {
+        level: this.data.mults.defense,
+        exp: this.data.mults.defense_exp,
+      },
+    };
+
+    this.dex = {
+      level: this.data.skills.dexterity,
+      exp: this.data.exp.dexterity,
+      mults: {
+        level: this.data.mults.dexterity,
+        exp: this.data.mults.dexterity_exp,
+      },
+    };
+
+    this.agi = {
+      level: this.data.skills.agility,
+      exp: this.data.exp.agility,
+      mults: {
+        level: this.data.mults.agility,
+        exp: this.data.mults.agility_exp,
+      },
+    };
+
+    this.cha = {
+      level: this.data.skills.charisma,
+      exp: this.data.exp.charisma,
+      mults: {
+        level: this.data.mults.charisma,
+        exp: this.data.mults.charisma_exp,
+      },
+    };
+
+    this.work = {
+      jobs: this.data.jobs,
+      mults: {
+        money: this.data.mults.work_money,
+      },
+    };
+
+    this.faction = {
+      factions: this.data.factions,
+      mults: {
+        rep: this.data.mults.faction_rep,
+      },
+    };
+
+    this.company = {
+      mults: {
+        rep: this.data.mults.company_rep,
+      },
+    };
+
+    this.crime = {
+      kills: this.data.numPeopleKilled,
+      mults: {
+        chance: this.data.mults.crime_success,
+        money: this.data.mults.crime_money,
+      },
+    };
+
+    this.bladeburner = {
+      mults: {
+        staminaMax: this.data.mults.bladeburner_max_stamina,
+        staminaGain: this.data.mults.bladeburner_stamina_gain,
+        analysis: this.data.mults.bladeburner_analysis,
+        chance: this.data.mults.bladeburner_success_chance,
+      },
+    };
+
+    this.entropy = this.data.entropy;
+  }
+}
 
 export async function main(ns: NS) {
   ns.tail();
   ns.clearLog();
+  ns.disableLog('disableLog');
+  ns.disableLog('sleep');
+  // ns.disableLog('ALL');
+  const p = new Player(ns);
 
-  // const node = getBitNodeMultipliers(12, 12);
-  // ns.print(node);
-
-  // ns.print(CONFIGS);
-  // ns.print(DEPLOY);
-  // ns.print(ns.getScriptRam(xMin));
-  // if (data === 'NULL PORT DATA') {
-  //   data = new Map();
-  // }
-  while (true) {
-    ns.clearLog();
-    const data: any = ns.peek(PORTS.PLAYER);
-    ns.print(data);
-    await ns.sleep(1000);
-  }
-}
-
-// export async function main(ns: NS) {
-//   const homeFocus = ns.args[0] as string;
-//   const p = new Player(ns);
-//   const focus = new Server(ns, p, homeFocus);
-//   ns.tail();
-//   ns.clearLog();
-//   ns.disableLog('disableLog');
-//   ns.disableLog('scan');
-//   ns.disableLog('sleep');
-
-//   // const target = new Server(ns, p, 'n00dles');
-//   const machine = new Server(ns, p, 'home');
-//   // const sources = ns
-//   //   .getPurchasedServers()
-//   //   .map((s: string) => new Server(ns, p, s));
-//   // sources.forEach((s: any) => {
-//   //   ns.scp([xMin, xHack, xWeak, xGrow, xShare], s.hostname, 'home');
-//   // });
-//   // sources.push(new Server(ns, p, 'home'));
-//   let recheck = performance.now();
-//   let tHack = recheck;
-//   let tWeak = recheck;
-//   let tGrow = recheck;
-//   let tWeakAfterGrow = recheck;
-//   let tHackN = 0;
-//   let tWeakN = 0;
-//   let tGrowN = 0;
-//   let tWeakAfterGrowN = 0;
-//   ns.print(recheck);
-
-//   function flow(now: number, source: any, target: Server, partial = false) {
-//     const batch = target.batch(source.cores, partial);
-//     if (source.ram.now > batch.batchRam && now >= recheck) {
-//       if (batch.weakThreads > 0) {
-//         ns.exec(
-//           xWeak,
-//           source.hostname,
-//           batch.weakThreads,
-//           target.hostname,
-//           false,
-//           batch.weakDeploy
-//         );
-//         tWeak = batch.weakDeploy;
-//         tWeakN = batch.weakThreads;
-//       }
-
-//       if (batch.growThreads > 0) {
-//         ns.exec(
-//           xGrow,
-//           source.hostname,
-//           batch.growThreads,
-//           target.hostname,
-//           false,
-//           batch.growDeploy
-//         );
-//         tGrow = batch.growDeploy;
-//         tGrowN = batch.growThreads;
-//       }
-
-//       if (batch.weakThreadsAfterGrow > 0) {
-//         ns.exec(
-//           xWeak,
-//           source.hostname,
-//           batch.weakThreadsAfterGrow,
-//           target.hostname,
-//           false,
-//           batch.weakDeployAfterGrow
-//         );
-//         tWeakAfterGrow = batch.weakDeployAfterGrow;
-//         tWeakAfterGrowN = batch.weakThreads;
-//       }
-
-//       if (recheck < batch.deployEnd) {
-//         recheck = batch.deployEnd;
-//       }
-//     } else {
-//       switch (target.action) {
-//         case 'Weak': {
-//           if (now >= recheck && target.weakThreads > 0) {
-//             ns.exec(
-//               xWeak,
-//               source.hostname,
-//               target.weakThreads,
-//               target.hostname
-//             );
-//             if (recheck < now + target.weakTime) {
-//               recheck = now + target.weakTime;
-//               tWeak = recheck;
-//             }
-//           }
-//           break;
-//         }
-//         case 'Grow': {
-//           if (now >= recheck && target.growThreads(source.cores) > 0) {
-//             ns.exec(
-//               xWeak,
-//               source.hostname,
-//               target.growThreads(source.cores),
-//               target.hostname
-//             );
-//             if (recheck < now + target.growTime) {
-//               recheck = now + target.growTime;
-//               tGrow = recheck;
-//             }
-//           }
-//           break;
-//         }
-//         case 'Hack': {
-//           const batchPart = target.batch(source.cores);
-//           if (source.ram.now > batchPart.batchRam && target.canAttack) {
-//             if (batch.hackThreads > 0) {
-//               ns.exec(
-//                 xHack,
-//                 source.hostname,
-//                 batchPart.hackThreads,
-//                 target.hostname,
-//                 false,
-//                 batchPart.hackDeploy
-//               );
-//               tHackN = batchPart.hackThreads;
-//             }
-
-//             if (batchPart.weakThreads > 0) {
-//               ns.exec(
-//                 xWeak,
-//                 source.hostname,
-//                 batchPart.weakThreads,
-//                 target.hostname,
-//                 false,
-//                 batchPart.weakDeploy
-//               );
-//               tWeakN = batchPart.weakThreads;
-//             }
-
-//             if (batchPart.growThreads > 0) {
-//               ns.exec(
-//                 xGrow,
-//                 source.hostname,
-//                 batchPart.growThreads,
-//                 target.hostname,
-//                 false,
-//                 batchPart.growDeploy
-//               );
-//               tGrowN = batchPart.growThreads;
-//             }
-
-//             if (batchPart.weakThreadsAfterGrow > 0) {
-//               ns.exec(
-//                 xWeak,
-//                 source.hostname,
-//                 batchPart.weakThreadsAfterGrow,
-//                 target.hostname,
-//                 false,
-//                 batchPart.weakDeployAfterGrow
-//               );
-//               tWeakAfterGrowN = batchPart.weakThreadsAfterGrow;
-//             }
-
-//             if (recheck < batchPart.deployEnd) {
-//               recheck = batchPart.deployEnd;
-//               tHack = batchPart.hackDeploy;
-//               tWeak = batchPart.weakDeploy;
-//               tGrow = batchPart.growDeploy;
-//               tWeakAfterGrow = batchPart.weakDeployAfterGrow;
-//             }
-//           }
-//           break;
-//         }
-//         default:
-//       }
-//     }
-//   }
-
-//   while (true) {
-//     // ns.print(sources);
-//     const now = performance.now();
-
-//     // sources.forEach((s: any) => {
-//     //   flow(now, s);
-//     // });
-//     flow(now, machine, focus, false);
-
-//     // ns.clearLog();
-//     ns.print(focus.hostname);
-//     ns.print(`[Now] ${now}`);
-//     ns.print(`[Recheck] ${recheck}`);
-//     ns.print(`[Update] ${timeFormat(ns, recheck - now)}`);
-//     ns.print(`[Hack] ${timeFormat(ns, tHack - now)} [t=${tHackN}]`);
-//     ns.print(`[Weak] ${timeFormat(ns, tWeak - now)} [t=${tWeakN}]`);
-//     ns.print(`[Grow] ${timeFormat(ns, tGrow - now)} [t=${tGrowN}]`);
-//     ns.print(
-//       `[Weak] ${timeFormat(ns, tWeakAfterGrow - now)} [t=${tWeakAfterGrowN}]`
-//     );
-//     await ns.sleep(3000);
-//   }
-
-//   // const servers = ns.getPurchasedServers().length;
-
-//   // for (let i = 1; i <= 20; i += 1) {
-//   //   const ram = 2 ** i;
-//   //   const cost = ns.getPurchasedServerCost(ram);
-
-//   //   ns.print(
-//   //     `[Level ${i}] ${ns.formatRam(ram)} ${ns.formatNumber(
-//   //       cost,
-//   //       2
-//   //     )} x${servers} [${ns.formatNumber(cost * servers, 2)}]  Raw $(${cost})`
-//   //   );
-//   // }
-
-//   // while (true) {
-//   //   await ns.sleep(3000);
-//   // }
-// }
-
-/* eslint-disable-next-line */
-export function autocomplete(data: any, args: any) {
-  return data.servers;
+  ns.print(
+    `[Node] ${p.bitnode} [City] ${p.city} [Location] ${p.location} [Entropy] ${p.entropy}`
+  );
+  ns.print(`[HP] ${p.hp.now} / ${p.hp.max}`);
+  ns.print(`[Money] ${ns.formatNumber(p.money, 2)}`);
+  ns.print(`[Level] ${p.level} (${p.levelRange.min} - ${p.levelRange.max})`);
+  ns.print(`[Challenge] ${p.challenge}`);
+  ns.print(`  [Tor] ${p.programs.tor}`);
+  ns.print(`  [SSH] ${p.programs.ssh}`);
+  ns.print(`  [FTP] ${p.programs.ftp}`);
+  ns.print(`  [SMTP] ${p.programs.smtp}`);
+  ns.print(`  [HTTP] ${p.programs.http}`);
+  ns.print(`  [SQL] ${p.programs.sql}`);
+  ns.print(`[Playtime] ${ns.tFormat(p.playtime.total)}`);
+  ns.print(`  [Augment] ${ns.tFormat(p.playtime.aug)}`);
+  ns.print(`  [Bitnode] ${ns.tFormat(p.playtime.node)}`);
+  ns.print(`[Hack]`);
+  ns.print(
+    `  [Mults] Chance: ${p.hack.mults.chance} Grow: ${p.hack.mults.grow} Speed: ${p.hack.mults.speed} Money: ${p.hack.mults.money}`
+  );
+  ns.print(
+    `[Hacknet] Production: ${p.hacknet.production} Node: ${p.hacknet.node} Level: ${p.hacknet.level} Ram: ${p.hacknet.ram} Cores: ${p.hacknet.cores}`
+  );
+  ns.print(`[Stats]`);
+  const header = ' %4s | %5s | %5s | %5s | %6s ';
+  ns.printf(header, 'Stat', 'Level', 'EXP', 'Level', 'EXP');
+  ns.printf(
+    header,
+    'HACK',
+    p.hack.mults.level,
+    p.hack.mults.exp,
+    p.hack.level,
+    ns.formatNumber(p.hack.exp, 2)
+  );
+  ns.printf(header, 'INT', '', '', p.int.level, p.int.exp);
+  ns.printf(
+    header,
+    'STR',
+    p.str.mults.level,
+    p.str.mults.exp,
+    p.str.level,
+    ns.formatNumber(p.str.exp)
+  );
+  ns.printf(
+    header,
+    'DEF',
+    p.def.mults.level,
+    p.def.mults.exp,
+    p.def.level,
+    ns.formatNumber(p.def.exp)
+  );
+  ns.printf(
+    header,
+    'DEX',
+    p.dex.mults.level,
+    p.dex.mults.exp,
+    p.dex.level,
+    ns.formatNumber(p.dex.exp)
+  );
+  ns.printf(
+    header,
+    'AGI',
+    p.agi.mults.level,
+    p.agi.mults.exp,
+    p.agi.level,
+    ns.formatNumber(p.agi.exp)
+  );
+  ns.printf(
+    header,
+    'CHA',
+    p.cha.mults.level,
+    p.cha.mults.exp,
+    p.cha.level,
+    ns.formatNumber(p.cha.exp)
+  );
+  ns.print(`[Work] ${p.work.mults.money}`);
+  ns.print(p.work.jobs);
+  ns.print(`[Faction] ${p.faction.mults.rep}`);
+  ns.print(p.faction.factions);
+  ns.print(`[Company] ${p.company.mults.rep}`);
+  ns.print(
+    `[Crime] Kills ${p.crime.kills} | [Chance] ${p.crime.mults.chance} [Money] ${p.crime.mults.money}`
+  );
+  ns.print(`[Bladeburner]`);
+  ns.print(p.bladeburner);
 }

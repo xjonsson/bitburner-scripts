@@ -2,6 +2,16 @@
 
 Collection of scripts while trying out Bitburner
 
+**Run filesync:**
+How to run the sync
+
+```
+npm install
+npm run watch
+```
+
+Then go to Bitburner and connect in the remote API options
+
 **Alias:**
 Launch the scripts
 
