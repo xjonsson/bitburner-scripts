@@ -61,18 +61,18 @@ export const PATHS: any = {
 export const CORE: any = {};
 (function () {
   // System
-  CORE.BITNODE = 'bitnode.txt'; // "/Temp/BitNode.txt";
-  CORE.CLOCK = `${PATHS.OS}/clock.js`; // "/runtimes/keepalive.js";
-  CORE.LAUNCHER = `${PATHS.OS}/launcher.js`; // "/runtimes/launcher.js";
-  CORE.MINIMAL = `${PATHS.OS}/minimal.js`; // "/runtimes/tucson.js";
-  CORE.TWITCH = `${PATHS.OS}/twitch.js`; // "/runtimes/phoenix.js";
+  CORE.BITNODE = 'bitnode.txt'; // "/Temp/BitNode.txt"; // TODO: Create bitnode
+  CORE.CLOCK = `${PATHS.OS}/clock.js`; // "/runtimes/keepalive.js"; // TODO: Create clock
+  CORE.LAUNCHER = `${PATHS.OS}/launcher.js`; // "/runtimes/launcher.js"; // TODO: Create launcher
+  CORE.MINIMAL = `${PATHS.OS}/minimal.js`; // "/runtimes/tucson.js"; // TODO: Create minimal
+  CORE.TWITCH = `${PATHS.OS}/twitch.js`; // "/runtimes/phoenix.js"; // TODO: Create full
 
   // Managers
-  CORE.HACKNET = `${PATHS.MODULES}/hacknet.js`; // "/sys/hacknet.js";
-  CORE.HOSTING = `${PATHS.MODULES}/hosting.js`; // "/sys/manage_servers.js";
-  CORE.MARKET = `${PATHS.MODULES}/stockmarket.js`; // "/sys/stockmaster.js";
-  CORE.MONITOR = `${PATHS.MODULES}/monitor.js`; // "/sys/monitor.js";
-  CORE.CONTRACTS = `${PATHS.MODULES}/contracts.js`; // "/sys/fetch_and_solve_leetcode.js";
+  CORE.HACKNET = `${PATHS.MODULES}/hacknet.js`; // "/sys/hacknet.js"; // TODO: Create hacknet
+  CORE.HOSTING = `${PATHS.MODULES}/hosting.js`; // "/sys/manage_servers.js"; // TODO: Create hosting
+  CORE.MARKET = `${PATHS.MODULES}/stockmarket.js`; // "/sys/stockmaster.js"; // TODO: Create stockmarkets
+  CORE.MONITOR = `${PATHS.MODULES}/monitor.js`; // "/sys/monitor.js"; // TODO: Create monitor
+  CORE.CONTRACTS = `${PATHS.MODULES}/contracts.js`; // "/sys/fetch_and_solve_leetcode.js"; // TODO: Create contracts
 })();
 
 // export const MINISAVE: any = {
@@ -81,26 +81,33 @@ export const CORE: any = {};
 
 export const PORTS: any = {};
 (function () {
-  PORTS[(PORTS.SYSTEM = 1)] = 'SYSTEM';
-  PORTS[(PORTS.CONTROL = 2)] = 'CONTROL';
-  PORTS[(PORTS.BITNODE = 3)] = 'BITNODE';
+  PORTS[(PORTS.SYSTEM = 1)] = 'SYSTEM'; // TODO: Add clock
+  PORTS[(PORTS.CONTROL = 2)] = 'CONTROL'; // TODO: Add control flow
+  PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   PORTS[(PORTS.PLAYER = 4)] = 'PLAYER';
-  PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS';
-  PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES';
-  PORTS[(PORTS.HACKNET = 7)] = 'HACKNET';
-  PORTS[(PORTS.SERVERS = 8)] = 'SERVERS';
-  PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS';
-  PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS';
-  PORTS[(PORTS.CRIMES = 11)] = 'CRIMES';
-  PORTS[(PORTS.STOCKS = 12)] = 'STOCKS';
+  PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
+  PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
+  PORTS[(PORTS.HACKNET = 7)] = 'HACKNET'; // TODO: Add hacknet
+  PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
+  PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
+  PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
+  PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
+  PORTS[(PORTS.STOCKS = 12)] = 'STOCKS'; // TODO: Add stocks
 })();
 
-// TODO: Implement caching system
-// export const CACHE: any = {
-//   BITNODE: `${PATHS.CACHE}/cacheBitnode.js`,
-//   PLAYER: `${PATHS.CACHE}/cachePlayer.js`,
-//   NETWORK: `${PATHS.CACHE}/cacheNetwork.js`,
-// };
+export const CACHE: any = {};
+(function () {
+  CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
+  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`; // TODO: Add player cache
+  CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
+  CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
+  CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache
+  CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`; // TODO: Add servers cache
+  CACHE.FACTIONS = `${PATHS.CACHE}/cacheFactions.js`; // TODO: Add factions cache
+  CACHE.CORPORATIONS = `${PATHS.CACHE}/cacheCorporations.js`; // TODO: Add corporations cache
+  CACHE.CRIMES = `${PATHS.CACHE}/cacheCrimes.js`; // TODO: Add crimes cache
+  CACHE.STOCKS = `${PATHS.CACHE}/cacheStocks.js`; // TODO: Add stocks cache
+})();
 
 export const DEPLOY: any = {
   xMin: `${PATHS.DEPLOY}/xmin.js`, // Minimal script

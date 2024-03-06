@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONSTANTS } from '/os/data/constants';
-import { Player } from '/os/modules/Player';
 /* eslint-enable */
 
 export function growthAnalyzeAccurate(

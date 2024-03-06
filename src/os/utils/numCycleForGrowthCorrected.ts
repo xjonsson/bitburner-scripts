@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
+import { CONSTANTS } from '/os/data/constants';
 /* eslint-enable */
 
 export function numCycleForGrowthCorrected(
@@ -10,25 +11,34 @@ export function numCycleForGrowthCorrected(
   cores = 1,
   player: any
 ): number {
-  const nodeMulti = ns.getPlayer().bitNodeN;
+  const nodeMulti = player.bitnode;
   let bnMult = 1;
   switch (nodeMulti) {
     case 2: {
       bnMult = 0.8;
+      break;
     }
 
     case 3: {
       bnMult = 0.2;
+      break;
     }
 
     case 11: {
       bnMult = 0.2;
+      break;
     }
 
     case 12: {
-      const inc = Math.pow(1.02, 1); // lvl
+      const inc = 1.02 ** 1; // lvl
       const dec = 1 / inc;
       bnMult = dec;
+      break;
+    }
+
+    default: {
+      bnMult = 1;
+      break;
     }
   }
   if (startMoney < 0) startMoney = 0; // servers "can't" have less than 0 dollars on them
@@ -133,16 +143,16 @@ export function numCycleForGrowthCorrected(
    * If you are interested then check out the wikipedia page.
    */
   let bt = exponentialBase ** threadMultiplier;
-  if (bt == Infinity) bt = 1e300;
+  if (bt === Infinity) bt = 1e300;
   let corr = Infinity;
   // Two sided error because we do not want to get stuck if the error stays on the wrong side
   do {
     // c should be above 0 so Halley's method can't be used, we have to stick to Newton-Raphson
     let bct = bt ** cycles;
-    if (bct == Infinity) bct = 1e300;
+    if (bct === Infinity) bct = 1e300;
     const opc = startMoney + cycles;
     let diff = opc * bct - targetMoney;
-    if (diff == Infinity) diff = 1e300;
+    if (diff === Infinity) diff = 1e300;
     corr = diff / (opc * x + 1.0) / bct;
     cycles -= corr;
   } while (Math.abs(corr) >= 1);
@@ -154,14 +164,14 @@ export function numCycleForGrowthCorrected(
   const fca = Math.floor(cycles);
   if (
     targetMoney <=
-    (startMoney + fca) * Math.pow(exponentialBase, fca * threadMultiplier)
+    (startMoney + fca) * exponentialBase ** (fca * threadMultiplier)
   ) {
     return fca;
   }
   const cca = Math.ceil(cycles);
   if (
     targetMoney <=
-    (startMoney + cca) * Math.pow(exponentialBase, cca * threadMultiplier)
+    (startMoney + cca) * exponentialBase ** (cca * threadMultiplier)
   ) {
     return cca;
   }
