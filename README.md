@@ -16,7 +16,7 @@ Then go to Bitburner and connect in the remote API options
 Launch the scripts
 
 ```
-alias start="run /launch.js"
+alias start="run /os/launcher.js"
 ```
 
 Buy software

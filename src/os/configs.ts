@@ -1,8 +1,8 @@
 export const CONFIGS: any = {
   moneyReserve: {
     base: 0, // 100000 * 1000000, // 1000000 1 Million
-    hacknet: 0 * 1e6, // 1 Million (Min before hacknet purchases)
-    servers: 0 * 1e6, // 1 Million (Min before server purchases)
+    hacknet: 1 * 1e6, // 1 Million (Min before hacknet purchases)
+    servers: 1 * 1e6, // 1 Million (Min before server purchases)
   },
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
@@ -32,10 +32,11 @@ export const CONFIGS: any = {
     savings: 0.1, // 20% of ram will be used as reserve
   },
   hacknetTarget: {
-    count: 20, // 20 Soft Max (Real Max Infinity)
-    level: 200, // 200 (Real Max)
-    ram: 64, // 64 (Real Max)
-    cores: 16, // 16 (Real Max)
+    breakeven: 2 * 60 * 60, // 2 hours in seconds
+    countTarget: 20, // 20 Soft Max (Real Max Infinity)
+    levelTarget: 200, // 200 (Real Max)
+    ramTarget: 64, // 64 (Real Max)
+    coresTarget: 16, // 16 (Real Max)
   },
   serversTarget: {
     count: 25, // 25 (Real Max)
@@ -75,6 +76,24 @@ export const CORE: any = {};
   CORE.CONTRACTS = `${PATHS.MODULES}/contracts.js`; // "/sys/fetch_and_solve_leetcode.js"; // TODO: Create contracts
 })();
 
+export const TIME: any = {};
+(function () {
+  TIME.LAUNCHING = 1 * 1000; // 1 second launch wait
+  TIME.RUNNING = 1 * 1000; // 1 second checking pids
+  TIME.CLOCK = 60 * 1000; // 1 min ticks
+  TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
+  TIME.PLAYER = 1 * 1000; // 1 second updates
+  TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
+  TIME.SLEEVES = 2 * 1000; // 2 second updates
+  TIME.HACKNET = 3 * 1000; // 3 second updates
+  TIME.SERVERS = 0.5 * 1000; // 0.5 second updates
+  TIME.FACTIONS = 30 * 1000; // 30 second updates
+  TIME.CORPORATIONS = 20 * 1000; // 20 second updates
+  TIME.CRIMES = 2 * 1000; // 2 second updates
+  TIME.STOCKS = 1 * 1000; // 1 second updates
+  TIME.CONTRACTS = 90 * 1000; // 1.5 min updates
+})();
+
 // export const MINISAVE: any = {
 //   FILE: `${PATHS.TMP}/Active.txt`,
 // };
@@ -98,7 +117,7 @@ export const PORTS: any = {};
 export const CACHE: any = {};
 (function () {
   CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
-  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`; // TODO: Add player cache
+  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
   CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
   CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
   CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache

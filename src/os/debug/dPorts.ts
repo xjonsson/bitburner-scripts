@@ -19,6 +19,8 @@ export async function main(ns: NS) {
   function updatePorts() {
     ns.clearLog();
 
+    const player = PlayerCache.read(ns, 'player');
+
     ns.printf(portsHeader, 'Purpose', 'Port', 'Name', 'Data');
     ns.printf(
       portsHeader,
@@ -47,7 +49,7 @@ export async function main(ns: NS) {
       PORTS.PLAYER,
       PORTS[4],
       // ns.peek(PORTS.PLAYER) // TODO: Add cache primary
-      `Level: ${PlayerCache.read(ns, 'player')?.level}`
+      `Level: ${player?.level} | ${ns.formatNumber(player?.money || 0, 3)}`
     );
     ns.printf(
       portsHeader,
