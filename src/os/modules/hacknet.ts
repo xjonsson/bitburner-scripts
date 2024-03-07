@@ -129,6 +129,7 @@ export async function main(ns: NS) {
     }
     if (ratios.every((r) => r.payback > breakeven)) {
       if (nodes.size >= countTarget) {
+        // ns.closeTail();
         return; // ns.exit(); // return;
       }
 
