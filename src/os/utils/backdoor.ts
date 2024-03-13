@@ -6,12 +6,17 @@ import { PlayerCache } from '/os/modules/Cache';
 
 // NOTE: You must be on the terminal tab for injection to work.
 
-const terminalInput = document.getElementById('terminal-input');
+// const terminalInput = document.getElementById('terminal-input');
+const terminalInput = document.getElementById(
+  'terminal-input'
+) as HTMLInputElement;
 const handler = Object?.keys(terminalInput)[1];
 
 function backdoor(ns: NS, route: string) {
   terminalInput.value = route;
-  terminalInput[handler].onChange({ target: terminalInput });
+  terminalInput[handler].onChange({
+    target: terminalInput,
+  });
   terminalInput[handler].onKeyDown({
     key: 'Enter',
     preventDefault: () => null,
@@ -39,7 +44,7 @@ export async function main(ns: NS) {
       const server = {
         hostname: data.hostname,
         server: data.purchasedByPlayer,
-        level: data.requiredHackingSkill,
+        level: data.requiredHackingSkill || 9999,
         root: data.hasAdminRights,
         challenge: data.numOpenPortsRequired,
         open: data.openPortCount,

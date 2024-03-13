@@ -137,8 +137,8 @@ export const DEPLOY: any = {
   xWeakRam: 1.76, // HWGW Weak script RAM required
   xGrow: `${PATHS.DEPLOY}/xgrow.js`, // HWGW Grow script
   xGrowRam: 1.76, // HWGW Grow script RAM required
-  // xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
-  // xShareRam: 4.2, // Rep Share RAM required
+  xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
+  xShareRam: 4.2, // Rep Share RAM required
 };
 
 /* 
