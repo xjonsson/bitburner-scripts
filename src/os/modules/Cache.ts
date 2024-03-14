@@ -38,7 +38,7 @@ export const Cache = {
 
 // CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
 
-// CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`; // TODO: Add player cache
+// CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
 export const PlayerCache = {
   all(ns: NS) {
     return Cache.all(ns, PORTS.PLAYER);
@@ -56,7 +56,23 @@ export const PlayerCache = {
 // CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
 // CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
 // CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache
-// CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`; // TODO: Add servers cache
+
+// CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`;
+export const ServersCache = {
+  all(ns: NS) {
+    return Cache.all(ns, PORTS.SERVERS);
+  },
+  read(ns: NS, id: string) {
+    return Cache.read(ns, PORTS.SERVERS, id);
+  },
+  async update(ns: NS, obj: any) {
+    return Cache.update(ns, PORTS.SERVERS, obj);
+  },
+  async delete(ns: NS, id: string) {
+    return Cache.delete(ns, PORTS.SERVERS, id);
+  },
+};
+
 // CACHE.FACTIONS = `${PATHS.CACHE}/cacheFactions.js`; // TODO: Add factions cache
 // CACHE.CORPORATIONS = `${PATHS.CACHE}/cacheCorporations.js`; // TODO: Add corporations cache
 // CACHE.CRIMES = `${PATHS.CACHE}/cacheCrimes.js`; // TODO: Add crimes cache

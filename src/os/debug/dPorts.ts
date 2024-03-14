@@ -1,7 +1,8 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { PORTS } from '/os/configs';
-import { PlayerCache } from '/os/modules/Cache';
+import { PlayerCache, ServersCache } from '/os/modules/Cache';
+import { Server } from '/os/modules/Server';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -20,6 +21,12 @@ export async function main(ns: NS) {
     ns.clearLog();
 
     const player = PlayerCache.read(ns, 'player');
+    // const servers = ServersCache.all(ns);
+    // const serversTargets = Array.from(servers.values()).filter(
+    //   (s: Server) => s.isTarget
+    // );
+    const servers = Array.from(ServersCache.all(ns).values());
+    const serversTarget = servers.filter((s: Server) => s.isTarget);
 
     ns.printf(portsHeader, 'Purpose', 'Port', 'Name', 'Data');
     ns.printf(
@@ -77,7 +84,9 @@ export async function main(ns: NS) {
       'Servers',
       PORTS.SERVERS,
       PORTS[8],
-      ns.peek(PORTS.SERVERS) // TODO: Add cache primary
+      // ns.peek(PORTS.SERVERS) // TODO: Add cache primary
+      // `Servers: ${servers.size} | Targets: ${serversTargets.length}`
+      `Servers: ${servers.length} | Targets: ${serversTarget.length}`
     );
     ns.printf(
       portsHeader,
