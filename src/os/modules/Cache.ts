@@ -36,6 +36,22 @@ export const Cache = {
   },
 };
 
+// CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
+export const ControlCache = {
+  all(ns: NS) {
+    return Cache.all(ns, PORTS.CONTROL);
+  },
+  read(ns: NS, id: string) {
+    return Cache.read(ns, PORTS.CONTROL, id);
+  },
+  async update(ns: NS, obj: any) {
+    return Cache.update(ns, PORTS.CONTROL, obj);
+  },
+  async delete(ns: NS, id: string) {
+    return Cache.delete(ns, PORTS.CONTROL, id);
+  },
+};
+
 // CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
 
 // CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;

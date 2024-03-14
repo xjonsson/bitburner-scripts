@@ -1,8 +1,16 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { TIME, CORE, CACHE } from '/os/configs';
+import { Control } from '/os/modules/Control';
 import { launch } from '/os/utils/launch';
 /* eslint-enable */
+
+const updateControl = async (ns: NS) => {
+  while (true) {
+    await launch(ns, CACHE.CONTROL);
+    await ns.asleep(TIME.CONTROL);
+  }
+};
 
 const updatePlayer = async (ns: NS) => {
   while (true) {
@@ -36,13 +44,16 @@ export async function main(ns: NS) {
   ns.clearLog();
   ns.tail();
 
+  // ******** Initialize
+
   // Launch modules
   // launch(ns, CORE.HACKNET); // FIXME:
+  updateControl(ns).catch(console.error);
   updatePlayer(ns).catch(console.error);
   // updateAugments(ns).catch(console.error);
   // updateSleeves(ns).catch(console.error);
   // updateHacknet(ns).catch(console.error);
-  updateServers(ns).catch(console.error);
+  updateServers(ns).catch(console.error); // FIXME:
   // updateFactions(ns).catch(console.error);
   // updateCorporations(ns).catch(console.error);
   // updateCrimes(ns).catch(console.error);

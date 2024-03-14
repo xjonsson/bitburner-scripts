@@ -1,16 +1,16 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, DEPLOY } from '/os/configs';
-import { CONSTANTS } from '/os/data/constants';
-import { Player } from '/os/modules/Player';
-import { formatTime } from '/os/utils/formatTime';
-import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
-import { serversData } from '/os/data/servers';
+// import { CONSTANTS } from '/os/data/constants';
+// import { Player } from '/os/modules/Player';
+// import { formatTime } from '/os/utils/formatTime';
+// import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
+// import { serversData } from '/os/data/servers';
 import { Scan } from '/os/utils/scan';
 /* eslint-enable */
 
 const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;
-const { xMinRam, xHackRam, xWeakRam, xGrowRam, xShareRam } = DEPLOY;
+// const { xMinRam, xHackRam, xWeakRam, xGrowRam, xShareRam } = DEPLOY;
 const xReservedRam = CONFIGS.ramReserve.home;
 
 export class Server {
@@ -30,15 +30,15 @@ export class Server {
   isNode: boolean;
   isTarget: boolean;
   // isReclaimed: boolean; // FIXME: DEBUG
-  isMilestone: boolean;
-  isFaction: boolean;
+  // isMilestone: boolean;
+  // isFaction: boolean;
   isDoored: boolean;
   // canReclaim: boolean; // FIXME: DEBUG
   // canDoor: boolean; // FIXME: DEBUG
   // canFocus: boolean; // FIXME: DEBUG
   // canAttack: boolean; // FIXME: DEBUG
   cores: number;
-  power: number;
+  // power: number;
   level: number;
   open: number;
   challenge: number;
@@ -69,8 +69,8 @@ export class Server {
   // ******** Constructor
   // constructor(ns: NS, player: Player, hostname: string) {
   constructor(ns: NS, hostname: string) {
-    // this.ns = ns; // FIXME: DEBUG
-    // this.p = player; // FIXME: DEBUG
+    // this.ns = ns; // // NOTE: Computed
+    // this.p = player; // NOTE: Computed
     this.hostname = hostname; // "iron-gym"
     this.id = hostname; // "iron-gym"
     this.data = ns.getServer(hostname);
@@ -79,7 +79,7 @@ export class Server {
     this.ip = this.data.ip;
     this.organization = this.data.organizationName;
     this.cores = this.data.cpuCores;
-    this.power = Math.max(0, Math.log2(this.data.maxRam));
+    // this.power = Math.max(0, Math.log2(this.data.maxRam)); // NOTE: Computed
     this.level = this.data.requiredHackingSkill;
     this.open = this.data.openPortCount;
     this.challenge = this.data.numOpenPortsRequired;
@@ -132,57 +132,56 @@ export class Server {
       this.open >= this.challenge &&
       this.root &&
       // this.level <= this.p.level; // FIXME: DEBUG
-      this.level <= ns.getHackingLevel();
-    // this.isReclaimed =
-    //   !this.isHome && !this.isServer && this.root && this.ram.max > 0;
-    this.isMilestone = [
-      'CSEC',
-      'avmnite-02h',
-      'I.I.I.I',
-      'run4theh111z',
-      'The-Cave',
-      'w0r1d_d43m0n',
-    ].includes(this.hostname);
-    this.isFaction = [
-      'CSEC',
-      'avmnite-02h',
-      'I.I.I.I',
-      'run4theh111z',
-      '.',
-      'fulcrumassets',
-    ].includes(this.hostname);
+      this.level <= ns.getHackingLevel(); // NOTE: Computed
+    // this.isMilestone = [
+    //   'CSEC',
+    //   'avmnite-02h',
+    //   'I.I.I.I',
+    //   'run4theh111z',
+    //   'The-Cave',
+    //   'w0r1d_d43m0n',
+    // ].includes(this.hostname); // NOTE: Moving to backdoor logic
+    // this.isFaction = [
+    //   'CSEC',
+    //   'avmnite-02h',
+    //   'I.I.I.I',
+    //   'run4theh111z',
+    //   '.',
+    //   'fulcrumassets',
+    // ].includes(this.hostname); // NOTE: Moving to control logic
 
     // ******** Decision
-    // FIXME: DEBUG
+    // NOTE: Moving to backdoor logic
     // this.canReclaim =
-    //   this.challenge <= this.p.challenge && // FIXME: DEBUG
+    //   this.challenge <= this.p.challenge && // NOTE: Computed
     //   !this.root &&
     //   !this.isHome &&
     //   !this.isServer;
-    // FIXME: DEBUG
+    // NOTE: Moving to backdoor logic
     // this.canDoor =
-    //   this.level <= this.p.hack.level &&
+    //   // this.level <= this.p.hack.level && // NOTE: Computed
+    //   this.level <= ns.getHackingLevel() &&
     //   this.root &&
     //   !this.isDoored &&
     //   !this.isHome &&
     //   !this.isServer;
+    // NOTE: Distance logic will take over
     // this.canFocus =
     //   this.level >= this.p.levelRange.min &&
     //   this.level <= this.p.levelRange.max;
-    // FIXME: DEBUG
+    // NOTE: Computed and moving to hack logic. Not for every server
     // this.canAttack =
     //   this.money.now === this.money.max &&
     //   this.sec.now === this.sec.min &&
-    //   this.hackChance === 1;
+    //   this.hackChance(ns) === 1;
   }
 
   // ******** Actions
-  // FIXME: DEBUG
   deployScripts(ns: NS): any {
     ns.scp([xMin, xHack, xWeak, xGrow, xShare], this.hostname, 'home');
   }
 
-  // FIXME: DEBUG
+  // NOTE: Moving to focus logic
   // get distance(): any {
   //   const value = this.level - this.p.level / 2;
   //   if (this.level > this.p.level) return { value, message: `❌ High` };
@@ -194,7 +193,7 @@ export class Server {
   //   return { value, message: `😒 NOT SURE` };
   // }
 
-  // FIXME: DEBUG
+  // NOTE: Spliting this logic to other locations
   // get action(): string {
   //   if (this.isHome || this.isServer) return '';
   //   if (this.canReclaim) return '👾 RECLAIM';
@@ -214,7 +213,7 @@ export class Server {
   // }
 
   // ******** Computed
-  // FIXME: DEBUG
+  // NOTE: Heavy computed, move to attack server
   // get value(): any {
   //   const batch = this.batch(1);
   //   const moneyPerBatch = this.money.max * CONFIGS.hacking.skim;
@@ -238,7 +237,7 @@ export class Server {
   //   };
   // }
 
-  // FIXME: DEBUG
+  // NOTE: Heavy computed, move to attack server
   // batch(cores = 1, partial = true): any {
   //   const { buffer, delay } = CONFIGS.hacking;
   //   const deployStart = performance.now() + delay;
@@ -277,10 +276,12 @@ export class Server {
   //   return batch;
   // }
 
-  threads(script = 1.6): number {
-    return Math.floor(this.ram.now / script);
-  }
+  // FIXME: Move elsewhere
+  // threads(script = 1.6): number {
+  //   return Math.floor(this.ram.now / script);
+  // }
 
+  // NOTE: Heavy computed, move to attack server
   // ******** Computed Hack
   // FIXME: DEBUG
   // get hackThreads(): number {
@@ -292,22 +293,26 @@ export class Server {
   //   );
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get hackTime(): number {
   //   return this.ns.getHackTime(this.hostname);
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
-  // get hackChance(): number {
-  //   return this.ns.hackAnalyzeChance(this.hostname);
+  // hackChance(ns: NS): number {
+  //   return ns.hackAnalyzeChance(this.hostname);
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get hackSecInc(): number {
   //   return this.ns.hackAnalyzeSecurity(this.hackThreads, this.hostname);
   // }
 
   // ******** Computed Weak
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get weakThreads(): number {
   //   return Math.ceil(
@@ -315,16 +320,19 @@ export class Server {
   //   );
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // weakThreadsAfterGrow(cores = 1, batch = false): number {
   //   return Math.ceil(this.growThreads(cores, batch) / 12.5);
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get weakTime(): number {
   //   return this.ns.getWeakenTime(this.hostname);
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // ******** Computed Grow
   // FIXME: DEBUG
   // growThreads(cores = 1, batch = false): number {
@@ -340,11 +348,13 @@ export class Server {
   //   );
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get growTime(): number {
   //   return this.ns.getGrowTime(this.hostname);
   // }
 
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // growSecInc(cores = 1): number {
   //   return this.ns.growthAnalyzeSecurity(
@@ -355,6 +365,7 @@ export class Server {
   // }
 
   // ******** Display
+  // NOTE: Heavy computed, move to attack server
   // FIXME: DEBUG
   // get mHSBC(): any {
   //   let m = '';

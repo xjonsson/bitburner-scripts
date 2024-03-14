@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { PORTS } from '/os/configs';
-import { PlayerCache, ServersCache } from '/os/modules/Cache';
+import { ControlCache, PlayerCache, ServersCache } from '/os/modules/Cache';
 import { Server } from '/os/modules/Server';
 /* eslint-enable */
 
@@ -20,6 +20,7 @@ export async function main(ns: NS) {
   function updatePorts() {
     ns.clearLog();
 
+    const control = ControlCache.read(ns, 'control');
     const player = PlayerCache.read(ns, 'player');
     // const servers = ServersCache.all(ns);
     // const serversTargets = Array.from(servers.values()).filter(
@@ -41,7 +42,8 @@ export async function main(ns: NS) {
       'Control',
       PORTS.CONTROL,
       PORTS[2],
-      ns.peek(PORTS.CONTROL) // TODO: Add cache primary
+      // ns.peek(PORTS.CONTROL) // TODO: Add cache primary
+      `Control: ${control?.ticks} | ${control?.serverTargets.length} | ${control?.serverFocus.length}`
     );
     ns.printf(
       portsHeader,

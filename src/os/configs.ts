@@ -47,7 +47,7 @@ export const CONFIGS: any = {
     buffer: 1000, // Time in ms between scripts
     delay: 3000, // Delay in ms between batches
     batches: 128, // Batch 128 hack, weak, grow, weak
-    targets: 25, // Only work on 25 servers
+    targets: 5, // Only work on 25 servers
   },
 };
 
@@ -82,6 +82,7 @@ export const TIME: any = {};
   TIME.RUNNING = 1 * 1000; // 1 second checking pids
   TIME.CLOCK = 60 * 1000; // 1 min ticks
   TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
+  TIME.CONTROL = 1 * 1000; // 1 second updates (MINIMUM TIME FOR GAME)
   TIME.PLAYER = 1 * 1000; // 1 second updates
   TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
   TIME.SLEEVES = 2 * 1000; // 2 second updates
@@ -116,6 +117,7 @@ export const PORTS: any = {};
 
 export const CACHE: any = {};
 (function () {
+  CACHE.CONTROL = `${PATHS.CACHE}/cacheControl.js`;
   CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
   CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
   CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
