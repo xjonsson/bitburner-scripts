@@ -8,6 +8,7 @@ import { PlayerCache } from '/os/modules/Cache';
 // import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
 // import { serversData } from '/os/data/servers';
 import { Server, ServerInfo } from '/os/modules/Server';
+import { reclaimServer } from '/os/modules/Reclaim';
 import { Scan } from '/os/utils/scan';
 /* eslint-enable */
 
@@ -22,7 +23,6 @@ export class Control {
     money: number;
   };
   isLevelUp: boolean; // Rescan servers on levelup
-  isProgramUp: boolean; // Rehack and rescan servers on level
   isShopPrograms: boolean; // Buy until we have all programs
   isShopHacknet: boolean; // Buy until we have maxed out
   isShopHosting: boolean; // Buy until we have maxed out
@@ -51,7 +51,7 @@ export class Control {
       money: p?.money || 0,
     };
     this.isLevelUp = past?.isLevelUp || false;
-    this.isProgramUp = past?.isProgramUp || false;
+    // this.isProgramUp = past?.isProgramUp || false;
     this.isShopPrograms = past?.isShopPrograms || true;
     this.isShopHacknet = past?.isShopHacknet || true;
     this.isShopHosting = past?.isShopHosting || true;
@@ -65,7 +65,7 @@ export class Control {
     if (past?.player) {
       if (this.player.level > past.player.level) this.isLevelUp = true;
       if (this.player.challenge > past.player.challenge) {
-        this.isProgramUp = true;
+        this.isLevelUp = true;
       }
     }
 
@@ -73,6 +73,7 @@ export class Control {
     if (this.isLevelUp) {
       this.updateServers(ns);
       this.updateFocus(ns);
+      // this.updateReclaim(ns);
 
       this.isLevelUp = false;
     }
@@ -91,7 +92,7 @@ export class Control {
     this.serverReclaim = [];
     this.serverBackdoor = [];
     this.serverTargets = [];
-    const servers = ServerInfo.all(ns).forEach((s: Server) => {
+    const servers = ServerInfo.all(ns).forEach(async (s: Server) => {
       // ******** NODE LOGIC (Servers with RAM)
       if (s.isNode && !s.isHome) this.serverNode.push(s.hostname);
 
@@ -102,7 +103,10 @@ export class Control {
         !s.isServer &&
         s.challenge <= this.player.challenge
       ) {
-        this.serverReclaim.push(s.hostname);
+        // this.serverReclaim.push(s.hostname); // FIXME:
+        const result = reclaimServer(ns, s.hostname);
+        if (result && s.isBot) this.serverNode.push(s.hostname);
+        if (!result) this.serverReclaim.push(s.hostname);
       }
 
       // ******** BACKDOOR LOGIC
@@ -146,6 +150,16 @@ export class Control {
       this.serverFocus.push('n00dles');
     }
   }
+
+  // ******** Attempt reclaims and clean list
+  // updateReclaim(ns: NS) {
+  //   while (this.serverReclaim.length > 0) {
+  //     const s = this.serverReclaim.shift();
+  //     const result = reclaimServer(ns, s as string);
+  //     if (result) this.serverNode.push(s);
+  //     ns.asleep(1000);
+  //   }
+  // }
 
   // playerActions(): any {
   //   if (this.player && this.past?.player) {

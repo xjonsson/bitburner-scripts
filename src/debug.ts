@@ -12,23 +12,22 @@ export async function main(ns: NS) {
   ns.tail();
   ns.clearLog();
 
-  // const p = PlayerCache.read(ns, 'player');
-  // // const s = ServerInfo.list(ns);
-  // // ns.print(s);
-  // const servers = ServerInfo.all(ns);
-  // servers.forEach((s: Server) => {
-  //   ns.print(`[Server] ${s.hostname} | ${s.level} | ${s.distance.message}`);
-  // });
+  // NOTE: ONETIME CODE
+  // const sample = ControlCache.read(ns, 'control').serverReclaim;
+  // ns.print(sample.length);
+  // ns.print(sample);
 
   // NOTE: DOES`THE LOOP
   while (true) {
-    const c = ControlCache.read(ns, 'control');
-    // ns.clearLog();
-    ns.print(c); // FIXME: Plane work
-    // ns.print(
-    //   `[Past] ${c?.past?.player.level} [Now] ${c?.player.level} [Action] ${c?.player?.action?.length}`
-    // );
-    // ns.print(`[Action] ${c?.player.action}`);
+    // const c = ControlCache.read(ns, 'control');
+    // ns.print(c); // FIXME: Plane work
+    const sample = ControlCache.read(ns, 'control').serverReclaim;
+    ns.print(sample.length);
+    ns.print(sample);
+
+    while (sample.length > 0) {
+      ns.print(`We would nuke: ${sample.shift()}`);
+    }
 
     await ns.asleep(1000);
   }
