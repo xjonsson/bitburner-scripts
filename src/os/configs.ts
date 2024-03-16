@@ -48,6 +48,7 @@ export const CONFIGS: any = {
     delay: 3000, // Delay in ms between batches
     batches: 128, // Batch 128 hack, weak, grow, weak
     targets: 5, // Only work on 25 servers
+    distance: 30, // How much about 50% of player level we will target
   },
 };
 

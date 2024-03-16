@@ -20,14 +20,16 @@ export async function main(ns: NS) {
   //   ns.print(`[Server] ${s.hostname} | ${s.level} | ${s.distance.message}`);
   // });
 
+  // NOTE: DOES`THE LOOP
   while (true) {
     const c = ControlCache.read(ns, 'control');
     // ns.clearLog();
-    ns.print(c);
+    ns.print(c); // FIXME: Plane work
     // ns.print(
     //   `[Past] ${c?.past?.player.level} [Now] ${c?.player.level} [Action] ${c?.player?.action?.length}`
     // );
     // ns.print(`[Action] ${c?.player.action}`);
+
     await ns.asleep(1000);
   }
 }
