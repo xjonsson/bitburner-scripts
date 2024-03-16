@@ -43,7 +43,8 @@ export async function main(ns: NS) {
       PORTS.CONTROL,
       PORTS[2],
       // ns.peek(PORTS.CONTROL) // TODO: Add cache primary
-      `Control: ${control?.ticks} | ${control?.serverTargets.length} | ${control?.serverFocus.length}`
+      // `Control: ${control?.ticks} | ${control?.serverTargets.length} | ${control?.serverFocus.length}`
+      `🖲️${control?.ticks} 🤖${control?.serverNode.length} 👾${control?.serverReclaim.length} 🚪${control?.serverBackdoor.length} 💰${control?.serverTargets.length} 💎${control?.serverFocus.length}`
     );
     ns.printf(
       portsHeader,

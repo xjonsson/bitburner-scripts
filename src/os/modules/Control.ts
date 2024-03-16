@@ -134,7 +134,6 @@ export class Control {
       this.serverTargets
         .filter((s: any) => s?.level <= this.player.level)
         .sort((a: any, b: any) => a.level - b.level)
-        // .forEach((s) => this.serverFocus.push(s));
         .forEach((s: any) => {
           if (this.serverFocus.length < CONFIGS.hacking.targets) {
             this.serverFocus.push(s.name);
@@ -142,7 +141,7 @@ export class Control {
             this.serverFocus.push(s.name);
             this.serverFocus.shift();
           }
-        }
+        });
     } else {
       this.serverFocus.push('n00dles');
     }

@@ -9,6 +9,9 @@ export const main = async (ns: NS) => {
   control.serverNode.forEach(async (hostname: string) => {
     await ServersCache.update(ns, ServerInfo.details(ns, hostname));
   });
+  control.serverFocus.forEach(async (hostname: string) => {
+    await ServersCache.update(ns, ServerInfo.details(ns, hostname));
+  });
 
   // const servers = ServerInfo.all(ns);
   // for (const server of servers) {
