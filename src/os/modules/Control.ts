@@ -15,12 +15,15 @@ import { Scan } from '/os/utils/scan';
 export class Control {
   id: string;
   status: any;
+  actions: any;
   ticks: any;
   player: {
     // action: any;
     level: number;
+    programs: any;
     challenge: number;
     money: number;
+    home: number;
   };
   isLevelUp: boolean; // Rescan servers on levelup
   isShopPrograms: boolean; // Buy until we have all programs
@@ -43,12 +46,15 @@ export class Control {
     // ******** Defaults
     this.id = 'control';
     // this.status = 'CHECK';
+    this.actions = [];
     this.ticks = past ? past.ticks + 1 : 0;
     this.player = {
       // action: [],
       level: p?.level || 0,
+      programs: p?.programs || 0,
       challenge: p?.challenge || 0,
       money: p?.money || 0,
+      home: p?.home || ns.getServer('home').maxRam,
     };
     this.isLevelUp = past?.isLevelUp || false;
     // this.isProgramUp = past?.isProgramUp || false;
@@ -83,6 +89,61 @@ export class Control {
     // ******** Details
 
     // ******** Classification
+
+    // ******** Game Logic
+    /**
+     * Milestone order is roughly:
+     * - Daemon Minimal             -> Develop a solid base from minimal resources
+     * - Daemon Fresh               -> Develop a solid base from some resources (post-Reset)
+     * - Daemon Default             -> Achieve long-term stability of resources
+     * - Daemon PrepareToReset      -> Maximize potential of upcoming reset
+     * - Daemon MeetDaedalus        -> We are under the number of required augmentations to join Daedalus
+     * - Daemon JoinDaedalus        -> We meet the number of required augmentations to join Daedalus
+     * - Daemon RedPill             -> We have Daedalus membership and can rush the Red Pill
+     * - Daemon Visible             -> We have taken the red pill and our only remaining goal is to backdoor the world daemon
+     */
+
+    if (this.isShopPrograms) {
+      if (this.player.programs.tor) {
+        if (!this.player.programs.ssh) {
+          this.actions.push('BUY_SSH');
+        }
+        if (!this.player.programs.ftp) {
+          this.actions.push('BUY_FTP');
+        }
+        if (!this.player.programs.smtp) {
+          this.actions.push('BUY_SMTP');
+        }
+        if (!this.player.programs.http) {
+          this.actions.push('BUY_HTTP');
+        }
+        if (!this.player.programs.sql) {
+          this.actions.push('BUY_SQL');
+        }
+        if (this.player.challenge >= 5) {
+          this.isShopPrograms = false;
+        }
+      } else {
+        this.actions.push('BUY_TOR');
+      }
+    }
+
+    // TODO: 1. If RAM < 256 use minimal (DaemonMinimal)
+    if (this.player.home < 256) {
+      this.actions.push('BUY_HOME_RAM');
+    }
+
+    // if (this.serverBackdoor.length > 0) {
+    //   this.actions.push(`BACKDOOR_${this.serverBackdoor[0]}`);
+    // }
+
+    // Augs (DaemonPrepareToReset)
+    // TODO: 2. If Programs < 3 use Fresh (DaemonFresh)
+    // TODO: 3. If world daemon is visible hack it (DaemonVisible)
+    // TODO: 4. If faction daedalus available red pill (DaemonRedPill)
+    // TODO: 5. If hacking level and augments meet daedalus (DaemonJoinDaedalus)
+    // (DaemonMeetDaedalus)
+    // TODO: 6. Default (DaemonDefault)
   }
 
   // ******** Actions

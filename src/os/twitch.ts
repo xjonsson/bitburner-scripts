@@ -47,7 +47,7 @@ export async function main(ns: NS) {
   // ******** Initialize
 
   // Launch modules
-  // launch(ns, CORE.HACKNET); // FIXME:
+  launch(ns, CORE.HACKNET);
   updateControl(ns).catch(console.error);
   updatePlayer(ns).catch(console.error);
   // updateAugments(ns).catch(console.error);

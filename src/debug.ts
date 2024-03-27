@@ -21,13 +21,11 @@ export async function main(ns: NS) {
   while (true) {
     // const c = ControlCache.read(ns, 'control');
     // ns.print(c); // FIXME: Plane work
-    const sample = ControlCache.read(ns, 'control').serverReclaim;
+    // const sample = ControlCache.read(ns, 'control').serverReclaim;
+    // const sample = ControlCache.read(ns, 'control').serverFocus;
+    const sample = ControlCache.read(ns, 'control').actions;
     ns.print(sample.length);
     ns.print(sample);
-
-    while (sample.length > 0) {
-      ns.print(`We would nuke: ${sample.shift()}`);
-    }
 
     await ns.asleep(1000);
   }
