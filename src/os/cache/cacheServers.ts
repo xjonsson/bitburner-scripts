@@ -4,6 +4,8 @@ import { ServerInfo } from '/os/modules/Server';
 import { ControlCache, ServersCache } from '/os/modules/Cache';
 /* eslint-enable */
 
+// NOTE: DELETE ME
+
 export const main = async (ns: NS) => {
   const control = ControlCache.read(ns, 'control');
   if (control) {

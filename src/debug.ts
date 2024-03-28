@@ -1,10 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { PlayerCache } from '/os/modules/Cache';
-import { Server, ServerInfo } from '/os/modules/Server';
-import { ControlCache } from '/os/modules/Cache';
-import { ControlInfo } from '/os/modules/Control';
-// import { serversData } from '/os/data/servers';
+import Player from '/os/modules/Player';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -20,20 +16,14 @@ export async function main(ns: NS) {
   // NOTE: DOES`THE LOOP
   while (true) {
     ns.clearLog();
-    // const c = ControlCache.read(ns, 'control');
-    // ns.print(c); // FIXME: Plane work
-    // const sample = ControlCache.read(ns, 'control').serverReclaim;
-    // const sample = ControlCache.read(ns, 'control').serverFocus;
-    const stage = ControlCache.read(ns, 'control')?.stage;
-    const player = PlayerCache.read(ns, 'player');
-    const phase = ControlCache.read(ns, 'control')?.phase;
-    const sample = ControlCache.read(ns, 'control')?.actions;
-    ns.print(sample?.length);
-    ns.print(sample);
-    ns.print(`Milestone ${phase}`);
+    // const stage = ControlCache.read(ns, 'control')?.stage;
+    // const player = PlayerCache.read(ns, 'player');
+    // const phase = ControlCache.read(ns, 'control')?.phase;
+    // const sample = ControlCache.read(ns, 'control')?.actions;
+    const p = new Player(ns, 'player');
     ns.print('===== DEBUG =====');
-    ns.print(player?.faction.factions);
-    ns.print(stage);
+    // ns.print(ns.peek(1));
+    ns.print(p.level);
 
     await ns.asleep(1000);
   }

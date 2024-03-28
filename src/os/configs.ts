@@ -54,46 +54,37 @@ export const CONFIGS: any = {
 
 export const PATHS: any = {
   OS: '/os',
-  DATA: '/os/data',
+  // DATA: '/os/data',
   DEPLOY: '/os/deploy',
-  MODULES: '/os/modules',
+  // MODULES: '/os/modules',
   CACHE: '/os/cache',
 };
 
 export const CORE: any = {};
 (function () {
   // System
-  CORE.BITNODE = 'bitnode.txt'; // "/Temp/BitNode.txt"; // TODO: Create bitnode
-  CORE.CLOCK = `${PATHS.OS}/clock.js`; // "/runtimes/keepalive.js"; // TODO: Create clock
-  CORE.LAUNCHER = `${PATHS.OS}/launcher.js`; // "/runtimes/launcher.js"; // TODO: Create launcher
-  CORE.MINIMAL = `${PATHS.OS}/minimal.js`; // "/runtimes/tucson.js"; // TODO: Create minimal
-  CORE.TWITCH = `${PATHS.OS}/twitch.js`; // "/runtimes/phoenix.js"; // TODO: Create full
-
-  // Managers
-  CORE.HACKNET = `${PATHS.MODULES}/hacknet.js`; // "/sys/hacknet.js"; // TODO: Create hacknet
-  CORE.HOSTING = `${PATHS.MODULES}/hosting.js`; // "/sys/manage_servers.js"; // TODO: Create hosting
-  CORE.MARKET = `${PATHS.MODULES}/stockmarket.js`; // "/sys/stockmaster.js"; // TODO: Create stockmarkets
-  CORE.MONITOR = `${PATHS.MODULES}/monitor.js`; // "/sys/monitor.js"; // TODO: Create monitor
-  CORE.CONTRACTS = `${PATHS.MODULES}/contracts.js`; // "/sys/fetch_and_solve_leetcode.js"; // TODO: Create contracts
+  CORE.LAUNCHER = `${PATHS.OS}/launcher.js`;
+  // CORE.MINIMAL = `${PATHS.OS}/minimal.js`;
+  CORE.TWITCH = `${PATHS.OS}/twitch.js`;
 })();
 
 export const TIME: any = {};
 (function () {
   TIME.LAUNCHING = 1 * 1000; // 1 second launch wait
   TIME.RUNNING = 1 * 1000; // 1 second checking pids
-  TIME.CLOCK = 60 * 1000; // 1 min ticks
-  TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
+  // TIME.CLOCK = 60 * 1000; // 1 min ticks
+  // TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
   TIME.CONTROL = 1 * 1000; // 1 second updates (MINIMUM TIME FOR GAME)
-  TIME.PLAYER = 1 * 1000; // 1 second updates
-  TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
-  TIME.SLEEVES = 2 * 1000; // 2 second updates
-  TIME.HACKNET = 3 * 1000; // 3 second updates
-  TIME.SERVERS = 10 * 1000; // 0.5 second updates
-  TIME.FACTIONS = 30 * 1000; // 30 second updates
-  TIME.CORPORATIONS = 20 * 1000; // 20 second updates
-  TIME.CRIMES = 2 * 1000; // 2 second updates
-  TIME.STOCKS = 1 * 1000; // 1 second updates
-  TIME.CONTRACTS = 90 * 1000; // 1.5 min updates
+  // TIME.PLAYER = 1 * 1000; // 1 second updates
+  // TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
+  // TIME.SLEEVES = 2 * 1000; // 2 second updates
+  // TIME.HACKNET = 3 * 1000; // 3 second updates
+  // TIME.SERVERS = 10 * 1000; // 0.5 second updates
+  // TIME.FACTIONS = 30 * 1000; // 30 second updates
+  // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
+  // TIME.CRIMES = 2 * 1000; // 2 second updates
+  // TIME.STOCKS = 1 * 1000; // 1 second updates
+  // TIME.CONTRACTS = 90 * 1000; // 1.5 min updates
 })();
 
 // export const MINISAVE: any = {
@@ -102,33 +93,32 @@ export const TIME: any = {};
 
 export const PORTS: any = {};
 (function () {
-  PORTS[(PORTS.SYSTEM = 1)] = 'SYSTEM'; // TODO: Add clock
-  PORTS[(PORTS.CONTROL = 2)] = 'CONTROL'; // TODO: Add control flow
-  PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
-  PORTS[(PORTS.PLAYER = 4)] = 'PLAYER';
-  PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
-  PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
-  PORTS[(PORTS.HACKNET = 7)] = 'HACKNET'; // TODO: Add hacknet
-  PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
-  PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
-  PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
-  PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
-  PORTS[(PORTS.STOCKS = 12)] = 'STOCKS'; // TODO: Add stocks
+  PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
+  // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
+  // PORTS[(PORTS.PLAYER = 4)] = 'PLAYER';
+  // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
+  // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
+  // PORTS[(PORTS.HACKNET = 7)] = 'HACKNET'; // TODO: Add hacknet
+  // PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
+  // PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
+  // PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
+  // PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
+  // PORTS[(PORTS.STOCKS = 12)] = 'STOCKS'; // TODO: Add stocks
 })();
 
 export const CACHE: any = {};
 (function () {
   CACHE.CONTROL = `${PATHS.CACHE}/cacheControl.js`;
-  CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
-  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
-  CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
-  CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
-  CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache
-  CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`;
-  CACHE.FACTIONS = `${PATHS.CACHE}/cacheFactions.js`; // TODO: Add factions cache
-  CACHE.CORPORATIONS = `${PATHS.CACHE}/cacheCorporations.js`; // TODO: Add corporations cache
-  CACHE.CRIMES = `${PATHS.CACHE}/cacheCrimes.js`; // TODO: Add crimes cache
-  CACHE.STOCKS = `${PATHS.CACHE}/cacheStocks.js`; // TODO: Add stocks cache
+  // CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
+  // CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
+  // CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
+  // CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
+  // CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache
+  // CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`;
+  // CACHE.FACTIONS = `${PATHS.CACHE}/cacheFactions.js`; // TODO: Add factions cache
+  // CACHE.CORPORATIONS = `${PATHS.CACHE}/cacheCorporations.js`; // TODO: Add corporations cache
+  // CACHE.CRIMES = `${PATHS.CACHE}/cacheCrimes.js`; // TODO: Add crimes cache
+  // CACHE.STOCKS = `${PATHS.CACHE}/cacheStocks.js`; // TODO: Add stocks cache
 })();
 
 export const DEPLOY: any = {
