@@ -48,7 +48,7 @@ export const CONFIGS: any = {
     delay: 3000, // Delay in ms between batches
     batches: 128, // Batch 128 hack, weak, grow, weak
     targets: 5, // Only work on 25 servers
-    distance: 30, // How much about 50% of player level we will target
+    distance: 15, // How much above 50% of player level we will target
   },
 };
 
@@ -143,6 +143,66 @@ export const DEPLOY: any = {
   xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
   xShareRam: 4.2, // Rep Share RAM required
 };
+
+export const STAGE: any = {};
+(function () {
+  STAGE[0] = {
+    done: false,
+    challenge: 1,
+    level: 55,
+    host: 'CSEC',
+    faction: 'CyberSec',
+    proof: 'csec-test.msg',
+  };
+  STAGE[1] = {
+    done: false,
+    challenge: 0,
+    level: 80,
+    host: '',
+    faction: 'Netburners',
+    proof: '',
+  };
+  STAGE[2] = {
+    done: false,
+    challenge: 2,
+    level: 204,
+    host: 'avmnite-02h',
+    faction: 'NiteSec',
+    proof: 'nitesec-test.msg',
+  };
+  STAGE[3] = {
+    done: false,
+    challenge: 3,
+    level: 362,
+    host: 'I.I.I.I',
+    faction: 'TheBlackHand',
+    proof: 'TBD',
+  };
+  STAGE[4] = {
+    done: false,
+    challenge: 4,
+    level: 524,
+    host: 'run4theh111z',
+    faction: 'BitRunners',
+    proof: 'TBD',
+  };
+  STAGE[5] = {
+    done: false,
+    challenge: 5,
+    level: 925,
+    host: 'The-Cave',
+    faction: 'Daedalus',
+    proof: 'TBD',
+  };
+  STAGE[6] = {
+    done: false,
+    challenge: 5,
+    level: 1000,
+    host: 'w0r1d_d43m0n',
+    faction: 'Daedalus',
+    proof: 'TBD',
+  };
+})();
 
 /* 
   Server Target RAM
