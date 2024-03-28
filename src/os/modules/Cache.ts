@@ -52,3 +52,19 @@ export const ControlCache = {
     return Cache.delete(ns, PORTS.CONTROL, id);
   },
 };
+
+// ******** PLAYER CACHE ********
+export const PlayerCache = {
+  all(ns: NS) {
+    return Cache.all(ns, PORTS.PLAYER);
+  },
+  read(ns: NS, id: string) {
+    return Cache.read(ns, PORTS.PLAYER, id);
+  },
+  async update(ns: NS, obj: any) {
+    return Cache.update(ns, PORTS.PLAYER, obj);
+  },
+  async delete(ns: NS, id: string) {
+    return Cache.delete(ns, PORTS.PLAYER, id);
+  },
+};

@@ -75,7 +75,7 @@ export const TIME: any = {};
   // TIME.CLOCK = 60 * 1000; // 1 min ticks
   // TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
   TIME.CONTROL = 1 * 1000; // 1 second updates (MINIMUM TIME FOR GAME)
-  // TIME.PLAYER = 1 * 1000; // 1 second updates
+  TIME.PLAYER = 60 * 1000; // 1 second updates
   // TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
   // TIME.SLEEVES = 2 * 1000; // 2 second updates
   // TIME.HACKNET = 3 * 1000; // 3 second updates
@@ -94,8 +94,8 @@ export const TIME: any = {};
 export const PORTS: any = {};
 (function () {
   PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
+  PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
-  // PORTS[(PORTS.PLAYER = 4)] = 'PLAYER';
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
   // PORTS[(PORTS.HACKNET = 7)] = 'HACKNET'; // TODO: Add hacknet
@@ -109,8 +109,8 @@ export const PORTS: any = {};
 export const CACHE: any = {};
 (function () {
   CACHE.CONTROL = `${PATHS.CACHE}/cacheControl.js`;
+  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
   // CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
-  // CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
   // CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
   // CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
   // CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache

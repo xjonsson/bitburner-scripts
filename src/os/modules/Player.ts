@@ -1,103 +1,155 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { handleDB } from '/os/cache/db';
 /* eslint-enable */
 
-export default class Player {
-  ns: NS;
-  _id: string;
-
-  constructor(ns: NS, id: string) {
-    // super();
-    this.ns = ns;
-    this._id = id;
-  }
-
-  get id(): string {
-    return this._id;
-  }
-
-  get data(): any {
-    return this.ns.getPlayer();
-  }
-
-  /* eslint-disable */
-  get updatedAt(): any {
-    return new Date().valueOf();
-  }
-  /* eslint-enable */
-
-  get resetData(): any {
-    return this.ns.getResetInfo();
-  }
-
-  get sourcefiles(): any {
-    return this.resetData.ownedSF;
-  }
-
-  get bitnode(): any {
-    return this.resetData.currentNode;
-  }
-
-  get augments(): any {
-    return this.resetData.ownedAugs;
-  }
-
-  get money(): number {
-    return this.data.money;
-  }
-
-  get level(): number {
-    return this.data.skills.hacking;
-  }
-
-  get hp(): any {
-    return { now: this.data.hp.current, max: this.data.hp.max };
-  }
-
-  get city(): any {
-    return this.data.city;
-  }
-
-  get location(): any {
-    return this.data.location;
-  }
-
-  get programs(): any {
-    return {
-      tor: this.ns.hasTorRouter(),
-      ssh: this.ns.fileExists('BruteSSH.exe', 'home'),
-      ftp: this.ns.fileExists('FTPCrack.exe', 'home'),
-      smtp: this.ns.fileExists('relaySMTP.exe', 'home'),
-      http: this.ns.fileExists('HTTPWorm.exe', 'home'),
-      sql: this.ns.fileExists('SQLInject.exe', 'home'),
+export class Player {
+  id: string;
+  data: any;
+  resetData: any;
+  sourcefiles: any;
+  augments: any;
+  hp: { now: number; max: number };
+  programs: any;
+  challenge: number;
+  bitnode: number;
+  city: string;
+  location: string;
+  playtime: { total: number; aug: number; node: number };
+  money: number;
+  level: number;
+  hack: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+      chance: number;
+      grow: number;
+      speed: number;
+      money: number;
     };
-  }
+  };
+  hacknet: {
+    production: number;
+    node: number;
+    level: number;
+    ram: number;
+    cores: number;
+  };
+  int: {
+    level: number;
+    exp: number;
+  };
+  cha: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  str: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  def: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  dex: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  agi: {
+    level: number;
+    exp: number;
+    mults: {
+      level: number;
+      exp: number;
+    };
+  };
+  work: {
+    jobs: any;
+    mults: {
+      money: number;
+    };
+  };
+  faction: {
+    factions: any;
+    mults: {
+      rep: number;
+    };
+  };
+  company: {
+    mults: {
+      rep: number;
+    };
+  };
+  crime: {
+    kills: number;
+    mults: {
+      chance: number;
+      money: number;
+    };
+  };
+  bladeburner: {
+    mults: {
+      staminaMax: number;
+      staminaGain: number;
+      analysis: number;
+      chance: number;
+    };
+  };
+  entropy: number;
 
-  get challenge(): number {
-    return Object.keys(this.programs)
+  constructor(ns: NS) {
+    this.id = 'player';
+    this.data = ns.getPlayer();
+    this.resetData = ns.getResetInfo();
+    this.sourcefiles = this.resetData.ownedSF;
+    this.augments = this.resetData.ownedAugs;
+    this.bitnode = this.resetData.currentNode;
+    this.money = this.data.money;
+    this.level = this.data.skills.hacking;
+    this.hp = {
+      now: this.data.hp.current,
+      max: this.data.hp.max,
+    };
+
+    this.programs = {
+      tor: ns.hasTorRouter(),
+      ssh: ns.fileExists('BruteSSH.exe', 'home'),
+      ftp: ns.fileExists('FTPCrack.exe', 'home'),
+      smtp: ns.fileExists('relaySMTP.exe', 'home'),
+      http: ns.fileExists('HTTPWorm.exe', 'home'),
+      sql: ns.fileExists('SQLInject.exe', 'home'),
+    };
+
+    this.challenge = Object.keys(this.programs)
       .filter((prog) => this.programs[prog] && prog !== 'tor')
       .reduce((total) => total + 1, 0);
-  }
 
-  get playtime(): any {
-    return {
+    this.city = this.data.city;
+    this.location = this.data.location;
+    this.playtime = {
       total: this.data.totalPlaytime,
       aug: this.resetData.lastAugReset,
       node: this.resetData.lastNodeReset,
     };
-  }
 
-  get levelRange(): any {
-    return {
-      min: this.level * 0.25 < 1 ? 1 : Math.ceil(this.level * 0.25),
-      focus: this.level * 0.5 < 1 ? 1 : Math.ceil(this.level * 0.5),
-      max: this.level * 0.75 < 1 ? 1 : Math.ceil(this.level * 0.75),
-    };
-  }
-
-  get hack(): any {
-    return {
+    this.hack = {
       level: this.data.skills.hacking,
       exp: this.data.exp.hacking,
       mults: {
@@ -109,27 +161,21 @@ export default class Player {
         money: this.data.mults.hacking_money,
       },
     };
-  }
 
-  get hacknet(): any {
-    return {
+    this.hacknet = {
       production: this.data.mults.hacknet_node_money,
       node: this.data.mults.hacknet_node_purchase_cost,
       level: this.data.mults.hacknet_node_level_cost,
       ram: this.data.mults.hacknet_node_ram_cost,
       cores: this.data.mults.hacknet_node_core_cost,
     };
-  }
 
-  get int(): any {
-    return {
+    this.int = {
       level: this.data.skills.intelligence,
       exp: this.data.exp.intelligence,
     };
-  }
 
-  get cha(): any {
-    return {
+    this.cha = {
       level: this.data.skills.charisma,
       exp: this.data.exp.charisma,
       mults: {
@@ -137,10 +183,8 @@ export default class Player {
         exp: this.data.mults.charisma_exp,
       },
     };
-  }
 
-  get str(): any {
-    return {
+    this.str = {
       level: this.data.skills.strength,
       exp: this.data.exp.strength,
       mults: {
@@ -148,10 +192,8 @@ export default class Player {
         exp: this.data.mults.strength_exp,
       },
     };
-  }
 
-  get def(): any {
-    return {
+    this.def = {
       level: this.data.skills.defense,
       exp: this.data.exp.defense,
       mults: {
@@ -159,10 +201,8 @@ export default class Player {
         exp: this.data.mults.defense_exp,
       },
     };
-  }
 
-  get dex(): any {
-    return {
+    this.dex = {
       level: this.data.skills.dexterity,
       exp: this.data.exp.dexterity,
       mults: {
@@ -170,10 +210,8 @@ export default class Player {
         exp: this.data.mults.dexterity_exp,
       },
     };
-  }
 
-  get agi(): any {
-    return {
+    this.agi = {
       level: this.data.skills.agility,
       exp: this.data.exp.agility,
       mults: {
@@ -181,46 +219,36 @@ export default class Player {
         exp: this.data.mults.agility_exp,
       },
     };
-  }
 
-  get work(): any {
-    return {
+    this.work = {
       jobs: this.data.jobs,
       mults: {
         money: this.data.mults.work_money,
       },
     };
-  }
 
-  get faction(): any {
-    return {
+    this.faction = {
       factions: this.data.factions,
       mults: {
         rep: this.data.mults.faction_rep,
       },
     };
-  }
 
-  get company(): any {
-    return {
+    this.company = {
       mults: {
         rep: this.data.mults.company_rep,
       },
     };
-  }
 
-  get crime(): any {
-    return {
+    this.crime = {
       kills: this.data.numPeopleKilled,
       mults: {
         chance: this.data.mults.crime_success,
         money: this.data.mults.crime_money,
       },
     };
-  }
 
-  get bladeburner(): any {
-    return {
+    this.bladeburner = {
       mults: {
         staminaMax: this.data.mults.bladeburner_max_stamina,
         staminaGain: this.data.mults.bladeburner_stamina_gain,
@@ -228,58 +256,13 @@ export default class Player {
         chance: this.data.mults.bladeburner_success_chance,
       },
     };
-  }
 
-  get entropy(): any {
-    return this.data.entropy;
-  }
-
-  listGetters(instance: any, properties = new Set()) {
-    const getters = Object.entries(
-      Object.getOwnPropertyDescriptors(Reflect.getPrototypeOf(instance))
-    )
-      .filter((e) => typeof e[1].get === 'function' && e[0] !== '__proto__')
-      .map((e) => e[0]);
-
-    getters.forEach((g) => {
-      properties.add(g);
-      return this.listGetters(Object.getPrototypeOf(instance), properties);
-    });
-    return properties;
-  }
-
-  async createEventListener(fieldSet: any) {
-    const embeddedObject = (obj: any, field: any) => obj[field];
-
-    const splitFields = fieldSet.split('.');
-    let oldValue;
-    while (true) {
-      let subObj = this;
-      for (const field of splitFields) {
-        subObj = embeddedObject(subObj, field);
-      }
-      if (oldValue !== subObj) {
-        oldValue = subObj;
-        this.updateCache(false);
-      }
-      await this.ns.asleep(10);
-    }
-  }
-
-  async updateCache(repeat = true, kv = new Map()) {
-    do {
-      const db = await handleDB();
-      const old = (await db.get('player', this.id)) || {};
-      const getters = this.listGetters(this);
-      getters.forEach((g) => {
-        old[g] = this[g];
-      });
-      kv.forEach((v, k) => (old[k] = v));
-
-      await db.put('player', old);
-      if (repeat) {
-        (await this.ns.asleep(Math.random() * 10000)) + 55000;
-      }
-    } while (repeat);
+    this.entropy = this.data.entropy;
   }
 }
+
+export const PlayerInfo = {
+  details(ns: NS) {
+    return new Player(ns);
+  },
+};

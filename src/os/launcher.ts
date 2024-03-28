@@ -21,10 +21,7 @@ export async function main(ns: NS) {
   }
 
   // Prepare the cache before running
-  for (const cache of [
-    CACHE.CONTROL,
-    // CACHE.PLAYER,
-  ]) {
+  for (const cache of [CACHE.CONTROL, CACHE.PLAYER]) {
     await launch(ns, cache);
   }
 
