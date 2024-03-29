@@ -1,4 +1,5 @@
 export const CONFIGS: any = {
+  ramReserve: 8, // 8GB reserved ram
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
@@ -19,14 +20,11 @@ export const CONFIGS: any = {
     autolink: 1e6, // 1 Million (1000000)
     formulas: 5e9, // 5 Billion (5000000000)
   },
-  ramReserve: {
-    home: 4, // However much you want to keep available for other scripts
-  },
-  ramRatio: {
-    work: 0.6, // 60% of ram will be used for work
-    shares: 0.3, // 30% of ram will be used for shares
-    savings: 0.1, // 20% of ram will be used as reserve
-  },
+  // ramRatio: {
+  //   work: 0.6, // 60% of ram will be used for work
+  //   shares: 0.3, // 30% of ram will be used for shares
+  //   savings: 0.1, // 20% of ram will be used as reserve
+  // },
   hacknet: {
     hacknetBreakevenTime: 2 * 60 * 60, // 2 hours in seconds
     hacknetTargetCount: 16, // 20 Soft Max (Real Max Infinity)

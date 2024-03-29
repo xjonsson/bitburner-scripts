@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { ControlCache, PlayerCache } from '/os/modules/Cache';
-import { updateHacknet } from './os/modules/Hacknets';
+import { ServerInfo } from '/os/modules/Server';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -21,11 +21,18 @@ export async function main(ns: NS) {
   // NOTE: DOES`THE LOOP
   while (true) {
     ns.clearLog();
-    const control = ControlCache.read(ns, 'control');
+    // const control = ControlCache.read(ns, 'control');
     // const player = PlayerCache.read(ns, 'player');
+    const hostnames = ServerInfo.list(ns);
+    const servers = hostnames.map((h: string) => {
+      const s = ServerInfo.details(ns, h);
+      return s;
+    });
+    const nodes = servers.filter((s) => s.isNode);
     ns.print('===== DEBUG =====');
+    ns.print(`Nodes: ${nodes.length}`);
+    nodes.forEach((s) => ns.print(s.hostname));
     // ns.print(ns.peek(2));
-    ns.print(control);
 
     await ns.asleep(1000);
   }
