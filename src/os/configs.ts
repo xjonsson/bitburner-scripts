@@ -1,14 +1,10 @@
 export const CONFIGS: any = {
-  moneyReserve: {
-    base: 0, // 100000 * 1000000, // 1000000 1 Million
-    hacknet: 1 * 1e6, // 1 Million (Min before hacknet purchases)
-    servers: 1 * 1e6, // 1 Million (Min before server purchases)
-  },
+  moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
-    hacknet: 0.5, // 50% of money will be used on hacknet
-    servers: 0.3, // 50% of money will be used on servers
-    savings: 0.2, // 20% of money will be used for savings
+    hacknetMoneyRatio: 0.5, // 50% of money will be used on hacknet
+    hostingMoneyRatio: 0.3, // 30% of money will be used on servers
+    savingsMoneyRatio: 0.2, // 20% of money will be used for savings
   },
   shoppingPrices: {
     tor: 200e3, // 200 K
@@ -31,12 +27,12 @@ export const CONFIGS: any = {
     shares: 0.3, // 30% of ram will be used for shares
     savings: 0.1, // 20% of ram will be used as reserve
   },
-  hacknetTarget: {
-    breakeven: 2 * 60 * 60, // 2 hours in seconds
-    countTarget: 20, // 20 Soft Max (Real Max Infinity)
-    levelTarget: 200, // 200 (Real Max)
-    ramTarget: 64, // 64 (Real Max)
-    coresTarget: 16, // 16 (Real Max)
+  hacknet: {
+    hacknetBreakevenTime: 2 * 60 * 60, // 2 hours in seconds
+    hacknetTargetCount: 16, // 20 Soft Max (Real Max Infinity)
+    hacknetTargetLevel: 200, // 200, // 200 (Real Max)
+    hacknetTargetRam: 64, // 64, // 64 (Real Max)
+    hacknetTargetCores: 16, // 16, // 16 (Real Max)
   },
   serversTarget: {
     count: 25, // 25 (Real Max)
@@ -56,7 +52,7 @@ export const PATHS: any = {
   OS: '/os',
   // DATA: '/os/data',
   DEPLOY: '/os/deploy',
-  // MODULES: '/os/modules',
+  MODULES: '/os/modules',
   CACHE: '/os/cache',
 };
 
@@ -66,6 +62,9 @@ export const CORE: any = {};
   CORE.LAUNCHER = `${PATHS.OS}/launcher.js`;
   // CORE.MINIMAL = `${PATHS.OS}/minimal.js`;
   CORE.TWITCH = `${PATHS.OS}/twitch.js`;
+
+  // Modules
+  CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
 })();
 
 export const TIME: any = {};
@@ -78,7 +77,7 @@ export const TIME: any = {};
   TIME.PLAYER = 60 * 1000; // 1 second updates
   // TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
   // TIME.SLEEVES = 2 * 1000; // 2 second updates
-  // TIME.HACKNET = 3 * 1000; // 3 second updates
+  TIME.HACKNET = 3 * 1000; // 3 second updates
   // TIME.SERVERS = 10 * 1000; // 0.5 second updates
   // TIME.FACTIONS = 30 * 1000; // 30 second updates
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
@@ -142,7 +141,7 @@ export const STAGE: any = {};
     level: 55,
     host: 'CSEC',
     faction: 'CyberSec',
-    proof: 'csec-test.msg',
+    proof: 'csec-test.msg', // Invalid
   };
   STAGE[1] = {
     done: false,

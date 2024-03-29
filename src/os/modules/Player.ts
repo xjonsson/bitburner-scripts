@@ -5,6 +5,7 @@ import { NS } from '@ns';
 export class Player {
   id: string;
   data: any;
+  // updatedAt: number;
   resetData: any;
   sourcefiles: any;
   augments: any;
@@ -117,6 +118,7 @@ export class Player {
   constructor(ns: NS) {
     this.id = 'player';
     this.data = ns.getPlayer();
+    // this.updatedAt = performance.now();
     this.resetData = ns.getResetInfo();
     this.sourcefiles = this.resetData.ownedSF;
     this.augments = this.resetData.ownedAugs;

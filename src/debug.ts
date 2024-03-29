@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import Player from '/os/modules/Player';
+import { ControlCache, PlayerCache } from '/os/modules/Cache';
+import { updateHacknet } from './os/modules/Hacknets';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -20,14 +21,11 @@ export async function main(ns: NS) {
   // NOTE: DOES`THE LOOP
   while (true) {
     ns.clearLog();
-    // const stage = ControlCache.read(ns, 'control')?.stage;
+    const control = ControlCache.read(ns, 'control');
     // const player = PlayerCache.read(ns, 'player');
-    // const phase = ControlCache.read(ns, 'control')?.phase;
-    // const sample = ControlCache.read(ns, 'control')?.actions;
-    // const p = new Player(ns);
     ns.print('===== DEBUG =====');
     // ns.print(ns.peek(2));
-    // ns.print(p.money);
+    ns.print(control);
 
     await ns.asleep(1000);
   }
