@@ -25,10 +25,16 @@ Buy software
 alias exes="home;connect darkweb;buy BruteSSH.exe;buy FTPCrack.exe;buy relaySMTP.exe;buy HTTPWorm.exe;buy SQLInject.exe;buy ServerProfiler.exe;buy AutoLink.exe;buy DeepscanV1.exe;buy DeepscanV2.exe;home";
 ```
 
-Route and door
+Nuke server
 
 ```
-alias door="home;run /old/uRoute.js";
+alias nuke="run BruteSSH.exe;run FTPCrack.exe;run relaySMTP.exe;run HTTPWorm.exe;run SQLInject.exe;run NUKE.exe"
+```
+
+Route and door (host: string, door: boolean)
+
+```
+alias route="run os/modules/Route.js"
 ```
 
 ## Logic

@@ -31,6 +31,40 @@ export async function main(ns: NS) {
   //   return nodesTemp;
   // }
 
+  function getReserve() {
+    const stage = ControlCache.read(ns, 'control')?.stage;
+    switch (stage) {
+      case 1: {
+        return CONFIGS.shoppingPrices.tor;
+      }
+      case 2: {
+        return CONFIGS.shoppingPrices.ssh;
+      }
+      case 4: {
+        return CONFIGS.shoppingPrices.ftp;
+      }
+      case 6: {
+        return CONFIGS.shoppingPrices.smtp;
+      }
+      case 8: {
+        return CONFIGS.shoppingPrices.http;
+      }
+      case 10: {
+        return CONFIGS.shoppingPrices.sql;
+      }
+      default: {
+        return 0;
+      }
+    }
+  }
+
+  function getMoney() {
+    return (
+      (ns.getServerMoneyAvailable('home') - (moneyReserve + getReserve())) *
+      hostingMoneyRatio
+    );
+  }
+
   function updateShop() {
     const shop = [];
     const servers = ns.getPurchasedServers();
@@ -79,40 +113,6 @@ export async function main(ns: NS) {
       });
 
     return shop.sort((a, b) => a.cost - b.cost);
-  }
-
-  function getReserve() {
-    const stage = ControlCache.read(ns, 'control')?.stage;
-    switch (stage) {
-      case 1: {
-        return CONFIGS.shoppingPrices.tor;
-      }
-      case 2: {
-        return CONFIGS.shoppingPrices.ssh;
-      }
-      case 4: {
-        return CONFIGS.shoppingPrices.ftp;
-      }
-      case 6: {
-        return CONFIGS.shoppingPrices.smtp;
-      }
-      case 8: {
-        return CONFIGS.shoppingPrices.http;
-      }
-      case 10: {
-        return CONFIGS.shoppingPrices.sql;
-      }
-      default: {
-        return 0;
-      }
-    }
-  }
-
-  function getMoney() {
-    return (
-      (ns.getServerMoneyAvailable('home') - (moneyReserve + getReserve())) *
-      hostingMoneyRatio
-    );
   }
 
   // function buyServer(sCount: number, sRam: number) {

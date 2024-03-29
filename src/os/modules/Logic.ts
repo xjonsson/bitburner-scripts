@@ -4,6 +4,8 @@ import { CONFIGS } from '/os/configs';
 import { PlayerCache } from '/os/modules/Cache';
 /* eslint-enable */
 
+// TODO: Add faction and augments priorities
+
 export function osLogic(ns: NS, stage: number): any {
   const p = PlayerCache.read(ns, 'player');
   switch (stage) {

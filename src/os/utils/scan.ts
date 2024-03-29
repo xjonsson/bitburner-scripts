@@ -46,6 +46,10 @@ export const Scan = {
   },
   routeTerminal(ns: NS, target = '') {
     const { route } = scanner(ns, target);
-    return `connect ${route.join('; connect ')}; backdoor;`;
+    return `connect ${route.join('; connect ')};`;
   },
+  // routeTerminal(ns: NS, target = '') {
+  //   const { route } = scanner(ns, target);
+  //   return `connect ${route.join('; connect ')}; backdoor;`;
+  // },
 };

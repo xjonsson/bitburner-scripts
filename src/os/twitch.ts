@@ -21,11 +21,17 @@ const updatePlayer = async (ns: NS) => {
 };
 
 const updateHacknet = async (ns: NS) => {
-  await launch(ns, CORE.HACKNET);
+  if (!ns.isRunning(CORE.HACKNET, 'home')) {
+    await launch(ns, CORE.HACKNET);
+    await ns.asleep(TIME.HACKNET);
+  }
 };
 
 const updateHosting = async (ns: NS) => {
-  await launch(ns, CORE.HOSTING);
+  if (!ns.isRunning(CORE.HOSTING, 'home')) {
+    await launch(ns, CORE.HOSTING);
+    await ns.asleep(TIME.HOSTING);
+  }
 };
 
 export async function main(ns: NS) {
@@ -38,11 +44,10 @@ export async function main(ns: NS) {
   // ******** Initialize
 
   // Launch modules
-  // launch(ns, CORE.HACKNET);
   updateControl(ns).catch(console.error);
   updatePlayer(ns).catch(console.error);
-  updateHacknet(ns).catch(console.error);
-  updateHosting(ns).catch(console.error);
+  updateHacknet(ns).catch(console.error); // TODO: Improve timings
+  updateHosting(ns).catch(console.error); // TODO: Improve performance
   // updateServers(ns).catch(console.error); // FIXME:
 
   // Keep the game loop going
