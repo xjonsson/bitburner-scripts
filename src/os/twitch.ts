@@ -24,6 +24,10 @@ const updateHacknet = async (ns: NS) => {
   await launch(ns, CORE.HACKNET);
 };
 
+const updateHosting = async (ns: NS) => {
+  await launch(ns, CORE.HOSTING);
+};
+
 export async function main(ns: NS) {
   ns.disableLog('disableLog');
   ns.disableLog('asleep');
@@ -38,6 +42,7 @@ export async function main(ns: NS) {
   updateControl(ns).catch(console.error);
   updatePlayer(ns).catch(console.error);
   updateHacknet(ns).catch(console.error);
+  updateHosting(ns).catch(console.error);
   // updateServers(ns).catch(console.error); // FIXME:
 
   // Keep the game loop going

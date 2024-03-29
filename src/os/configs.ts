@@ -34,9 +34,10 @@ export const CONFIGS: any = {
     hacknetTargetRam: 64, // 64, // 64 (Real Max)
     hacknetTargetCores: 16, // 16, // 16 (Real Max)
   },
-  serversTarget: {
-    count: 25, // 25 (Real Max)
-    ram: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+  hosting: {
+    hostingTargetCount: 25, // 25 (Real Max)
+    hostingStartRam: 16,
+    hostingTargetRam: 1024, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
     skim: 0.1, // 10%
@@ -65,6 +66,7 @@ export const CORE: any = {};
 
   // Modules
   CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
+  CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
 })();
 
 export const TIME: any = {};
@@ -78,6 +80,7 @@ export const TIME: any = {};
   // TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
   // TIME.SLEEVES = 2 * 1000; // 2 second updates
   TIME.HACKNET = 3 * 1000; // 3 second updates
+  TIME.HOSTING = 10 * 1000; // 10 second updates
   // TIME.SERVERS = 10 * 1000; // 0.5 second updates
   // TIME.FACTIONS = 30 * 1000; // 30 second updates
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
@@ -132,66 +135,6 @@ export const DEPLOY: any = {
   xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
   xShareRam: 4.2, // Rep Share RAM required
 };
-
-export const STAGE: any = {};
-(function () {
-  STAGE[0] = {
-    done: false,
-    challenge: 1,
-    level: 55,
-    host: 'CSEC',
-    faction: 'CyberSec',
-    proof: 'csec-test.msg', // Invalid
-  };
-  STAGE[1] = {
-    done: false,
-    challenge: 0,
-    level: 80,
-    host: '',
-    faction: 'Netburners',
-    proof: '',
-  };
-  STAGE[2] = {
-    done: false,
-    challenge: 2,
-    level: 204,
-    host: 'avmnite-02h',
-    faction: 'NiteSec',
-    proof: 'nitesec-test.msg',
-  };
-  STAGE[3] = {
-    done: false,
-    challenge: 3,
-    level: 362,
-    host: 'I.I.I.I',
-    faction: 'TheBlackHand',
-    proof: 'TBD',
-  };
-  STAGE[4] = {
-    done: false,
-    challenge: 4,
-    level: 524,
-    host: 'run4theh111z',
-    faction: 'BitRunners',
-    proof: 'TBD',
-  };
-  STAGE[5] = {
-    done: false,
-    challenge: 5,
-    level: 925,
-    host: 'The-Cave',
-    faction: 'Daedalus',
-    proof: 'TBD',
-  };
-  STAGE[6] = {
-    done: false,
-    challenge: 5,
-    level: 1000,
-    host: 'w0r1d_d43m0n',
-    faction: 'Daedalus',
-    proof: 'TBD',
-  };
-})();
 
 /* 
   Server Target RAM

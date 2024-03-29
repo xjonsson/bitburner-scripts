@@ -10,6 +10,7 @@ export class Control {
   stage: number;
   phase: any;
   isShopHacknet: boolean;
+  isShopHosting: boolean;
 
   // ******** Constructor
   constructor(ns: NS, past: Control) {
@@ -19,6 +20,7 @@ export class Control {
     this.stage = past ? past.stage : 0;
     this.phase = osLogic(ns, this.stage);
     this.isShopHacknet = past ? past.isShopHacknet : true;
+    this.isShopHosting = past ? past.isShopHosting : true;
 
     // ******** Calculations
     if (this.phase.done) {

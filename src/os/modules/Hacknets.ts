@@ -106,7 +106,7 @@ export async function main(ns: NS) {
   // let control
   const repeat = true;
   while (repeat) {
-    await ns.sleep(100);
+    await ns.sleep(1000);
     ns.clearLog();
     ns.print(`Reserve: ${getReserve()}`);
     ns.print('Node\tLevel\tRAM\tCores\tProd/s');
