@@ -74,24 +74,24 @@ export async function main(ns: NS) {
     );
   }
 
-  // function calculateProduction(level: number, ram: number, cores: number) {
-  //   return (
-  //     level *
-  //     1.5 *
-  //     1.035 ** (ram - 1) *
-  //     ((cores + 5) / 6) *
-  //     prodMult *
-  //     prodMultBitnode
-  //   );
-  // }
+  function calculateProduction(level: number, ram: number, cores: number) {
+    return (
+      level *
+      1.5 *
+      1.035 ** (ram - 1) *
+      ((cores + 5) / 6) *
+      prodMult *
+      prodMultBitnode
+    );
+  }
 
-  // function calculatePaybackTime(
-  //   cost: number,
-  //   oldProd: number,
-  //   newProd: number
-  // ) {
-  //   return cost / (newProd - oldProd);
-  // }
+  function calculatePaybackTime(
+    cost: number,
+    oldProd: number,
+    newProd: number
+  ) {
+    return cost / (newProd - oldProd);
+  }
 
   const UpgradeType: any = {};
   (function () {
@@ -124,25 +124,25 @@ export async function main(ns: NS) {
       const ramUpgradeCost = ns.hacknet.getRamUpgradeCost(i, 1);
       const coreUpgradeCost = ns.hacknet.getCoreUpgradeCost(i, 1);
       // get prod. growth / cost ratios
-      // const levelPaybackTime = calculatePaybackTime(
-      //   levelUpgradeCost,
-      //   calculateProduction(node.level, node.ram, node.cores),
-      //   calculateProduction(node.level + 1, node.ram, node.cores)
-      // );
-      // const ramPaybackTime = calculatePaybackTime(
-      //   ramUpgradeCost,
-      //   calculateProduction(node.level, node.ram, node.cores),
-      //   calculateProduction(node.level, node.ram * 2, node.cores)
-      // );
-      // const corePaybackTime = calculatePaybackTime(
-      //   coreUpgradeCost,
-      //   calculateProduction(node.level, node.ram, node.cores),
-      //   calculateProduction(node.level, node.ram, node.cores + 1)
-      // );
+      const levelPaybackTime = calculatePaybackTime(
+        levelUpgradeCost,
+        calculateProduction(node.level, node.ram, node.cores),
+        calculateProduction(node.level + 1, node.ram, node.cores)
+      );
+      const ramPaybackTime = calculatePaybackTime(
+        ramUpgradeCost,
+        calculateProduction(node.level, node.ram, node.cores),
+        calculateProduction(node.level, node.ram * 2, node.cores)
+      );
+      const corePaybackTime = calculatePaybackTime(
+        coreUpgradeCost,
+        calculateProduction(node.level, node.ram, node.cores),
+        calculateProduction(node.level, node.ram, node.cores + 1)
+      );
       if (node.level < hacknetTargetLevel) {
         ratios.push({
           cost: levelUpgradeCost,
-          // payback: levelPaybackTime,
+          payback: levelPaybackTime,
           idx: i,
           upgrade: UpgradeType.level,
         });
@@ -150,7 +150,7 @@ export async function main(ns: NS) {
       if (node.ram < hacknetTargetRam) {
         ratios.push({
           cost: ramUpgradeCost,
-          // payback: ramPaybackTime,
+          payback: ramPaybackTime,
           idx: i,
           upgrade: UpgradeType.ram,
         });
@@ -158,7 +158,7 @@ export async function main(ns: NS) {
       if (node.cores < hacknetTargetCores) {
         ratios.push({
           cost: coreUpgradeCost,
-          // payback: corePaybackTime,
+          payback: corePaybackTime,
           idx: i,
           upgrade: UpgradeType.core,
         });
@@ -187,7 +187,10 @@ export async function main(ns: NS) {
         return;
       }
 
-      const { cost, idx, upgrade } = ratios.sort((a, b) => a.cost - b.cost)[0];
+      // const { cost, idx, upgrade } = ratios.sort((a, b) => a.cost - b.cost)[0];
+      const { cost, idx, upgrade } = ratios.sort(
+        (a, b) => a.payback - b.payback
+      )[0];
       if (Number.isFinite(cost) && cost) {
         while (getMoney() < cost) {
           await ns.sleep(hacknetSleepTime);
