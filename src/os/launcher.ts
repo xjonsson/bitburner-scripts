@@ -2,6 +2,8 @@
 import { NS } from '@ns';
 import { CORE, CACHE } from '/os/configs';
 import { launch } from '/os/utils/launch';
+import { ServerInfo } from '/os/modules/Server';
+import deployScripts from '/os/utils/deploy';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -11,11 +13,18 @@ export async function main(ns: NS) {
   ns.disableLog('asleep');
 
   // TODO: Kill all processes
-  // TODO: Prep servers
+
+  // ******** Prep non purchased servers
+  ServerInfo.list(ns)
+    .filter((h: string) => h !== 'home')
+    .forEach((h: string) => {
+      deployScripts(ns, h);
+    });
+
   // TODO: Prep bitnode
   // const node = ns.getResetInfo().currentNode; // Gets current bitnode
 
-  // Clear ports for clean run
+  // ******** Clear ports for clean run
   for (let i = 1; i <= 20; i += 1) {
     ns.clearPort(i);
   }

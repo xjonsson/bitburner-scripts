@@ -119,7 +119,7 @@ export function osLogic(ns: NS, stage: number): any {
     }
     case 7: {
       // ******** Join TheBlackHand
-      if (!p?.faction.factions.includes('TheBlackHand')) {
+      if (!p?.faction.factions.includes('The Black Hand')) {
         if (p?.level < 362) {
           return { done: false, msg: 'LVL_362' };
         }

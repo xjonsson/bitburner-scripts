@@ -3,6 +3,7 @@ import { NS } from '@ns';
 import { ControlCache, PlayerCache } from '/os/modules/Cache';
 import { ControlInfo } from '/os/modules/Control';
 import { CONFIGS, TIME } from '/os/configs';
+import deployScripts from '/os/utils/deploy';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -21,15 +22,6 @@ export async function main(ns: NS) {
     CONFIGS.hosting;
 
   let serverRam = hostingStartRam;
-
-  // ******** Update the nodes
-  // function updateNodes() {
-  //   const nodesTemp = new Map();
-  //   for (let i = 0; i < ns.hacknet.numNodes(); i += 1) {
-  //     nodesTemp.set(i, ns.hacknet.getNodeStats(i));
-  //   }
-  //   return nodesTemp;
-  // }
 
   function getReserve() {
     const stage = ControlCache.read(ns, 'control')?.stage;
@@ -165,6 +157,7 @@ export async function main(ns: NS) {
               const serverID = ns.getPurchasedServers().length || 0;
               const name = `ps-${serverID}`;
               const ref = ns.purchaseServer(name, serverRam);
+              deployScripts(ns, name);
               break;
             }
             case 'SERVER_RAM': {

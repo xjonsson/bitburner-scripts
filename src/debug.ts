@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { ControlCache, PlayerCache } from '/os/modules/Cache';
-import { ServerInfo } from '/os/modules/Server';
+import { ServerInfo, Server } from '/os/modules/Server';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -10,29 +10,28 @@ export async function main(ns: NS) {
   ns.clearLog();
 
   // NOTE: ONETIME CODE
-  // const sample = ControlCache.read(ns, 'control').serverReclaim;
-  // ns.print(sample.length);
-  // ns.print(sample);
-
-  // for (let i = 1; i <= 20; i += 1) {
-  //   ns.clearPort(i);
-  // }
 
   // NOTE: DOES`THE LOOP
   while (true) {
     ns.clearLog();
-    // const control = ControlCache.read(ns, 'control');
+    const control = ControlCache.read(ns, 'control');
+    const pChallenge = control ? control.challenge : 0;
+
+    const servers = ServerInfo.list(ns)
+      .filter((h: string) => h !== 'home')
+      .map((h: string) => ServerInfo.details(ns, h));
+
+    const ports = servers.filter((s: Server) => s.challenge <= pChallenge);
+    const admin = servers.filter((s: Server) => s.isRoot && !s.isServer);
+
     // const player = PlayerCache.read(ns, 'player');
-    const hostnames = ServerInfo.list(ns);
-    const servers = hostnames.map((h: string) => {
-      const s = ServerInfo.details(ns, h);
-      return s;
-    });
-    const nodes = servers.filter((s) => s.isNode);
+    // const servers = hostnames.map((h: string) => {
+    //   const s = ServerInfo.details(ns, h);
+    //   return s;
+    // });
     ns.print('===== DEBUG =====');
-    ns.print(`Nodes: ${nodes.length}`);
-    nodes.forEach((s) => ns.print(s.hostname));
-    // ns.print(ns.peek(2));
+    ns.print(`Total visible: ${servers.length}`);
+    ns.print(`Ports: ${ports.length} | Admin: ${admin.length}`);
 
     await ns.asleep(1000);
   }
