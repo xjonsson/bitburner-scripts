@@ -57,7 +57,7 @@ export async function main(ns: NS) {
     );
 
     servers.forEach((s: ServerTarget) => {
-      const batch = s.getBatch();
+      const batch = s.getBatch(true, 1);
       ns.printf(
         rowHeader,
         s.isServer ? '' : s.level,
@@ -80,7 +80,7 @@ export async function main(ns: NS) {
         s.aWeak ? formatTime(ns, s.weakTime) : '',
         s.aGrow ? formatTime(ns, s.growTime) : '',
         // s.aAttack ? ns.formatRam(batch.dRam, 2) : '',
-        ns.formatRam(batch.dRam, 2),
+        ns.formatRam(batch.dRam, 1),
         ns.formatNumber(batch.dValue, 2)
       );
     });
