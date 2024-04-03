@@ -41,7 +41,7 @@ export const CONFIGS: any = {
     skim: 0.1, // 10%
     buffer: 1000, // Time in ms between scripts
     delay: 3000, // Delay in ms between batches
-    batches: 128, // Batch 128 hack, weak, grow, weak
+    batches: 10, // Batch 128 hack, weak, grow, weak
     targets: 5, // Only work on 25 servers
     distance: 15, // How much above 50% of player level we will target
   },
