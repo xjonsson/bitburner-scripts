@@ -60,11 +60,11 @@ export function osLogic(ns: NS, stage: number): any {
     case 3: {
       // ******** Join CSEC
       if (!p?.faction.factions.includes('CyberSec')) {
-        if (p?.level < 55) {
-          return { done: false, msg: 'LVL_55' };
+        const host = ns.getServer('CSEC');
+        if (p?.level < host.requiredHackingSkill) {
+          return { done: false, msg: `LVL_${host.requiredHackingSkill}` };
         }
 
-        const host = ns.getServer('CSEC');
         if (!host.hasAdminRights) {
           return { done: false, msg: 'ROOT_CSEC' };
         }
@@ -90,11 +90,11 @@ export function osLogic(ns: NS, stage: number): any {
     case 5: {
       // ******** Join NiteSec
       if (!p?.faction.factions.includes('NiteSec')) {
-        if (p?.level < 204) {
-          return { done: false, msg: 'LVL_204' };
+        const host = ns.getServer('avmnite-02h');
+        if (p?.level < host.requiredHackingSkill) {
+          return { done: false, msg: `LVL_${host.requiredHackingSkill}` };
         }
 
-        const host = ns.getServer('avmnite-02h');
         if (!host.hasAdminRights) {
           return { done: false, msg: 'ROOT_avmnite-02h' };
         }
@@ -120,11 +120,11 @@ export function osLogic(ns: NS, stage: number): any {
     case 7: {
       // ******** Join TheBlackHand
       if (!p?.faction.factions.includes('The Black Hand')) {
-        if (p?.level < 362) {
-          return { done: false, msg: 'LVL_362' };
+        const host = ns.getServer('I.I.I.I');
+        if (p?.level < host.requiredHackingSkill) {
+          return { done: false, msg: `LVL_${host.requiredHackingSkill}` };
         }
 
-        const host = ns.getServer('I.I.I.I');
         if (!host.hasAdminRights) {
           return { done: false, msg: 'ROOT_I.I.I.I' };
         }
@@ -150,11 +150,11 @@ export function osLogic(ns: NS, stage: number): any {
     case 9: {
       // ******** Join BitRunners
       if (!p?.faction.factions.includes('BitRunners')) {
-        if (p?.level < 524) {
-          return { done: false, msg: 'LVL_524' };
+        const host = ns.getServer('run4theh111z');
+        if (p?.level < host.requiredHackingSkill) {
+          return { done: false, msg: `LVL_${host.requiredHackingSkill}` };
         }
 
-        const host = ns.getServer('run4theh111z');
         if (!host.hasAdminRights) {
           return { done: false, msg: 'ROOT_run4theh111z' };
         }
@@ -180,6 +180,10 @@ export function osLogic(ns: NS, stage: number): any {
     case 11: {
       // ******** TBD
       return { done: false, msg: 'STAGE_11' };
+
+      // NOTE: Augments / 30
+      // NOTE: Money / 100 Billion
+      // NOTE: Hacking / 2500
     }
     default: {
       return { done: false, msg: '' };

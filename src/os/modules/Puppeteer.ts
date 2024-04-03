@@ -1,13 +1,12 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CONFIGS, DEPLOY } from '/os/configs';
-import { ControlCache, ServersCache } from '/os/modules/Cache';
-import { Server, ServerInfo } from '/os/modules/Server';
-import ServerHack from '/os/modules/ServerHack';
+import { DEPLOY } from '/os/configs';
+import { ServerInfo, Server } from '/os/modules/Server';
+import ServerTarget from '/os/modules/ServerTarget';
 /* eslint-enable */
 
-const { xMin, xHack, xWeak, xGrow, xShare } = DEPLOY;
-const { xMinRam, xHackRam, xWeakRam, xGrowRam, xShareRam } = DEPLOY;
+const { xHack, xWeak, xGrow } = DEPLOY;
+const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
 
 // ******** Utility
 function threads(ram: number, script = 1.6): number {
@@ -16,104 +15,106 @@ function threads(ram: number, script = 1.6): number {
 
 export async function main(ns: NS) {
   ns.disableLog('disableLog');
-  ns.disableLog('asleep');
-  ns.disableLog('exec');
   ns.disableLog('getHackingLevel');
-  ns.clearLog();
-  // ns.tail();
+  ns.disableLog('asleep');
+  ns.disableLog('scan');
 
+  ns.clearLog();
+  ns.tail();
+
+  // NOTE: ONETIME CODE
   // ******** Initialize
 
-  // Launch modules
+  // NOTE: DOES`THE LOOP
+  while (true) {
+    ns.clearLog();
 
-  const control = ControlCache.read(ns, 'control');
-  const servers: any = [];
-  if (control) {
-    // ns.print(control.serverNode);
-    // control.serverNode.forEach((h: string) => {
-    //   const s = ServersCache.read(ns, h);
-    //   ns.print(`H:${s.hostname} B:${s.isNode} R:${s.ram.max}`);
-    // });
+    // Servers
+    const servers = ServerInfo.list(ns)
+      .filter((h: string) => h !== 'home')
+      .map((h: string) => ServerInfo.details(ns, h));
 
-    let ramAvailable = 0;
-    control.serverNode.forEach((h: string) => {
-      const s = ServerInfo.details(ns, h);
-      servers.push(s);
-      ramAvailable += s.ram.now;
+    // Bots
+    // const nodes = servers
+    //   .filter((s: Server) => s.isNode)
+    //   .sort((a: Server, b: Server) => b.ram.now - a.ram.now);
+    // const ramTotal = nodes.reduce(
+    //   (totalRam: number, s: Server) => totalRam + s.ram.now,
+    //   0
+    // );
+
+    const targets = servers
+      .filter((s: Server) => s.isTarget)
+      .map((s: Server) => {
+        const st = new ServerTarget(ns, s.hostname);
+        // if (st.batch.dRam < ramTotal) {
+        //   st.aBatch = true;
+        // }
+        return st;
+      })
+      .sort(
+        (a: ServerTarget, b: ServerTarget) => b.batch.dValue - a.batch.dValue
+      );
+
+    // ns.print(
+    //   `Nodes: ${nodes.length} | Ram Now: ${ns.formatRam(
+    //     ramTotal
+    //   )} (${ramTotal})`
+    // );
+    ns.print('===== DEBUG =====');
+
+    targets.forEach((s: ServerTarget) => {
+      const nodes = servers
+        .filter((n: Server) => n.isNode && n.ram.now > 0)
+        .sort((a: Server, b: Server) => b.ram.now - a.ram.now);
+
+      const ramAvailable = nodes.reduce(
+        (totalRam: number, n: Server) => totalRam + n.ram.now,
+        0
+      );
+
+      const batch = s.getBatch(true, 1);
+
+      // Can we do a full batch
+      if (s.aAttack && batch.dRam < ramAvailable) {
+        let { tHack } = batch;
+        const { tWeak } = batch;
+        const { tGrow } = batch;
+        const { tWeakAG } = batch;
+
+        nodes.forEach((n: Server) => {
+          if (tHack > 0) {
+            const tNodeHack = threads(n.ram.now, xHackRam);
+            // ns.exec(xhack, source, amount, target, repeat, delay);
+            ns.exec(
+              xHack,
+              n.hostname,
+              tNodeHack,
+              s.hostname,
+              false,
+              batch.dHack
+            );
+            tHack -= tNodeHack;
+          }
+        });
+        ns.print(`${tHack} | ${tWeak} | ${tGrow} | ${tWeakAG}`);
+      }
+
+      ns.print(
+        `${s.hostname} | ${ns.formatRam(s.batch.dRam, 2)} | ${ns.formatNumber(
+          s.batch.dValue,
+          2
+        )} | ${s.aAttack} | ${s.aAction} | ARam: ${ns.formatRam(
+          ramAvailable,
+          2
+        )}`
+      );
     });
 
-    servers.sort((a: Server, b: Server) => b.ram.now - a.ram.now);
-
-    // servers.forEach((s: Server) => {
-    //   ns.print(`B:${s.hostname} R:${s.ram.now}`);
+    // nodes.forEach((s: Server) => {
+    //   ns.print(`Host: ${s.hostname} | ${s.ram.now}`);
     // });
 
-    ns.print(`Global Ram: ${ramAvailable}`);
-
-    const targets: any = [];
-    if (control.serverFocus && ramAvailable > 0) {
-      control.serverFocus.forEach((h: string) => {
-        targets.push(new ServerHack(ns, h));
-      });
-
-      targets
-        .filter((s: Server) => s.root)
-        .sort((a: ServerHack, b: ServerHack) => b.value.total - a.value.total);
-
-      targets.forEach((sh: ServerHack) => {
-        // ns.print(`${sh.hostname} A:${sh.action.action} V:${sh.value.total}`);
-        switch (sh.action.action) {
-          case 'WEAK': {
-            // ns.print('WEAKEN');
-            let { weakThreads } = sh;
-            servers.forEach((s: Server) => {
-              const t = threads(s.ram.now, xWeakRam);
-              if (weakThreads > 0 && ramAvailable > 0 && t > 0) {
-                ns.print(weakThreads);
-                ramAvailable -= t * xWeakRam;
-                weakThreads -= t;
-                ns.exec(xWeak, s.hostname, t, sh.hostname, false, 0);
-                // ns.print(`${s.hostname} T:${t}`);
-              }
-            });
-            break;
-          }
-          case 'GROW': {
-            let growThreads = sh.growThreads(1);
-            servers.forEach((s: Server) => {
-              const t = threads(s.ram.now, xGrowRam);
-              if (growThreads > 0 && ramAvailable > 0 && t > 0) {
-                // ns.print(growThreads);
-                ramAvailable -= t * xGrowRam;
-                growThreads -= t;
-                ns.exec(xGrow, s.hostname, t, sh.hostname, false, 0);
-                // ns.print(`${s.hostname} T:${t}`);
-              }
-            });
-            break;
-          }
-          case 'HACK': {
-            let { hackThreads } = sh;
-            servers.forEach((s: Server) => {
-              const t = threads(s.ram.now, xHackRam);
-              if (hackThreads > 0 && ramAvailable > 0 && t > 0) {
-                // ns.print(growThreads);
-                ramAvailable -= t * xHackRam;
-                hackThreads -= t;
-                ns.exec(xHack, s.hostname, t, sh.hostname, false, 0);
-                // ns.print(`${s.hostname} T:${t}`);
-              }
-            });
-            break;
-          }
-          default:
-        }
-      });
-    }
+    await ns.asleep(1000);
   }
-
-  // Keep the game loop going
-  // while (true) {
-  //   await ns.asleep(1000);
-  // }
 }

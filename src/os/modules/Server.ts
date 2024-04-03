@@ -83,15 +83,15 @@ export class Server {
     this.isServer =
       this.data.purchasedByPlayer && this.data.hostname !== 'home';
     this.isBot = !this.isHome && !this.isServer && this.ram.max > 0;
-    this.isCash = !this.isHome && !this.isServer && this.money.max > 0;
     this.isNode = this.isServer || (this.isBot && this.isRoot); // Dont use Home
+    this.isCash = !this.isHome && !this.isServer && this.money.max > 0;
     this.isTarget =
       !this.isHome &&
       !this.isServer &&
       this.isCash &&
       this.isRoot &&
       this.open >= this.challenge &&
-      this.level <= ns.getHackingLevel(); // NOTE: Computed
+      this.level <= ns.getHackingLevel();
   }
 }
 
