@@ -5,7 +5,6 @@ import { CONSTANTS } from '/os/data/constants';
 
 export function growthAnalyzeAccurate(
   ns: NS,
-  player: any,
   serverDifficulty: number,
   serverGrowth: number,
   serverMoneyMax: number,
@@ -14,9 +13,9 @@ export function growthAnalyzeAccurate(
   cores = 1
 ): number {
   // Rework of numCycleForGrowthCorrected
-  const nodeMulti = player.bitnode;
+  const playerMult = ns.getPlayer().mults.hacking_grow || 1;
   let bnMult = 1;
-  switch (nodeMulti) {
+  switch (ns.getResetInfo().currentNode) {
     case 2: {
       bnMult = 0.8;
       break;
@@ -60,10 +59,7 @@ export function growthAnalyzeAccurate(
   const serverGrowthPercentage = serverGrowth / 100.0;
   const coreMultiplier = 1 + (cores - 1) / 16;
   const threadMultiplier =
-    serverGrowthPercentage *
-    player.data.mults.hacking_grow *
-    coreMultiplier *
-    bnMult;
+    serverGrowthPercentage * playerMult * coreMultiplier * bnMult;
 
   const x = threadMultiplier * Math.log(exponentialBase);
   const y = serverMoneyNow * x + Math.log(targetMoney * x);

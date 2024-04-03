@@ -28,35 +28,15 @@ export async function main(ns: NS) {
   let dWeakAG = -1;
   let batch;
 
+  const node = ServerInfo.details(ns, 'ps-0');
+  // const sample = new ServerTarget(ns, 'sigma-cosmetics');
+  const sample = new ServerTarget(ns, 'nectar-net');
+
   // NOTE: DOES`THE LOOP
   while (true) {
     ns.clearLog();
-    // const player = PlayerCache.read(ns, 'player');
-
-    // const servers = ServerInfo.list(ns)
-    //   .filter((h: string) => h !== 'home')
-    //   .map((h: string) => ServerInfo.details(ns, h)); // NOTE: USEME
-
-    // const hosting = servers.filter((s: Server) => s.isServer);
-    // const nodes = servers.filter((s: Server) => s.isNode); // NOTE: USEME
-    // const cash = servers.filter((s: Server) => s.isCash);
-    // const targets = servers.filter((s: Server) => s.isTarget);
-    // const ram = nodes.reduce(
-    //   (totalRam: number, s: Server) => totalRam + s.ram.now,
-    //   0
-    // );
-
-    // ns.print('===== DEBUG =====');
-    // ns.print(`Servers: ${servers.length} (- Home)`);
-    // ns.print(`Nodes: ${nodes.length} | Hosting: ${hosting.length}`);
-    // ns.print(`Ram Now: ${ns.formatRam(ram)} (${ram})`);
-    // ns.print(`Cash: ${cash.length} | Targets: ${targets.length}`);
     ns.print('===== DEBUG =====');
-    // const sample = new ServerTarget(ns, 'n00dles');
-    const node = ServerInfo.details(ns, 'ps-0');
-    // Servers
-    const sample = new ServerTarget(ns, 'sigma-cosmetics');
-    // const sampleBatch = sample.getBatch(true, 1);
+
     const now = performance.now();
     ns.print(`[Now] ${now}`);
     ns.print(`[End] ${dEnd}`);
@@ -123,14 +103,6 @@ export async function main(ns: NS) {
         );
       }
     }
-    // if (dEnd < sampleBatch.dEnd) {
-    //   dEnd = sampleBatch.dEnd;
-    //   ns.print(`Refiring`);
-    // } else {
-    //   ns.print(`Waiting for landing`);
-    // }
-    // ns.print(sampleBatch);
-    // ns.print(`Hack: ${sampleBatch.tHack} | `)
 
     await ns.asleep(1000);
   }

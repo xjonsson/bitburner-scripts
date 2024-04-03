@@ -3,48 +3,48 @@ import { NS } from '@ns';
 import { Server } from '/os/modules/Server';
 import { CONFIGS, DEPLOY } from '/os/configs';
 import { CONSTANTS } from '/os/data/constants';
-import { Player } from '/os/modules/Player';
+// import { Player } from '/os/modules/Player';
 import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
-import { numCycleForGrowthCorrected } from '/os/utils/numCycleForGrowthCorrected';
-// import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
 const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
 
 export default class ServerTarget extends Server {
   ns: NS;
-  p: Player;
-  aWeak: boolean;
-  aGrow: boolean;
-  aHack: boolean;
-  aAttack: boolean;
-  aAction: string;
-  aBatch: boolean;
-  // canAttack: boolean;
 
   constructor(ns: NS, hostname: string) {
     super(ns, hostname);
     this.ns = ns;
-    this.p = new Player(ns);
+  }
 
-    // ******** Decision
-    this.aWeak = this.sec.now > this.sec.min;
-    this.aGrow = this.money.now < this.money.max;
-    this.aHack = this.hackChance >= 1 && this.hackThreads > 0;
-    this.aAttack = !this.aWeak && !this.aGrow && this.aHack;
-    this.aAction = '';
-    this.aBatch = false;
+  // ******** Server properties
+  get aWeak(): boolean {
+    return this.sec.now > this.sec.min;
+  }
 
-    // ******** Action
+  get aGrow(): boolean {
+    return this.money.now < this.money.max;
+  }
+
+  get aHack(): boolean {
+    return this.hackChance >= 1 && this.hackThreads > 0;
+  }
+
+  get aAttack(): boolean {
+    return !this.aWeak && !this.aGrow && this.aHack;
+  }
+
+  get aAction(): string {
     if (this.aAttack) {
-      this.aAction = 'HACK';
+      return 'HACK';
     }
     if (this.aGrow) {
-      this.aAction = 'GROW';
+      return 'GROW';
     }
     if (this.aWeak) {
-      this.aAction = 'WEAK';
+      return 'WEAK';
     }
+    return '';
   }
 
   // ******** Computed BATCH & VALUE
@@ -142,7 +142,6 @@ export default class ServerTarget extends Server {
   growThreads(batch = false, cores = 1): number {
     return growthAnalyzeAccurate(
       this.ns,
-      this.p,
       this.sec.now,
       this.money.growth,
       this.money.max,
