@@ -7,6 +7,7 @@ import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
 /* eslint-enable */
 
 const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
+const { hackSkim } = CONFIGS.hacking;
 
 export default class ServerTarget extends Server {
   ns: NS;
@@ -109,17 +110,17 @@ export default class ServerTarget extends Server {
   // ******** Computed BATCH & VALUE
   getBatch(batch = false, cores = 1): any {
     // ******** Timings
-    const { buffer, delay } = CONFIGS.hacking;
-    const dMoney = this.money.max * CONFIGS.hacking.skim;
-    const dStart = performance.now() + delay;
-    const dEnd = dStart + this.weakTime + buffer;
+    const { hackBuffer, hackDelay } = CONFIGS.hacking;
+    const dMoney = this.money.max * hackSkim;
+    const dStart = performance.now() + hackDelay;
+    const dEnd = dStart + this.weakTime + hackBuffer;
     const dTime = dEnd - dStart;
     const dSeconds = dTime / 1000; // Deploy time in seconds
     const dGainPerSecond = dMoney / dSeconds; // Gain Per Second
-    const dHack = dEnd - buffer * 3 - (this.hackTime + buffer);
-    const dWeak = dEnd - buffer * 2 - (this.weakTime + buffer);
-    const dGrow = dEnd - buffer * 1 - (this.growTime + buffer);
-    const dWeakAG = dEnd - (this.weakTime + buffer);
+    const dHack = dEnd - hackBuffer * 3 - (this.hackTime + hackBuffer);
+    const dWeak = dEnd - hackBuffer * 2 - (this.weakTime + hackBuffer);
+    const dGrow = dEnd - hackBuffer * 1 - (this.growTime + hackBuffer);
+    const dWeakAG = dEnd - (this.weakTime + hackBuffer);
 
     // ******** Threads
     const tHack = this.hackThreads;
@@ -167,10 +168,7 @@ export default class ServerTarget extends Server {
 
   get hackThreads(): number {
     return Math.ceil(
-      this.ns.hackAnalyzeThreads(
-        this.hostname,
-        this.money.max * CONFIGS.hacking.skim
-      )
+      this.ns.hackAnalyzeThreads(this.hostname, this.money.max * hackSkim)
     );
   }
 
@@ -204,9 +202,7 @@ export default class ServerTarget extends Server {
       this.sec.now,
       this.money.growth,
       this.money.max,
-      batch
-        ? this.money.max * (1 - CONFIGS.hacking.skim - 0.01)
-        : this.money.now,
+      batch ? this.money.max * (1 - hackSkim - 0.01) : this.money.now,
       this.money.max,
       cores
     );

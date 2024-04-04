@@ -37,7 +37,7 @@ export function reclaimer(ns: NS, pChallenge: number) {
     .map((h: string) => ServerInfo.details(ns, h))
     .filter((s: Server) => !s.isServer && s.challenge <= pChallenge)
     .forEach((s: Server) => {
-      ns.tprint(`Server: ${s.hostname} | ${s.challenge}`);
+      // ns.tprint(`Server: ${s.hostname} | ${s.challenge}`);
       nukeServer(ns, s.hostname, s.challenge);
     });
 }

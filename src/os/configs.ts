@@ -38,12 +38,18 @@ export const CONFIGS: any = {
     hostingTargetRam: 1024, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
-    skim: 0.1, // 10%
-    buffer: 1000, // Time in ms between scripts
-    delay: 3000, // Delay in ms between batches
-    batches: 10, // Batch 128 hack, weak, grow, weak
-    targets: 5, // Only work on 25 servers
-    distance: 15, // How much above 50% of player level we will target
+    hackSkim: 0.1, // 10%
+    hackBuffer: 1000, // Time in ms between scripts
+    hackDelay: 3000, // Delay in ms between batches
+    // maxBatches: 16, // Batch 128 hack, weak, grow, weak
+    /* Max batches is calculated based on 1 minute intervals with short hack times
+     * this ensures we do not lockup ram on long standing processess
+     * while still allowing for long value hacks and generate smaller value quick cash
+     * this prevents situations where you need to wait 30m for a large windfall
+     */
+    hackBatches: 16, // Batch 128 hack, weak, grow, weak
+    hackTargets: 5, // Only work on 25 servers
+    hackDistance: 15, // How much above 50% of player level we will target
   },
 };
 
