@@ -35,7 +35,7 @@ export const CONFIGS: any = {
   hosting: {
     hostingTargetCount: 25, // 25 (Real Max)
     hostingStartRam: 16,
-    hostingTargetRam: 1024, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+    hostingTargetRam: 32768, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
     hackSkim: 0.1, // 10%
@@ -48,7 +48,7 @@ export const CONFIGS: any = {
      * this prevents situations where you need to wait 30m for a large windfall
      */
     hackBatches: 16, // Batch 128 hack, weak, grow, weak
-    hackTargets: 5, // Only work on 25 servers
+    hackTargetsMax: 25, // Only work on 25 servers
     hackDistance: 15, // How much above 50% of player level we will target
   },
 };

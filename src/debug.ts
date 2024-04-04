@@ -9,7 +9,7 @@ import { formatTime } from '/os/utils/formatTime';
 
 const { xHack, xWeak, xGrow } = DEPLOY;
 const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
-const { hackBuffer, hackDelay, hackBatches } = CONFIGS.hacking;
+const { hackBuffer, hackDelay, hackBatches, hackTargetsMax } = CONFIGS.hacking;
 const defaultUpdate = TIME.SERVERS;
 
 // ******** Styling
@@ -63,9 +63,16 @@ function updateServers(ns: NS, oldServers: ServerTarget[]) {
     }
   });
 
-  return oldServers.sort(
-    (a: ServerTarget, b: ServerTarget) => a.level - b.level
+  oldServers.sort(
+    // (a: ServerTarget, b: ServerTarget) => a.level - b.level
+    (a: ServerTarget, b: ServerTarget) => b.sanity.value - a.sanity.value
   );
+
+  while (oldServers.length > hackTargetsMax) {
+    oldServers.pop();
+  }
+
+  return oldServers;
 
   // FIXME:
   //     .sort(
