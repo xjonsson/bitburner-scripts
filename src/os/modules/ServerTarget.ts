@@ -14,8 +14,8 @@ export default class ServerTarget extends Server {
   updatedAt: number;
   sanity: {
     action: string;
-    ram: number;
     value: number;
+    tRam: number;
     tHack: number;
     tWeak: number;
     tGrow: number;
@@ -31,8 +31,8 @@ export default class ServerTarget extends Server {
     this.updatedAt = performance.now();
     this.sanity = {
       action: '',
-      ram: 0,
       value: 0,
+      tRam: 0,
       tHack: -1,
       tWeak: -1,
       tGrow: -1,
@@ -52,8 +52,8 @@ export default class ServerTarget extends Server {
     const batch = this.getBatch(true, 1);
     this.sanity = {
       action: '',
-      ram: batch.dRam,
       value: batch.dValue,
+      tRam: batch.dRam,
       tHack: batch.tHack,
       tWeak: batch.tWeak,
       tGrow: batch.tGrow,
@@ -84,10 +84,6 @@ export default class ServerTarget extends Server {
 
   set setBatches(count: number) {
     this.sanity.batches = count;
-  }
-
-  get resetBatches() {
-    return (this.sanity.batches = 0);
   }
 
   // ******** Server properties
