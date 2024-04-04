@@ -3,7 +3,6 @@ import { NS } from '@ns';
 import { Server } from '/os/modules/Server';
 import { CONFIGS, DEPLOY } from '/os/configs';
 import { CONSTANTS } from '/os/data/constants';
-// import { Player } from '/os/modules/Player';
 import { growthAnalyzeAccurate } from '/os/utils/growthAnalyzeAccurate';
 /* eslint-enable */
 
@@ -11,10 +10,83 @@ const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
 
 export default class ServerTarget extends Server {
   ns: NS;
+  updatedAt: number;
+  sanity: {
+    action: string;
+    ram: number;
+    value: number;
+    tHack: number;
+    tWeak: number;
+    tGrow: number;
+    tWeakAG: number;
+    pWeak: number;
+    pGrow: number;
+    batches: number;
+  };
 
   constructor(ns: NS, hostname: string) {
     super(ns, hostname);
     this.ns = ns;
+    this.updatedAt = performance.now();
+    this.sanity = {
+      action: '',
+      ram: 0,
+      value: 0,
+      tHack: -1,
+      tWeak: -1,
+      tGrow: -1,
+      tWeakAG: -1,
+      pWeak: -1,
+      pGrow: -1,
+      batches: 0,
+    };
+  }
+
+  // ******** Batch properties
+  get lastUpdate(): number {
+    return this.updatedAt;
+  }
+
+  set update(delay: number) {
+    const batch = this.getBatch(true, 1);
+    this.sanity = {
+      action: '',
+      ram: batch.dRam,
+      value: batch.dValue,
+      tHack: batch.tHack,
+      tWeak: batch.tWeak,
+      tGrow: batch.tGrow,
+      tWeakAG: batch.tWeakAG,
+      pWeak: 0,
+      pGrow: 0,
+      batches: this.sanity.batches,
+    };
+
+    if (this.sec.now > this.sec.min) {
+      this.sanity.action = 'WEAK';
+      this.sanity.pWeak = this.weakThreads;
+    } else if (this.money.now < this.money.max) {
+      this.sanity.action = 'GROW';
+      this.sanity.pGrow = this.growThreads();
+    } else if (
+      this.sec.now <= this.sec.min &&
+      this.money.now >= this.money.max &&
+      this.hackChance >= 1
+    ) {
+      this.sanity.action = 'HACK';
+    } else {
+      this.sanity.action = '';
+    }
+
+    this.updatedAt = performance.now() + delay;
+  }
+
+  set setBatches(count: number) {
+    this.sanity.batches = count;
+  }
+
+  get resetBatches() {
+    return (this.sanity.batches = 0);
   }
 
   // ******** Server properties
@@ -32,19 +104,6 @@ export default class ServerTarget extends Server {
 
   get aAttack(): boolean {
     return !this.aWeak && !this.aGrow && this.aHack;
-  }
-
-  get aAction(): string {
-    if (this.aAttack) {
-      return 'HACK';
-    }
-    if (this.aGrow) {
-      return 'GROW';
-    }
-    if (this.aWeak) {
-      return 'WEAK';
-    }
-    return '';
   }
 
   // ******** Computed BATCH & VALUE
