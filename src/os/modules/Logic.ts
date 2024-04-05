@@ -183,7 +183,7 @@ export function osLogic(ns: NS, stage: number): any {
 
       // NOTE: Augments / 30
       // NOTE: Money / 100 Billion
-      // NOTE: Hacking / 2500
+      // NOTE: Hacking / 2500 JOIN DAEDALUS
     }
     default: {
       return { done: false, msg: '' };

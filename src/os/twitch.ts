@@ -71,6 +71,7 @@ export async function main(ns: NS) {
       `🚀${stage}`,
       `${phase.done ? '✅' : '❌'}${phase.msg}`
     );
+    ns.print(`T${hackTargets.length} | P${hackTargetsPrep.length}`);
     ns.print(hackTargets);
     ns.print(hackTargetsPrep);
     // ns.print(control); // NOTE: Debug

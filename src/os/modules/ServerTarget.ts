@@ -41,6 +41,9 @@ export default class ServerTarget extends Server {
       pGrow: -1,
       batches: 0,
     };
+
+    // Initiatlize the batch
+    this.update = 0;
   }
 
   // ******** Batch properties

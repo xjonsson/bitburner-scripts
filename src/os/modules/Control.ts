@@ -56,6 +56,10 @@ export class Control {
       // Disable the player check after X
     }
   }
+
+  set updateTargets(targets: []) {
+    this.hackTargets = targets;
+  }
 }
 
 export const ControlInfo = {

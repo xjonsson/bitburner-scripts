@@ -55,9 +55,9 @@ export const CONFIGS: any = {
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
-    hackBatches: 16, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 20, // Only work on 25 servers (Add hack + prep)
-    hackTargetsPrep: 5, // Prepare the next 5
+    hackBatches: 128, // Batch 128 hack, weak, grow, weak
+    hackTargetsMax: 15, // Only work on 25 servers (Add hack + prep)
+    hackTargetsPrepMax: 5, // Prepare the next 5 (needs to be less than 2)
     hackDistance: 15, // How much above 50% of player level we will target
   },
 };
