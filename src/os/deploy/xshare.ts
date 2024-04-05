@@ -3,20 +3,14 @@ import { NS } from '@ns';
 /* eslint-enable */
 
 export async function main(ns: NS) {
-  const sustain = ns.args[0] || false;
-  // ns.tail();
-  // ns.clearLog();
-  // ns.disableLog('disableLog');
-  // ns.disableLog('share');
+  const repeat = ns.args[0] || false;
+  const silent = (ns.args[1] as boolean) || true;
 
-  const sharePower = ns.getSharePower();
-  ns.print(`[Time] ${new Date().toLocaleTimeString()}`);
-  ns.print(`[Share] ${sharePower}`);
-  await ns.share();
-
-  while (sustain) {
-    ns.print(`[Time] ${new Date().toLocaleTimeString()}`);
-    ns.print(`[Share] ${sharePower}`);
-    await ns.share();
+  if (!silent) {
+    ns.tail();
   }
+
+  do {
+    await ns.share();
+  } while (repeat);
 }

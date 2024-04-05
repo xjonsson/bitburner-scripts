@@ -190,3 +190,16 @@ export function osLogic(ns: NS, stage: number): any {
     }
   }
 }
+
+/*
+ * [x] Gain root access on CSEC
+ * [x] Install the backdoor on CSEC
+ * [x] Join the faction hinted at in csec-test.msg
+ * [x] Install all the Augmentations from CyberSec
+ * [x] Join the faction hinted at in nitesec-test.msg
+ * [x] Install all the Augmentations from NiteSec
+ * [x] Join the faction hinted at in j3.msg
+ * [x] Install all the Augmentations from The Black Hand
+ * [x] Join the faction hinted at in 19dfj3l1nd.msg
+ * [ ] Install all the Augmentations from BitRunners
+ */

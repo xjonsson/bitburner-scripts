@@ -1,5 +1,5 @@
 export const CONFIGS: any = {
-  ramReserve: 8, // 8GB reserved ram
+  ramReserve: 32, // 8GB reserved ram
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
@@ -20,11 +20,20 @@ export const CONFIGS: any = {
     autolink: 1e6, // 1 Million (1000000)
     formulas: 5e9, // 5 Billion (5000000000)
   },
-  // ramRatio: {
-  //   work: 0.6, // 60% of ram will be used for work
-  //   shares: 0.3, // 30% of ram will be used for shares
-  //   savings: 0.1, // 20% of ram will be used as reserve
-  // },
+  ramRatio: {
+    /* It can be useful to ramp up share ratio for faction farming
+     * this is especially true if batches are low and no prep threats required
+     * 0.7 ~ 1.47 (47% bonus) ~ 135,305 threads
+     * 0.6 ~ 1.47 (47% bonus) ~ 115,340 threads
+     * 0.5 ~ 1.46 (46% bonus) ~ 96,987 threads
+     * 0.4 ~ 1.45 (45% bonus) ~ 77,119 threads
+     * 0.3 ~ 1.44 (44% bonus) ~ 58,064 threads - Best cost benefit
+     * 0.2 ~ 1.42 (42% bonus) ~ 38,640 threads
+     * 0.1 ~ 1.39 (39% bonus) ~ 19,630 threads
+     */
+    workRamRatio: 0.7, // 0.7 (70%) of ram will be used for work
+    shareRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
+  },
   hacknet: {
     hacknetBreakevenTime: 2 * 60 * 60, // 2 hours in seconds
     hacknetTargetCount: 16, // 20 Soft Max (Real Max Infinity)
@@ -41,14 +50,14 @@ export const CONFIGS: any = {
     hackSkim: 0.1, // 10%
     hackBuffer: 1000, // Time in ms between scripts
     hackDelay: 3000, // Delay in ms between batches
-    // maxBatches: 16, // Batch 128 hack, weak, grow, weak
     /* Max batches is calculated based on 1 minute intervals with short hack times
      * this ensures we do not lockup ram on long standing processess
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
     hackBatches: 16, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 25, // Only work on 25 servers
+    hackTargetsMax: 20, // Only work on 25 servers (Add hack + prep)
+    hackTargetsPrep: 5, // Prepare the next 5
     hackDistance: 15, // How much above 50% of player level we will target
   },
 };
@@ -137,7 +146,7 @@ export const DEPLOY: any = {
   xGrow: `${PATHS.DEPLOY}/xgrow.js`, // HWGW Grow script
   xGrowRam: 1.76, // HWGW Grow script RAM required
   xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
-  xShareRam: 4.2, // Rep Share RAM required
+  xShareRam: 4.0, // Rep Share RAM required
 };
 
 /* 

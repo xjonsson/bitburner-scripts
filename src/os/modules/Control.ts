@@ -16,6 +16,8 @@ export class Control {
   isPlayerCheck: boolean;
   isShopHacknet: boolean;
   isShopHosting: boolean;
+  hackTargets: [];
+  hackTargetsPrep: [];
 
   // ******** Constructor
   constructor(ns: NS, past: Control) {
@@ -29,6 +31,8 @@ export class Control {
     this.isPlayerCheck = past ? past.isPlayerCheck : true;
     this.isShopHacknet = past ? past.isShopHacknet : true;
     this.isShopHosting = past ? past.isShopHosting : true;
+    this.hackTargets = past ? past.hackTargets : [];
+    this.hackTargetsPrep = past ? past.hackTargetsPrep : [];
 
     // ******** Check for stage change
     if (this.phase.done) {

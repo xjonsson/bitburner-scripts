@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { TIME, CONFIGS, DEPLOY } from '/os/configs';
-import { ControlCache, PlayerCache } from '/os/modules/Cache';
 import { ServerInfo, Server } from '/os/modules/Server';
+import { ControlCache } from '/os/modules/Cache';
 import ServerTarget from '/os/modules/ServerTarget';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
@@ -13,8 +13,10 @@ const { hackBuffer, hackDelay, hackBatches, hackTargetsMax } = CONFIGS.hacking;
 const defaultUpdate = TIME.SERVERS;
 
 // ******** Styling
+// const rowStyle =
+//   '%4s %-18s |%2s|%6s %4s|%5s| %4s | %4s | %4s | %4s |%7s|%7s|%7s| %7s | %6s | %10s | %4s | %8s';
 const rowStyle =
-  '%4s %-18s |%2s|%6s %4s|%5s| %4s | %4s | %4s | %4s |%7s|%7s|%7s| %7s | %6s | %10s | %4s | %8s';
+  '%4s %-18s %2s %4s %4s|%5s| %4s %4s %4s %4s|%7s| %5s | %4s %9s %4s %5s';
 
 // ******** Utility
 function nodeThreads(ram: number, script = 1.6): number {
@@ -94,18 +96,18 @@ function updateHeaders(ns: NS, now: number, start: number, networkRam: number) {
     'Lvl',
     'Server',
     '💰',
-    'Money',
+    'Cash',
     '%',
     '+Sec',
+    'Hack',
     'Weak',
     'Grow',
     'Meak',
-    'Hack',
-    'Hack',
-    'Weak',
-    'Grow',
+    // 'Hack',
+    'Time', // 'Weak',
+    // 'Grow',
     'Batch',
-    'Value',
+    'VPRS',
     'Update',
     'HWGW',
     'DEBUG'
@@ -126,9 +128,10 @@ function updateRow(ns: NS, s: ServerTarget, now: number, debug = '') {
       ? '🌿'
       : '',
     /* eslint-enable */
-    ns.formatNumber(s.money.max, 1),
+    ns.formatNumber(s.money.max, 0),
     ns.formatPercent(s.money.now / s.money.max, 0),
     `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}`,
+    s.sanity.tHack > 0 ? s.sanity.tHack : '',
     /* eslint-disable */
     s.sanity.action === 'HACK'
       ? s.sanity.tWeak
@@ -142,12 +145,11 @@ function updateRow(ns: NS, s: ServerTarget, now: number, debug = '') {
       : '',
     /* eslint-enable */
     s.sanity.tWeakAG,
-    s.sanity.tHack > 0 ? s.sanity.tHack : '',
-    formatTime(ns, s.hackTime), // s.sanity.action === 'HACK' ? formatTime(ns, s.hackTime) : '',
-    formatTime(ns, s.weakTime), // s.sanity.action === 'WEAK' ? formatTime(ns, s.weakTime) : '',
-    formatTime(ns, s.growTime), // s.sanity.action === 'GROW' ? formatTime(ns, s.growTime) : '',
-    ns.formatRam(s.sanity.tRam, 1),
-    ns.formatNumber(s.sanity.value, 1),
+    // formatTime(ns, s.hackTime),
+    formatTime(ns, s.weakTime),
+    // formatTime(ns, s.growTime),
+    ns.formatRam(s.sanity.tRam, 0),
+    ns.formatNumber(s.sanity.value, 0),
     formatTime(ns, s.lastUpdate - now),
     s.sanity.batches,
     debug
@@ -313,10 +315,13 @@ export async function main(ns: NS) {
   while (true) {
     ns.clearLog();
     const now = performance.now();
+    const control = ControlCache.read(ns, 'control');
+    const { hackTargets, hackTargetsPrep } = control;
+    const pLevel = control.level;
     updateHeaders(ns, now, start, networkRam);
 
     // ******** Update Nodes & Servers on change
-    const pLevel = ns.getPlayer().skills.hacking;
+    // const pLevel = ns.getPlayer().skills.hacking;
     if (pLevel > cLevel) {
       cLevel = pLevel;
       servers = updateServers(ns, servers);
@@ -325,22 +330,22 @@ export async function main(ns: NS) {
     // ******** Servers each tick
     servers.forEach((s: ServerTarget) => {
       if (s.lastUpdate > now) {
-        updateRow(ns, s, now, 'Waiting');
+        updateRow(ns, s, now, 'WAIT');
       } else {
         s.update = 10 * 1000; // 10s Updates if nothing happening
 
         if (s.sanity.action === 'WEAK') {
-          updateRow(ns, s, now, 'WEAK PREP');
-          s.update = prepWeak(ns, s);
-          // s.update = s.weakTime + hackDelay;
+          updateRow(ns, s, now, 'WEAK');
+          // s.update = prepWeak(ns, s);
+          s.update = s.weakTime + hackDelay;
         } else if (s.sanity.action === 'GROW') {
-          updateRow(ns, s, now, 'GROW PREP');
-          s.update = prepGrow(ns, s);
-          // s.update = s.growTime + hackDelay;
+          updateRow(ns, s, now, 'GROW');
+          // s.update = prepGrow(ns, s);
+          s.update = s.growTime + hackDelay;
         } else if (s.sanity.action === 'HACK') {
           updateRow(ns, s, now, 'BATCH');
-          s.update = prepHWGW(ns, s);
-          // s.update = defaultUpdate;
+          // s.update = prepHWGW(ns, s);
+          s.update = defaultUpdate;
         } else {
           updateRow(ns, s, now, 'ERROR'); // ENDING LINE
         }
