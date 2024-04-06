@@ -56,24 +56,22 @@ export async function main(ns: NS) {
     const player = PlayerCache.read(ns, 'player');
     const { ticks } = control;
     const { level, money, challenge } = player;
-    const { stage, phase, hackTargets, hackTargetsPrep } = control;
+    const { stage, phase, hackTargets } = control;
     // const time = performance.now();
     // const { level } = player;
 
     ns.clearLog();
 
     ns.printf(
-      ' %-5s %-5s %6s %2s %2s %-16s',
+      ' %-5s %-5s %6s %2s %3s %2s %-16s',
       `🖲️${ticks}`,
       `🧠${level}`,
       `💰${ns.formatNumber(money, 1)}`,
       `🔑${challenge}`,
+      `🎯${hackTargets.length}`,
       `🚀${stage}`,
       `${phase.done ? '✅' : '❌'}${phase.msg}`
     );
-    ns.print(`T${hackTargets.length} | P${hackTargetsPrep.length}`);
-    ns.print(hackTargets);
-    ns.print(hackTargetsPrep);
     // ns.print(control); // NOTE: Debug
     await ns.asleep(1000);
   }

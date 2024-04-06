@@ -38,139 +38,114 @@ function updateNodes(ns: NS) {
     .sort((a: Server, b: Server) => b.ram.max - a.ram.max);
 }
 
-function updateRam(nodes: Server[]): number {
-  return nodes.reduce(
+function updateRam(nodes: Server[]): any {
+  let max = 0;
+  const total = nodes.reduce((totalRam: number, node: Server) => {
+    if (node.ram.max > max) max = node.ram.max;
     // eslint-disable-next-line no-param-reassign
-    (totalRam: number, node: Server) => (totalRam += node.ram.now),
-    0
-  );
+    return (totalRam += node.ram.now);
+  }, 0);
+  return { max, total };
 }
 
 // ******** Server Targets
-function updateServers(
-  ns: NS,
-  tServers: any[],
-  tTargets: string[],
-  tTargetsPrep: string[]
-) {
-  let cTargets = tTargets;
-  let cTargetsPrep = tTargetsPrep;
-  let oldServers = tServers;
-  let lowestValue;
+function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
+  let tServers = cServers;
+  let tTargets = cTargets;
+  const tRamMax = updateRam(updateNodes(ns)).max;
 
-  if (cTargets.length === 0) {
+  if (tTargets.length === 0) {
     // **** Fresh load (use level)
     const hackTargets = ServerInfo.list(ns)
       .map((h: string) => ServerInfo.details(ns, h))
-      .filter((s: Server) => s.isTarget && !cTargets.includes(s.hostname))
+      .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
       .map((s: Server) => new ServerTarget(ns, s.hostname))
-      .sort((a: ServerTarget, b: ServerTarget) => a.level - b.level)
+      .sort(
+        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
+      )
       .slice(0, hackTargetsMax);
 
-    hackTargets.forEach((s: ServerTarget) => cTargets.push(s.hostname));
+    hackTargets.forEach((s: ServerTarget) => {
+      tTargets.push(s.hostname);
+    });
 
-    ns.tprint(cTargets);
+    ns.tprint(tTargets);
     const iPast = ControlCache.read(ns, 'control');
-    iPast.hackTargets = cTargets;
+    iPast.hackTargets = tTargets;
     const iControl = ControlInfo.details(ns, iPast);
     ControlCache.update(ns, iControl);
     return hackTargets;
   }
 
   // **** Reconnecting to targets
-  if (oldServers.length === 0) {
-    cTargets.forEach((h: string) => {
-      oldServers.push(new ServerTarget(ns, h));
+  if (tServers.length === 0) {
+    tTargets.forEach((h: string) => {
+      tServers.push(new ServerTarget(ns, h));
     });
-    oldServers.sort(
-      (a: ServerTarget, b: ServerTarget) => b.sanity.value - a.sanity.value
-    );
+    tServers
+      .sort(
+        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
+      )
+      .slice(0, hackTargetsMax);
   }
 
-  // **** Calculate new targets
-  const newServers = ServerInfo.list(ns)
-    .map((h: string) => ServerInfo.details(ns, h))
-    .filter((s: Server) => s.isTarget && !cTargets.includes(s.hostname))
-    .map((s: Server) => new ServerTarget(ns, s.hostname))
-    .sort(
-      (a: ServerTarget, b: ServerTarget) => b.sanity.value - a.sanity.value
-    );
-
-  newServers.forEach((s: ServerTarget) => {
-    if (cTargetsPrep.includes(s.hostname) && !cTargets.includes(s.hostname)) {
-      ns.tprint(`Prep out of sync with Targets ${s.hostname}`);
-      cTargets.push(s.hostname);
-      oldServers.push(s);
-    } else if (
-      cTargets.length - cTargetsPrep.length < hackTargetsMax &&
-      !cTargets.includes(s.hostname)
-    ) {
-      cTargets.push(s.hostname);
-      oldServers.push(s);
-    } else if (
-      cTargetsPrep.length < hackTargetsPrepMax &&
-      !cTargets.includes(s.hostname) &&
-      !cTargetsPrep.includes(s.hostname) &&
-      s.sanity.value > oldServers[0].sanity.value
-    ) {
-      ns.tprint(`We are not prepping (${s.hostname}) Added`);
-      cTargets.push(s.hostname);
-      cTargetsPrep.push(s.hostname);
-      oldServers.push(s);
+  // **** Calculate Switching
+  let batcherCount = 0;
+  tServers.forEach((s: ServerTarget) => {
+    // ns.tprint(`${s.hostname} | ${s.sanity.batches}`);
+    if (s.sanity.batches > 0) {
+      batcherCount += 1;
     }
   });
 
-  // **** Sanity and pruning
-  if (cTargets.length - cTargetsPrep.length > hackTargetsMax) {
-    const bump = oldServers.at(-1).hostname;
-    if (cTargets.includes(bump)) {
-      cTargets = cTargets.filter((h: string) => h !== bump);
-    }
-    if (cTargetsPrep.includes(bump)) {
-      cTargetsPrep = cTargetsPrep.filter((h: string) => h !== bump);
-    }
-    ns.tprint(oldServers.pop().hostname);
-  }
-
-  // **** Shift fresh servers close to batch
-  if (cTargetsPrep.length > 0 && cTargets.length > hackTargetsMax) {
-    cTargetsPrep.forEach((hPrep: string) => {
-      const pIndex = oldServers.findIndex(
-        (s: ServerTarget) => s.hostname === hPrep
-      );
-      if (pIndex >= 0) {
-        const prepper = oldServers[pIndex];
-        const pMoney = prepper.money.now / prepper.money.max;
-        const pSec = prepper.sec.now - prepper.sec.min;
-        if (pMoney >= 0.9 && pSec <= 5 && cTargets.length > hackTargetsMax) {
-          const bump = oldServers[oldServers.length - 1].hostname;
-          cTargets = cTargets.filter((h: string) => h !== bump);
-          cTargetsPrep = cTargetsPrep.filter(
-            (h: string) => h !== prepper.hostname
-          );
-          oldServers = oldServers.filter(
-            (s: ServerTarget) => s.hostname !== bump
-          );
+  // ns.tprint(`Batchercount: ${batcherCount}`);
+  if (batcherCount > hackTargetsPrepMax) {
+    // **** Calculate new targets
+    const newServers = ServerInfo.list(ns)
+      .map((h: string) => ServerInfo.details(ns, h))
+      .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
+      .map((s: Server) => new ServerTarget(ns, s.hostname))
+      .filter((s: ServerTarget) => s.sanity.tRam < tRamMax)
+      .sort(
+        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
+      )
+      .slice(-hackTargetsPrepMax)
+      .filter((s: ServerTarget) => {
+        // const tCheck = tServers[tServers.length - 1];
+        const tCheck = tServers[0];
+        if (s.sanity.tRam < tRamMax && s.sanity.value > tCheck.sanity.value) {
+          return true;
         }
-      }
-    });
-  }
+        return false;
+      });
 
-  ns.tprint(`T:${cTargets.length} | P:${cTargetsPrep.length}`);
+    if (newServers.length > 0) {
+      newServers.forEach((s: ServerTarget) => {
+        const tCheck = tServers[0];
+        tTargets.push(s.hostname);
+        tServers.push(s);
+        tTargets = tTargets.filter((h: string) => h !== tCheck.hostname);
+        tServers = tServers
+          .filter((t: ServerTarget) => t.hostname !== tCheck.hostname)
+          .sort(
+            (a: ServerTarget, b: ServerTarget) =>
+              a.sanity.value - b.sanity.value
+          );
+        // tTargets.shift();
+        // tServers.shift();
+      });
+    }
+  }
 
   // **** Update targets
   const past = ControlCache.read(ns, 'control');
-  past.hackTargets = cTargets;
-  past.hackTargetsPrep = cTargetsPrep;
+  past.hackTargets = tTargets;
   const control = ControlInfo.details(ns, past);
   ControlCache.update(ns, control);
 
   // **** Resort and return
-  oldServers.sort(
-    (a: ServerTarget, b: ServerTarget) => b.sanity.value - a.sanity.value
-  );
-
-  return oldServers;
+  // ns.tprint(tTargets);
+  return tServers;
 }
 
 // ******** Styling and Display
@@ -398,22 +373,23 @@ export async function main(ns: NS) {
 
   // NOTE: ONETIME CODE
   let cLevel = -1;
-  const networkRam = -1; // FIXME:
+  let networkRam = -1; // FIXME:
   let servers: any = [];
 
   while (true) {
     ns.clearLog();
     const now = performance.now();
     const control = ControlCache.read(ns, 'control');
-    const { hackTargets, hackTargetsPrep } = control;
-    // const pLevel = control.level;
+    const { hackTargets } = control;
+    // const pLevel = control.level; // FIXME:
     updateHeaders(ns, now, start, networkRam);
 
     // ******** Update Nodes & Servers on change
-    const pLevel = ns.getPlayer().skills.hacking;
+    const pLevel = ns.getPlayer().skills.hacking; // FIXME:
     if (pLevel > cLevel) {
       cLevel = pLevel;
-      servers = updateServers(ns, servers, hackTargets, hackTargetsPrep);
+      networkRam = updateRam(updateNodes(ns)).total;
+      servers = updateServers(ns, servers, hackTargets);
     }
 
     // ******** Servers each tick

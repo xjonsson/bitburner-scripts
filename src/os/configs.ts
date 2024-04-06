@@ -44,7 +44,7 @@ export const CONFIGS: any = {
   hosting: {
     hostingTargetCount: 25, // 25 (Real Max)
     hostingStartRam: 16,
-    hostingTargetRam: 32768, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+    hostingTargetRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
     hackSkim: 0.1, // 10%
@@ -55,10 +55,16 @@ export const CONFIGS: any = {
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
-    hackBatches: 128, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 15, // Only work on 25 servers (Add hack + prep)
-    hackTargetsPrepMax: 5, // Prepare the next 5 (needs to be less than 2)
-    hackDistance: 15, // How much above 50% of player level we will target
+    hackBatches: 16, // 128, // Batch 128 hack, weak, grow, weak
+    hackTargetsMax: 20, // Only work on 25 servers
+    hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
+    /* hack Batches is the number of perfect HWGW being fired
+     * we only target servers where our largest server can perfect batch to prevent locks
+     * Target max is the amount of targets to focus on at the same time
+     * TargetsPrep is the number of simultanious batches we need before switching targets
+     * Retargeting happens on player level change
+     */
+    // hackDistance: 15, // How much above 50% of player level we will target
   },
 };
 
