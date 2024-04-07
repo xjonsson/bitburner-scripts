@@ -713,45 +713,47 @@ solvers['Algorithmic Stock Trader III'] = (data: any) => {
   return release2.toString();
 };
 
-// name: 'Algorithmic Stock Trader IV',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as [number, number[]];
-//       const k: number = data[0];
-//       const prices: number[] = data[1];
+// ******** Algorithmic Stock Trader IV
+solvers['Algorithmic Stock Trader IV'] = (_data: any) => {
+  const data = _data as [number, number[]];
+  const k: number = data[0];
+  const prices: number[] = data[1];
 
-//       const len = prices.length;
-//       if (len < 2) {
-//         return parseInt(ans) === 0;
-//       }
-//       if (k > len / 2) {
-//         let res = 0;
-//         for (let i = 1; i < len; ++i) {
-//           res += Math.max(prices[i] - prices[i - 1], 0);
-//         }
+  const len = prices.length;
+  if (len < 2) {
+    // return parseInt(ans) === 0;
+    return 0;
+  }
+  if (k > len / 2) {
+    let res = 0;
+    for (let i = 1; i < len; i += 1) {
+      res += Math.max(prices[i] - prices[i - 1], 0);
+    }
 
-//         return parseInt(ans) === res;
-//       }
+    // return parseInt(ans) === res;
+    return res;
+  }
 
-//       const hold: number[] = [];
-//       const rele: number[] = [];
-//       hold.length = k + 1;
-//       rele.length = k + 1;
-//       for (let i = 0; i <= k; ++i) {
-//         hold[i] = Number.MIN_SAFE_INTEGER;
-//         rele[i] = 0;
-//       }
+  const hold: number[] = [];
+  const rele: number[] = [];
+  hold.length = k + 1;
+  rele.length = k + 1;
+  for (let i = 0; i <= k; i += 1) {
+    hold[i] = Number.MIN_SAFE_INTEGER;
+    rele[i] = 0;
+  }
 
-//       let cur: number;
-//       for (let i = 0; i < len; ++i) {
-//         cur = prices[i];
-//         for (let j = k; j > 0; --j) {
-//           rele[j] = Math.max(rele[j], hold[j] + cur);
-//           hold[j] = Math.max(hold[j], rele[j - 1] - cur);
-//         }
-//       }
+  let cur: number;
+  for (let i = 0; i < len; i += 1) {
+    cur = prices[i];
+    for (let j = k; j > 0; j -= 1) {
+      rele[j] = Math.max(rele[j], hold[j] + cur);
+      hold[j] = Math.max(hold[j], rele[j - 1] - cur);
+    }
+  }
 
-//       return parseInt(ans) === rele[k];
-//     }
+  return rele[k];
+};
 
 // name: 'Minimum Path Sum in a Triangle',
 //     solver: (_data: unknown, ans: string): boolean => {
