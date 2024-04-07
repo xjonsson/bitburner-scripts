@@ -581,105 +581,66 @@ solvers['Sanitize Parentheses in Expression'] = (data: any) => {
   return res;
 };
 
-// name: 'Find All Valid Math Expressions',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as [string, number];
-//       const num = data[0];
-//       const target = data[1];
+// ******** Find All Valid Math Expressions
+solvers['Find All Valid Math Expressions'] = (data: any) => {
+  const num = data[0];
+  const target = data[1];
 
-//       function helper(
-//         res: string[],
-//         path: string,
-//         num: string,
-//         target: number,
-//         pos: number,
-//         evaluated: number,
-//         multed: number
-//       ): void {
-//         if (pos === num.length) {
-//           if (target === evaluated) {
-//             res.push(path);
-//           }
-//           return;
-//         }
+  /* eslint-disable no-shadow */
+  function helper(
+    res: string[],
+    path: string,
+    num: string,
+    target: number,
+    pos: number,
+    evaluated: number,
+    multed: number
+  ): void {
+    if (pos === num.length) {
+      if (target === evaluated) {
+        res.push(path);
+      }
+      return;
+    }
 
-//         for (let i = pos; i < num.length; ++i) {
-//           if (i != pos && num[pos] == '0') {
-//             break;
-//           }
-//           const cur = parseInt(num.substring(pos, i + 1));
+    for (let i = pos; i < num.length; i += 1) {
+      if (i !== pos && num[pos] === '0') {
+        break;
+      }
+      const cur = parseInt(num.substring(pos, i + 1));
 
-//           if (pos === 0) {
-//             helper(res, path + cur, num, target, i + 1, cur, cur);
-//           } else {
-//             helper(
-//               res,
-//               `${path}+${cur}`,
-//               num,
-//               target,
-//               i + 1,
-//               evaluated + cur,
-//               cur
-//             );
-//             helper(
-//               res,
-//               `${path}-${cur}`,
-//               num,
-//               target,
-//               i + 1,
-//               evaluated - cur,
-//               -cur
-//             );
-//             helper(
-//               res,
-//               `${path}*${cur}`,
-//               num,
-//               target,
-//               i + 1,
-//               evaluated - multed + multed * cur,
-//               multed * cur
-//             );
-//           }
-//         }
-//       }
+      if (pos === 0) {
+        helper(res, path + cur, num, target, i + 1, cur, cur);
+      } else {
+        helper(res, `${path}+${cur}`, num, target, i + 1, evaluated + cur, cur);
+        helper(
+          res,
+          `${path}-${cur}`,
+          num,
+          target,
+          i + 1,
+          evaluated - cur,
+          -cur
+        );
+        helper(
+          res,
+          `${path}*${cur}`,
+          num,
+          target,
+          i + 1,
+          evaluated - multed + multed * cur,
+          multed * cur
+        );
+      }
+    }
+  }
+  /* eslint-enable no-shadow */
 
-//       const sanitizedPlayerAns: string = removeBracketsFromArrayString(ans);
-//       // Don't include any "" entries in the parsed array
-//       const sanitizedPlayerAnsArr: string[] = filterTruthy(
-//         sanitizedPlayerAns.split(',')
-//       );
-//       for (let i = 0; i < sanitizedPlayerAnsArr.length; ++i) {
-//         sanitizedPlayerAnsArr[i] = removeQuotesFromString(
-//           sanitizedPlayerAnsArr[i].replace(/\s/g, '')
-//         );
-//       }
+  const result: string[] = [];
+  helper(result, '', num, target, 0, 0, 0);
 
-//       if (num == null || num.length === 0) {
-//         if (sanitizedPlayerAnsArr.length === 0) {
-//           return true;
-//         }
-//         if (
-//           sanitizedPlayerAnsArr.length === 1 &&
-//           sanitizedPlayerAnsArr[0] === ''
-//         ) {
-//           return true;
-//         }
-//         return false;
-//       }
-
-//       const result: string[] = [];
-//       helper(result, '', num, target, 0, 0, 0);
-//       // Prevent player from providing extra wrong answers and still receiving credit
-//       if (result.length !== sanitizedPlayerAnsArr.length) return false;
-
-//       for (const expr of result) {
-//         if (!sanitizedPlayerAnsArr.includes(expr)) {
-//           return false;
-//         }
-//       }
-
-//       return true;
-//     }
+  return result;
+};
 
 // name: 'HammingCodes: Integer to Encoded Binary',
 //     solver: (data: unknown, ans: string): boolean => {

@@ -56,6 +56,7 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
 
   if (tTargets.length === 0) {
     // **** Fresh load (use level)
+    // tTargets.push('n00dles');
     const hackTargets = ServerInfo.list(ns)
       .map((h: string) => ServerInfo.details(ns, h))
       .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
