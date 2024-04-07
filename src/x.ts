@@ -57,8 +57,16 @@ export async function main(ns: NS) {
 
   // ******** Single run code
   // let cLevel = -1;
-  const p = ns.getPlayer();
-  ns.print(p);
+  // const p = ns.getPlayer();
+  // ns.print(p);
+
+  const price = ns.getPurchasedServerCost(64);
+  ns.print(ns.formatNumber(price, 1));
+
+  // ns.formatNumber(
+  //   ns.getPurchasedServerUpgradeCost(existing.name, existing.ram * 2),
+  //   1
+  // );
 
   // while (true) {
   //   ns.clearLog();

@@ -674,18 +674,18 @@ solvers['Total Ways to Sum II'] = (data: any) => {
 //       return true;
 //     }
 
-// name: 'Algorithmic Stock Trader I',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       let maxCur = 0;
-//       let maxSoFar = 0;
-//       for (let i = 1; i < data.length; ++i) {
-//         maxCur = Math.max(0, (maxCur += data[i] - data[i - 1]));
-//         maxSoFar = Math.max(maxCur, maxSoFar);
-//       }
+// ******** Algorithmic Stock Trader I
+solvers['Algorithmic Stock Trader I'] = (_data: any) => {
+  const data = _data as number[];
+  let maxCur = 0;
+  let maxSoFar = 0;
+  for (let i = 1; i < data.length; i += 1) {
+    maxCur = Math.max(0, (maxCur += data[i] - data[i - 1]));
+    maxSoFar = Math.max(maxCur, maxSoFar);
+  }
 
-//       return maxSoFar.toString() === ans;
-//     }
+  return maxSoFar.toString();
+};
 
 // ******** Algorithmic Stock Trader II
 solvers['Algorithmic Stock Trader II'] = (data: any) => {

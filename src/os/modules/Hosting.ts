@@ -27,24 +27,29 @@ export async function main(ns: NS) {
 
   function getReserve() {
     const stage = ControlCache.read(ns, 'control')?.stage;
+    const sCount = ns.getPurchasedServers().length;
+
     switch (stage) {
       case 1: {
-        return CONFIGS.shoppingPrices.tor;
+        return CONFIGS.shoppingPrices.tor; // tor: 200e3, // 200 K
       }
       case 2: {
-        return CONFIGS.shoppingPrices.ssh;
+        return CONFIGS.shoppingPrices.ssh; // ssh: 500e3, // 500 K
       }
       case 4: {
-        return CONFIGS.shoppingPrices.ftp;
+        if (sCount < 8) {
+          return 0;
+        }
+        return CONFIGS.shoppingPrices.ftp; // ftp: 1.5e6, // 1.5 Million
       }
       case 6: {
-        return CONFIGS.shoppingPrices.smtp;
+        return CONFIGS.shoppingPrices.smtp; // smtp: 5e6, // 5 Million
       }
       case 8: {
-        return CONFIGS.shoppingPrices.http;
+        return CONFIGS.shoppingPrices.http; // http: 30e6, // 30 Million
       }
       case 10: {
-        return CONFIGS.shoppingPrices.sql;
+        return CONFIGS.shoppingPrices.sql; // sql: 250e6, // 250 Million
       }
       default: {
         return 0;

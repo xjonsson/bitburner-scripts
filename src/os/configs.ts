@@ -4,8 +4,8 @@ export const CONFIGS: any = {
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
     hacknetMoneyRatio: 0.5, // 50% of money will be used on hacknet
-    hostingMoneyRatio: 0.3, // 30% of money will be used on servers
-    savingsMoneyRatio: 0.2, // 20% of money will be used for savings
+    hostingMoneyRatio: 0.4, // 30% of money will be used on servers
+    savingsMoneyRatio: 0.1, // 20% of money will be used for savings
   },
   shoppingPrices: {
     tor: 200e3, // 200 K
