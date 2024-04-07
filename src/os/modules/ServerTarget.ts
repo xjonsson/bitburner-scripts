@@ -78,6 +78,12 @@ export default class ServerTarget extends Server {
       this.hackChance >= 1
     ) {
       this.sanity.action = 'HACK';
+    } else if (
+      this.sec.now <= this.sec.min &&
+      this.money.now >= this.money.max &&
+      this.hackChance < 1
+    ) {
+      this.sanity.action = 'RISK';
     } else {
       this.sanity.action = '';
     }

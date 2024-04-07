@@ -10,6 +10,8 @@ export async function main(ns: NS) {
   ns.disableLog('disableLog');
   ns.disableLog('getServerMoneyAvailable');
   ns.disableLog('getServerMaxRam');
+  ns.disableLog('purchaseServer');
+  ns.disableLog('scp');
   ns.disableLog('asleep');
   ns.clearLog();
   ns.tail();
@@ -71,8 +73,8 @@ export async function main(ns: NS) {
       });
     }
 
-    ns.print(`Reserve: ${getReserve()}`);
-    ns.printf(' %2s | %-6s | %4s | %8s ', 'ID', 'HOST', 'RAM', 'Cost');
+    ns.print(`💸 ${getReserve()}`);
+    ns.printf(' %2s %-5s %4s %5s ', 'ID', 'HOST', 'RAM', 'Cost');
     servers
       .map((hostname, index) => ({
         id: index,
@@ -93,7 +95,7 @@ export async function main(ns: NS) {
           text: `server RAM (${existing.ram * 2})`,
         });
         ns.printf(
-          ' %2s | %-5s | %6s | %6s ',
+          ' %2s %-5s %4s %5s ',
           existing.id,
           existing.name,
           ns.formatRam(existing.ram, 0),

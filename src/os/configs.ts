@@ -55,7 +55,7 @@ export const CONFIGS: any = {
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
-    hackBatches: 16, // 128, // Batch 128 hack, weak, grow, weak
+    hackBatches: 128, // 128, // Batch 128 hack, weak, grow, weak
     hackTargetsMax: 20, // Only work on 25 servers
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
     /* hack Batches is the number of perfect HWGW being fired
@@ -63,6 +63,8 @@ export const CONFIGS: any = {
      * Target max is the amount of targets to focus on at the same time
      * TargetsPrep is the number of simultanious batches we need before switching targets
      * Retargeting happens on player level change
+     * Early game 20 targets + 5 steps with low hack bathes works well
+     * Lategame with high ram 16 batches is too low, swap to 128
      */
     // hackDistance: 15, // How much above 50% of player level we will target
   },
@@ -105,7 +107,7 @@ export const TIME: any = {};
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
   // TIME.CRIMES = 2 * 1000; // 2 second updates
   // TIME.STOCKS = 1 * 1000; // 1 second updates
-  // TIME.CONTRACTS = 90 * 1000; // 1.5 min updates
+  TIME.TIMECONTRACTS = 60 * 1000; // 1.5 min updates
 })();
 
 // export const MINISAVE: any = {

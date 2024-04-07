@@ -105,19 +105,23 @@ export async function main(ns: NS) {
   // Keep the game loop going
   // let control
   const repeat = true;
+  const rowStyle = '%-8s %3s %2s %2s %6s';
   while (repeat) {
     await ns.sleep(1000);
     ns.clearLog();
-    ns.print(`Reserve: ${getReserve()}`);
-    ns.print('Node\tLevel\tRAM\tCores\tProd/s');
+    ns.print(`💸 ${getReserve()}`);
+    ns.printf(rowStyle, 'Node', 'LVL', 'GB', 'C#', 'Prod/s');
     // upgrade existing
     const ratios = [];
     let done = 0;
     for (const [i, node] of nodes.entries()) {
-      ns.print(
-        `Node ${i}\t${node.level}\t${node.ram}\t${
-          node.cores
-        }\t${ns.formatNumber(node.production, 1)}`
+      ns.printf(
+        rowStyle,
+        `Node ${i}`,
+        node.level,
+        node.ram,
+        node.cores,
+        ns.formatNumber(node.production, 1)
       );
       // get upgrades cost
       const levelUpgradeCost = ns.hacknet.getLevelUpgradeCost(i, 1);

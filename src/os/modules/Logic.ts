@@ -10,6 +10,10 @@ export function osLogic(ns: NS, stage: number): any {
   const p = PlayerCache.read(ns, 'player');
   switch (stage) {
     // ******** Minimal startup
+    // TODO: less than faction (than start working for money)
+    // TODO: home ram < 64 save 11m (Less makes it impossible to run)
+    // TODO: home ram < 128 save 32m
+    // TODO: home ram < 256 save 100m
     case 0: {
       // ******** Setup Hacknet
       if (ns.hacknet.numNodes() >= 8) {
@@ -185,6 +189,16 @@ export function osLogic(ns: NS, stage: number): any {
       // NOTE: Money / 100 Billion
       // NOTE: Hacking / 2500 JOIN DAEDALUS
     }
+
+    // NOTE: Get Red pill
+
+    // NOTE: Install red pill
+
+    // NOTE: World daemon visible (Through The-Cave)
+
+    // NOTE: Backdoor World daemon
+    // 5 Ports
+    // 3000 hacking level
     default: {
       return { done: false, msg: '' };
     }
