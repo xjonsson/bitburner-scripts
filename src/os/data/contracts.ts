@@ -265,6 +265,164 @@ export function comprLZDecode(compr: string): string | null {
   return plain;
 }
 
+export function HammingEncode(data: number): string {
+  const enc: number[] = [0];
+  const dataBits: any[] = data.toString(2).split('').reverse();
+
+  dataBits.forEach((e, i, a) => {
+    a[i] = parseInt(e);
+  });
+
+  let k = dataBits.length;
+
+  /* NOTE: writing the data like this flips the endianness, this is what the
+   * original implementation by Hedrauta did so I'm keeping it like it was. */
+  for (let i = 1; k > 0; i += 1) {
+    // eslint-disable-next-line no-bitwise
+    if ((i & (i - 1)) !== 0) {
+      enc[i] = dataBits[(k -= 1)];
+    } else {
+      enc[i] = 0;
+    }
+  }
+
+  let parity: any = 0;
+
+  /* Figure out the subsection parities */
+  for (let i = 0; i < enc.length; i += 1) {
+    if (enc[i]) {
+      // eslint-disable-next-line no-bitwise
+      parity ^= i;
+    }
+  }
+
+  parity = parity.toString(2).split('').reverse();
+  parity.forEach((e: any, i: any, a: any) => {
+    a[i] = parseInt(e);
+  });
+
+  /* Set the parity bits accordingly */
+  for (let i = 0; i < parity.length; i += 1) {
+    enc[2 ** i] = parity[i] ? 1 : 0;
+  }
+
+  parity = 0;
+  /* Figure out the overall parity for the entire block */
+  for (let i = 0; i < enc.length; i += 1) {
+    if (enc[i]) {
+      parity += 1;
+    }
+  }
+
+  /* Finally set the overall parity bit */
+  enc[0] = parity % 2 === 0 ? 0 : 1;
+
+  return enc.join('');
+}
+
+// export function HammingEncodeProperly(data: number): string {
+//   /* How many bits do we need?
+//    * n = 2^m
+//    * k = 2^m - m - 1
+//    * where k is the number of data bits, m the number
+//    * of parity bits and n the number of total bits. */
+
+//   let m = 1;
+
+//   while (2 ** (2 ** m - m - 1) - 1 < data) {
+//     m++;
+//   }
+
+//   const n: number = 2 ** m;
+//   const k: number = 2 ** m - m - 1;
+
+//   const enc: number[] = [0];
+//   const data_bits: any[] = data.toString(2).split("").reverse();
+
+//   data_bits.forEach((e, i, a) => {
+//     a[i] = parseInt(e);
+//   });
+
+//   /* Flip endianness as in the original implementation by Hedrauta
+//    * and write the data back to front
+//    * XXX why do we do this? */
+//   for (let i = 1, j = k; i < n; i++) {
+//     if ((i & (i - 1)) != 0) {
+//       enc[i] = data_bits[--j] ? data_bits[j] : 0;
+//     }
+//   }
+
+//   let parity: any = 0;
+
+//   /* Figure out the subsection parities */
+//   for (let i = 0; i < n; i++) {
+//     if (enc[i]) {
+//       parity ^= i;
+//     }
+//   }
+
+//   parity = parity.toString(2).split("").reverse();
+//   parity.forEach((e: any, i: any, a: any) => {
+//     a[i] = parseInt(e);
+//   });
+
+//   /* Set the parity bits accordingly */
+//   for (let i = 0; i < m; i++) {
+//     enc[2 ** i] = parity[i] ? 1 : 0;
+//   }
+
+//   parity = 0;
+//   /* Figure out the overall parity for the entire block */
+//   for (let i = 0; i < n; i++) {
+//     if (enc[i]) {
+//       parity++;
+//     }
+//   }
+
+//   /* Finally set the overall parity bit */
+//   enc[0] = parity % 2 == 0 ? 0 : 1;
+
+//   return enc.join("");
+// }
+
+// export function HammingDecode(data: string): number {
+//   let err = 0;
+//   const bits: number[] = [];
+
+//   /* TODO why not just work with an array of digits from the start? */
+//   for (const i in data.split("")) {
+//     const bit = parseInt(data[i]);
+//     bits[i] = bit;
+
+//     if (bit) {
+//       err ^= +i;
+//     }
+//   }
+
+//   /* If err != 0 then it spells out the index of the bit that was flipped */
+//   if (err) {
+//     /* Flip to correct */
+//     bits[err] = bits[err] ? 0 : 1;
+//   }
+
+//   /* Now we have to read the message, bit 0 is unused (it's the overall parity bit
+//    * which we don't care about). Each bit at an index that is a power of 2 is
+//    * a parity bit and not part of the actual message. */
+
+//   let ans = "";
+
+//   for (let i = 1; i < bits.length; i++) {
+//     /* i is not a power of two so it's not a parity bit */
+//     if ((i & (i - 1)) != 0) {
+//       ans += bits[i];
+//     }
+//   }
+
+//   /* TODO to avoid ambiguity about endianness why not let the player return the extracted (and corrected)
+//    * data bits, rather than guessing at how to convert it to a decimal string? */
+//   return parseInt(ans, 2);
+// }
+
 // ******** CONTRACT HELPERS END ******** //
 
 // ******** CONTRACT SOLVERS START ******** //
@@ -855,11 +1013,11 @@ solvers['Find All Valid Math Expressions'] = (data: any) => {
   return result;
 };
 
-// name: 'HammingCodes: Integer to Encoded Binary',
-//     solver: (data: unknown, ans: string): boolean => {
-//       if (typeof data !== 'number') throw new Error('solver expected number');
-//       return ans === HammingEncode(data);
-//     }
+// ******** HammingCodes: Integer to Encoded Binary
+solvers['HammingCodes: Integer to Encoded Binary'] = (data: any) => {
+  if (typeof data !== 'number') throw new Error('solver expected number');
+  return HammingEncode(data);
+};
 
 // name: 'HammingCodes: Encoded Binary to Integer',
 //     solver: (data: unknown, ans: string): boolean => {
@@ -992,7 +1150,7 @@ solvers['Find All Valid Math Expressions'] = (data: any) => {
 //     }
 
 // ******** Compression II: LZ Decompression
-solvers['Compression II: LZ Decompression'] = (data: unknown) => {
+solvers['Compression II: LZ Decompression'] = (data: any) => {
   if (typeof data !== 'string') throw new Error('solver expected string');
   return comprLZDecode(data);
 };
