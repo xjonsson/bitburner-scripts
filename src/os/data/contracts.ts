@@ -1166,24 +1166,21 @@ solvers['Compression II: LZ Decompression'] = (data: any) => {
 //       );
 //     }
 
-// name: 'Encryption I: Caesar Cipher',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       if (!Array.isArray(_data))
-//         throw new Error('data should be array of string');
-//       const data = _data as [string, number];
-//       // data = [plaintext, shift value]
-//       // build char array, shifting via map and join to final results
-//       const cipher = [...data[0]]
-//         .map((a) =>
-//           a === ' '
-//             ? a
-//             : String.fromCharCode(
-//                 ((a.charCodeAt(0) - 65 - data[1] + 26) % 26) + 65
-//               )
-//         )
-//         .join('');
-//       return cipher === ans;
-//     }
+// ******** Encryption I: Caesar Cipher
+solvers['Encryption I: Caesar Cipher'] = (_data: any) => {
+  if (!Array.isArray(_data)) throw new Error('data should be array of string');
+  const data = _data as [string, number];
+  // data = [plaintext, shift value]
+  // build char array, shifting via map and join to final results
+  const cipher = [...data[0]]
+    .map((a) =>
+      a === ' '
+        ? a
+        : String.fromCharCode(((a.charCodeAt(0) - 65 - data[1] + 26) % 26) + 65)
+    )
+    .join('');
+  return cipher;
+};
 
 // name: 'Encryption II: Vigenère Cipher',
 //     solver: (_data: unknown, ans: string): boolean => {
