@@ -56,7 +56,7 @@ export const CONFIGS: any = {
      * this prevents situations where you need to wait 30m for a large windfall
      */
     hackBatches: 128, // 128, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 20, // Only work on 25 servers
+    hackTargetsMax: 10, // Only work on 25 servers
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
     /* hack Batches is the number of perfect HWGW being fired
      * we only target servers where our largest server can perfect batch to prevent locks
@@ -88,6 +88,7 @@ export const CORE: any = {};
   // Modules
   CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
   CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
+  CORE.CONTRACTS = `${PATHS.MODULES}/Contract.js`;
 })();
 
 export const TIME: any = {};

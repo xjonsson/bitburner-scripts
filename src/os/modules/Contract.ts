@@ -3,7 +3,6 @@ import { NS } from '@ns';
 import { TIME } from '/os/configs';
 import { ServerInfo } from '/os/modules/Server';
 import { solvers } from '/os/data/contracts';
-import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
 // ******** Globals
@@ -43,12 +42,6 @@ export function attemptContract(ns: NS, contract: any) {
       contract.host
     );
 
-    // const reward = ns.codingcontract.attempt(
-    //   solution,
-    //   contract.file,
-    //   contract.host,
-    //   { returnReward: true }
-    // );
     if (reward) {
       ns.tprint(`${reward} for solving "${contract.type}" on ${contract.host}`);
     } else {

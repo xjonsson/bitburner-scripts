@@ -34,6 +34,12 @@ const updateHosting = async (ns: NS) => {
   }
 };
 
+const updateContracts = async (ns: NS) => {
+  if (!ns.isRunning(CORE.CONTRACTS, 'home')) {
+    await launch(ns, CORE.CONTRACTS);
+  }
+};
+
 export async function main(ns: NS) {
   ns.disableLog('disableLog');
   ns.disableLog('asleep');
@@ -48,7 +54,7 @@ export async function main(ns: NS) {
   updatePlayer(ns).catch(console.error);
   updateHacknet(ns).catch(console.error); // TODO: Improve timings
   updateHosting(ns).catch(console.error); // TODO: Improve performance
-  // updateServers(ns).catch(console.error); // FIXME:
+  updateContracts(ns).catch(console.error); // TODO: Complete solutions
 
   // Keep the game loop going
   while (true) {
