@@ -91,22 +91,21 @@ function convert2DArrayToString(arr: any) {
 //       return ways[data] === parseInt(ans, 10);
 //     },
 
-// name: 'Total Ways to Sum II',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as [number, number[]];
-//       // https://www.geeksforgeeks.org/coin-change-dp-7/?ref=lbp
-//       const n = data[0];
-//       const s = data[1];
-//       const ways: number[] = [1];
-//       ways.length = n + 1;
-//       ways.fill(0, 1);
-//       for (let i = 0; i < s.length; i++) {
-//         for (let j = s[i]; j <= n; j++) {
-//           ways[j] += ways[j - s[i]];
-//         }
-//       }
-//       return ways[n] === parseInt(ans, 10);
-//     }
+// ******** Total Ways to Sum II
+solvers['Total Ways to Sum II'] = (data: any) => {
+  // https://www.geeksforgeeks.org/coin-change-dp-7/?ref=lbp
+  const n = data[0];
+  const s = data[1];
+  const ways: number[] = [1];
+  ways.length = n + 1;
+  ways.fill(0, 1);
+  for (let i = 0; i < s.length; i += 1) {
+    for (let j = s[i]; j <= n; j += 1) {
+      ways[j] += ways[j - s[i]];
+    }
+  }
+  return ways[n];
+};
 
 // name: 'Spiralize Matrix',
 //     solver: (_data: unknown, ans: string): boolean => {
