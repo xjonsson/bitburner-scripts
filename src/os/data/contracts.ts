@@ -412,34 +412,30 @@ solvers['Algorithmic Stock Trader III'] = (data: any) => {
 //       return parseInt(ans) === currentRow[n - 1];
 //     }
 
-// name: 'Unique Paths in a Grid II',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[][];
-//       const obstacleGrid: number[][] = [];
-//       obstacleGrid.length = data.length;
-//       for (let i = 0; i < obstacleGrid.length; ++i) {
-//         obstacleGrid[i] = data[i].slice();
-//       }
+// ******** Unique Paths in a Grid II
+solvers['Unique Paths in a Grid II'] = (data: any) => {
+  const obstacleGrid: number[][] = [];
+  obstacleGrid.length = data.length;
+  for (let i = 0; i < obstacleGrid.length; i += 1) {
+    obstacleGrid[i] = data[i].slice();
+  }
 
-//       for (let i = 0; i < obstacleGrid.length; i++) {
-//         for (let j = 0; j < obstacleGrid[0].length; j++) {
-//           if (obstacleGrid[i][j] == 1) {
-//             obstacleGrid[i][j] = 0;
-//           } else if (i == 0 && j == 0) {
-//             obstacleGrid[0][0] = 1;
-//           } else {
-//             obstacleGrid[i][j] =
-//               (i > 0 ? obstacleGrid[i - 1][j] : 0) +
-//               (j > 0 ? obstacleGrid[i][j - 1] : 0);
-//           }
-//         }
-//       }
+  for (let i = 0; i < obstacleGrid.length; i += 1) {
+    for (let j = 0; j < obstacleGrid[0].length; j += 1) {
+      if (obstacleGrid[i][j] === 1) {
+        obstacleGrid[i][j] = 0;
+      } else if (i === 0 && j === 0) {
+        obstacleGrid[0][0] = 1;
+      } else {
+        obstacleGrid[i][j] =
+          (i > 0 ? obstacleGrid[i - 1][j] : 0) +
+          (j > 0 ? obstacleGrid[i][j - 1] : 0);
+      }
+    }
+  }
 
-//       return (
-//         obstacleGrid[obstacleGrid.length - 1][obstacleGrid[0].length - 1] ===
-//         parseInt(ans)
-//       );
-//     }
+  return obstacleGrid[obstacleGrid.length - 1][obstacleGrid[0].length - 1];
+};
 
 // name: 'Shortest Path in a Grid',
 //     solver: (_data: unknown, ans: string): boolean => {

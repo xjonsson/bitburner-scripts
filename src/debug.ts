@@ -56,13 +56,14 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
 
   if (tTargets.length === 0) {
     // **** Fresh load (use level)
-    // tTargets.push('n00dles');
     const hackTargets = ServerInfo.list(ns)
       .map((h: string) => ServerInfo.details(ns, h))
       .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
       .map((s: Server) => new ServerTarget(ns, s.hostname))
       .sort(
-        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
+        (a: ServerTarget, b: ServerTarget) => a.level - b.level
+        // Sort so n00dles is first on first run
+        // (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
       )
       .slice(0, hackTargetsMax);
 
