@@ -1,10 +1,32 @@
+// TODO: Augments path
+/* Augments path could go
+ * [x] Netburners - Hacknet
+ * [x] Sector-12
+ * [x] CyberSec (CSEC) - Milestone
+ * [x] Tian Di Hui
+ * [ ] NiteSec (avmnite-02h) - Milestone [112.500k rep]
+ * [ ] Aevum (40m)
+ * [ ] The Black Hand (I.I.I.I) - Milestone
+ * [ ] Chongqing
+ * [ ] New Tokyo
+ * [ ] Ishima
+ * [ ] Clarke Inc (Aevum) 400k [H 225 IT Intern]
+ * [ ] Bachman & Associates (Aevum) 400k [H 225 IT Intern]
+ * [ ] NWO (Volhaven) 400k [H 250 IT Intern]
+ * [ ] Bitrunners (run4theh111z) - Milestone
+ * [ ] OmniTek Incorporated (Volhaven) 400k [H 225 IT Intern]
+ * [ ] Fulcrum Technologies (Aevum) Backdoor 1585 400k [H 225 IT Intern]
+ * [ ] Daedalus [Augmentations: a / 30] | Money: m / $100.000b | Hacking: 2500]
+ * [ ] w0rld_d43m0n [H 3000]
+ */
+
 export const CONFIGS: any = {
   ramReserve: 32, // 8GB reserved ram
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
-    hacknetMoneyRatio: 0.5, // 50% of money will be used on hacknet
-    hostingMoneyRatio: 0.4, // 30% of money will be used on servers
+    hacknetMoneyRatio: 0.3, // 50% of money will be used on hacknet
+    hostingMoneyRatio: 0.6, // 30% of money will be used on servers
     savingsMoneyRatio: 0.1, // 20% of money will be used for savings
   },
   shoppingPrices: {

@@ -426,18 +426,19 @@ export function HammingEncode(data: number): string {
 // ******** CONTRACT HELPERS END ******** //
 
 // ******** CONTRACT SOLVERS START ******** //
-// solvers['Find Largest Prime Factor'] = (data: any) => {
-//   let fac = 2;
-//   let n: number = data;
-//   while (n > (fac - 1) * (fac - 1)) {
-//     while (n % fac === 0) {
-//       n = Math.round(n / fac);
-//     }
-//     fac += 1;
-//   }
+// ******** Find Largest Prime Factor
+solvers['Find Largest Prime Factor'] = (data: any) => {
+  let fac = 2;
+  let n: number = data;
+  while (n > (fac - 1) * (fac - 1)) {
+    while (n % fac === 0) {
+      n = Math.round(n / fac);
+    }
+    fac += 1;
+  }
 
-//   return n === 1 ? fac - 1 : n;
-// };
+  return n === 1 ? fac - 1 : n;
+};
 
 // name: 'Subarray with Maximum Sum',
 //     numTries: 10,

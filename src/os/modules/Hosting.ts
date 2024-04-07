@@ -34,6 +34,9 @@ export async function main(ns: NS) {
         return CONFIGS.shoppingPrices.tor; // tor: 200e3, // 200 K
       }
       case 2: {
+        if (sCount < 4) {
+          return 0;
+        }
         return CONFIGS.shoppingPrices.ssh; // ssh: 500e3, // 500 K
       }
       case 4: {
