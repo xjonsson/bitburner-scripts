@@ -38,6 +38,7 @@ export async function main(ns: NS) {
   ns.tail();
   const start = performance.now();
   let recheck = -1;
+  let tShare = 0;
 
   const nodes = updateNodes(ns);
 
@@ -52,7 +53,9 @@ export async function main(ns: NS) {
       `⏲️ ${formatTime(ns, now - start)} | 🔋 ${ns.formatNumber(
         sharePower,
         2
-      )} | (${ns.formatRam(nodesRam, 2)}) ${shareRamRatio * 100}%`
+      )} | (${ns.formatRam(nodesRam, 2)}) ${
+        shareRamRatio * 100
+      }% | 🧵 ${ns.formatNumber(tShare, 3)}`
     );
     // await ns.share();
 
@@ -66,13 +69,16 @@ export async function main(ns: NS) {
     // }
 
     if (recheck < now) {
+      tShare = 0;
       ns.print('Recheck');
+      // eslint-disable-next-line no-loop-func
       nodes.forEach((n: Server) => {
         const nRam = n.ram.now * shareRamRatio;
         const nShare = nodeThreads(nRam, xShareRam);
         if (nShare > 0 && n.ram.now > xShareRam) {
           ns.exec(xShare, n.hostname, nShare, false);
-          ns.print(`${n.hostname} (${nShare})`);
+          // ns.print(`${n.hostname} (${nShare})`);
+          tShare += nShare;
         }
       });
       recheck = performance.now() + 11 * 1000;
