@@ -322,22 +322,21 @@ solvers['Algorithmic Stock Trader II'] = (data: any) => {
   return profit.toString();
 };
 
-// name: 'Algorithmic Stock Trader III',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       let hold1 = Number.MIN_SAFE_INTEGER;
-//       let hold2 = Number.MIN_SAFE_INTEGER;
-//       let release1 = 0;
-//       let release2 = 0;
-//       for (const price of data) {
-//         release2 = Math.max(release2, hold2 + price);
-//         hold2 = Math.max(hold2, release1 - price);
-//         release1 = Math.max(release1, hold1 + price);
-//         hold1 = Math.max(hold1, price * -1);
-//       }
+// ******** Algorithmic Stock Trader III
+solvers['Algorithmic Stock Trader III'] = (data: any) => {
+  let hold1 = Number.MIN_SAFE_INTEGER;
+  let hold2 = Number.MIN_SAFE_INTEGER;
+  let release1 = 0;
+  let release2 = 0;
+  for (const price of data) {
+    release2 = Math.max(release2, hold2 + price);
+    hold2 = Math.max(hold2, release1 - price);
+    release1 = Math.max(release1, hold1 + price);
+    hold1 = Math.max(hold1, price * -1);
+  }
 
-//       return release2.toString() === ans;
-//     }
+  return release2.toString();
+};
 
 // name: 'Algorithmic Stock Trader IV',
 //     solver: (_data: unknown, ans: string): boolean => {
