@@ -16,6 +16,7 @@ export class Control {
   isPlayerCheck: boolean;
   isShopHacknet: boolean;
   isShopHosting: boolean;
+  isReserve: number;
   hackTargets: [];
 
   // ******** Constructor
@@ -28,9 +29,14 @@ export class Control {
     this.level = past ? past.level : -1;
     this.challenge = past ? past.challenge : -1;
     this.isPlayerCheck = past ? past.isPlayerCheck : true;
-    this.isShopHacknet = past ? past.isShopHacknet : true;
-    this.isShopHosting = past ? past.isShopHosting : true;
+    // this.isShopHacknet = past ? past.isShopHacknet : true;
+    // this.isShopHosting = past ? past.isShopHosting : true;
     this.hackTargets = past ? past.hackTargets : [];
+
+    // ******** Update shopping based on logic
+    this.isShopHacknet = this.phase.hacknet;
+    this.isShopHosting = this.phase.hosting;
+    this.isReserve = this.phase.reserve;
 
     // ******** Check for stage change
     if (this.phase.done) {

@@ -40,36 +40,36 @@ export async function main(ns: NS) {
     return nodesTemp;
   }
 
-  function getReserve() {
-    const stage = ControlCache.read(ns, 'control')?.stage;
-    switch (stage) {
-      case 1: {
-        return CONFIGS.shoppingPrices.tor;
-      }
-      case 2: {
-        return CONFIGS.shoppingPrices.ssh;
-      }
-      case 4: {
-        return CONFIGS.shoppingPrices.ftp;
-      }
-      case 6: {
-        return CONFIGS.shoppingPrices.smtp;
-      }
-      case 8: {
-        return CONFIGS.shoppingPrices.http;
-      }
-      case 10: {
-        return CONFIGS.shoppingPrices.sql;
-      }
-      default: {
-        return 0;
-      }
-    }
-  }
+  // function getReserve() {
+  //   const stage = ControlCache.read(ns, 'control')?.stage;
+  //   switch (stage) {
+  //     case 1: {
+  //       return CONFIGS.shoppingPrices.tor;
+  //     }
+  //     case 2: {
+  //       return CONFIGS.shoppingPrices.ssh;
+  //     }
+  //     case 4: {
+  //       return CONFIGS.shoppingPrices.ftp;
+  //     }
+  //     case 6: {
+  //       return CONFIGS.shoppingPrices.smtp;
+  //     }
+  //     case 8: {
+  //       return CONFIGS.shoppingPrices.http;
+  //     }
+  //     case 10: {
+  //       return CONFIGS.shoppingPrices.sql;
+  //     }
+  //     default: {
+  //       return 0;
+  //     }
+  //   }
+  // }
 
-  function getMoney() {
+  function getMoney(reserve: number) {
     return (
-      (ns.getServerMoneyAvailable('home') - (moneyReserve + getReserve())) *
+      (ns.getServerMoneyAvailable('home') - (moneyReserve + reserve)) *
       hacknetMoneyRatio
     );
   }
@@ -109,110 +109,116 @@ export async function main(ns: NS) {
   while (repeat) {
     await ns.sleep(1000);
     ns.clearLog();
-    ns.print(`💸 ${getReserve()}`);
+    const control = ControlCache.read(ns, 'control');
+    const isShopHacknet = control?.isShopHacknet;
+    const isReserve = control?.isReserve;
+
+    ns.print(`💸 ${ns.formatNumber(isReserve, 1)}`);
     ns.printf(rowStyle, 'Node', 'LVL', 'GB', 'C#', 'Prod/s');
     // upgrade existing
     const ratios = [];
     let done = 0;
-    for (const [i, node] of nodes.entries()) {
-      ns.printf(
-        rowStyle,
-        `Node ${i}`,
-        node.level,
-        node.ram,
-        node.cores,
-        ns.formatNumber(node.production, 1)
-      );
-      // get upgrades cost
-      const levelUpgradeCost = ns.hacknet.getLevelUpgradeCost(i, 1);
-      const ramUpgradeCost = ns.hacknet.getRamUpgradeCost(i, 1);
-      const coreUpgradeCost = ns.hacknet.getCoreUpgradeCost(i, 1);
-      // get prod. growth / cost ratios
-      const levelPaybackTime = calculatePaybackTime(
-        levelUpgradeCost,
-        calculateProduction(node.level, node.ram, node.cores),
-        calculateProduction(node.level + 1, node.ram, node.cores)
-      );
-      const ramPaybackTime = calculatePaybackTime(
-        ramUpgradeCost,
-        calculateProduction(node.level, node.ram, node.cores),
-        calculateProduction(node.level, node.ram * 2, node.cores)
-      );
-      const corePaybackTime = calculatePaybackTime(
-        coreUpgradeCost,
-        calculateProduction(node.level, node.ram, node.cores),
-        calculateProduction(node.level, node.ram, node.cores + 1)
-      );
-      if (node.level < hacknetTargetLevel) {
-        ratios.push({
-          cost: levelUpgradeCost,
-          payback: levelPaybackTime,
-          idx: i,
-          upgrade: UpgradeType.level,
-        });
-      }
-      if (node.ram < hacknetTargetRam) {
-        ratios.push({
-          cost: ramUpgradeCost,
-          payback: ramPaybackTime,
-          idx: i,
-          upgrade: UpgradeType.ram,
-        });
-      }
-      if (node.cores < hacknetTargetCores) {
-        ratios.push({
-          cost: coreUpgradeCost,
-          payback: corePaybackTime,
-          idx: i,
-          upgrade: UpgradeType.core,
-        });
+    if (isShopHacknet) {
+      for (const [i, node] of nodes.entries()) {
+        ns.printf(
+          rowStyle,
+          `Node ${i}`,
+          node.level,
+          node.ram,
+          node.cores,
+          ns.formatNumber(node.production, 1)
+        );
+        // get upgrades cost
+        const levelUpgradeCost = ns.hacknet.getLevelUpgradeCost(i, 1);
+        const ramUpgradeCost = ns.hacknet.getRamUpgradeCost(i, 1);
+        const coreUpgradeCost = ns.hacknet.getCoreUpgradeCost(i, 1);
+        // get prod. growth / cost ratios
+        const levelPaybackTime = calculatePaybackTime(
+          levelUpgradeCost,
+          calculateProduction(node.level, node.ram, node.cores),
+          calculateProduction(node.level + 1, node.ram, node.cores)
+        );
+        const ramPaybackTime = calculatePaybackTime(
+          ramUpgradeCost,
+          calculateProduction(node.level, node.ram, node.cores),
+          calculateProduction(node.level, node.ram * 2, node.cores)
+        );
+        const corePaybackTime = calculatePaybackTime(
+          coreUpgradeCost,
+          calculateProduction(node.level, node.ram, node.cores),
+          calculateProduction(node.level, node.ram, node.cores + 1)
+        );
+        if (node.level < hacknetTargetLevel) {
+          ratios.push({
+            cost: levelUpgradeCost,
+            payback: levelPaybackTime,
+            idx: i,
+            upgrade: UpgradeType.level,
+          });
+        }
+        if (node.ram < hacknetTargetRam) {
+          ratios.push({
+            cost: ramUpgradeCost,
+            payback: ramPaybackTime,
+            idx: i,
+            upgrade: UpgradeType.ram,
+          });
+        }
+        if (node.cores < hacknetTargetCores) {
+          ratios.push({
+            cost: coreUpgradeCost,
+            payback: corePaybackTime,
+            idx: i,
+            upgrade: UpgradeType.core,
+          });
+        }
+
+        if (
+          node.level >= hacknetTargetLevel &&
+          node.ram >= hacknetTargetRam &&
+          node.cores >= hacknetTargetCores
+        ) {
+          done += 1;
+        }
       }
 
       if (
-        node.level >= hacknetTargetLevel &&
-        node.ram >= hacknetTargetRam &&
-        node.cores >= hacknetTargetCores
+        nodes.size <= hacknetTargetCount &&
+        ns.hacknet.getPurchaseNodeCost() < getMoney(isReserve)
       ) {
-        done += 1;
-      }
-    }
-
-    if (
-      nodes.size <= hacknetTargetCount &&
-      ns.hacknet.getPurchaseNodeCost() < getMoney()
-    ) {
-      ns.hacknet.purchaseNode();
-    } else {
-      if (done >= hacknetTargetCount) {
-        const past = ControlCache.read(ns, 'control');
-        const control = ControlInfo.details(ns, past);
-        control.isShopHacknet = false;
-        await ControlCache.update(ns, control);
-        return;
-      }
-
-      // const { cost, idx, upgrade } = ratios.sort((a, b) => a.cost - b.cost)[0];
-      const { cost, idx, upgrade } = ratios.sort(
-        (a, b) => a.payback - b.payback
-      )[0];
-      if (Number.isFinite(cost) && cost) {
-        while (getMoney() < cost) {
-          await ns.sleep(hacknetSleepTime);
+        ns.hacknet.purchaseNode();
+      } else {
+        if (done >= hacknetTargetCount) {
+          // const past = ControlCache.read(ns, 'control');
+          // const control = ControlInfo.details(ns, past);
+          // control.isShopHacknet = false;
+          // await ControlCache.update(ns, control);
+          return;
         }
-        switch (upgrade) {
-          case UpgradeType.level:
-            ns.hacknet.upgradeLevel(idx, 1);
-            break;
-          case UpgradeType.ram:
-            ns.hacknet.upgradeRam(idx, 1);
-            break;
-          case UpgradeType.core:
-            ns.hacknet.upgradeCore(idx, 1);
-            break;
-          default:
+
+        // const { cost, idx, upgrade } = ratios.sort((a, b) => a.cost - b.cost)[0];
+        const { cost, idx, upgrade } = ratios.sort(
+          (a, b) => a.payback - b.payback
+        )[0];
+        if (Number.isFinite(cost) && cost) {
+          while (getMoney(isReserve) < cost) {
+            await ns.sleep(hacknetSleepTime);
+          }
+          switch (upgrade) {
+            case UpgradeType.level:
+              ns.hacknet.upgradeLevel(idx, 1);
+              break;
+            case UpgradeType.ram:
+              ns.hacknet.upgradeRam(idx, 1);
+              break;
+            case UpgradeType.core:
+              ns.hacknet.upgradeCore(idx, 1);
+              break;
+            default:
+          }
         }
       }
+      nodes = updateNodes();
     }
-    nodes = updateNodes();
   }
 }

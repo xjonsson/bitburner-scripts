@@ -76,142 +76,146 @@ function convert2DArrayToString(arr: any) {
 // }
 
 // compress plaintest string
-// export function comprLZEncode(plain: string): string {
-//   // for state[i][j]:
-//   //      if i is 0, we're adding a literal of length j
-//   //      else, we're adding a backreference of offset i and length j
-//   let cur_state: (string | null)[][] = Array.from(Array(10), () =>
-//     Array(10).fill(null)
-//   );
-//   let new_state: (string | null)[][] = Array.from(Array(10), () => Array(10));
+export function comprLZEncode(plain: string): string {
+  // for state[i][j]:
+  //      if i is 0, we're adding a literal of length j
+  //      else, we're adding a backreference of offset i and length j
+  let curState: (string | null)[][] = Array.from(Array(10), () =>
+    Array(10).fill(null)
+  );
+  let newState: (string | null)[][] = Array.from(Array(10), () => Array(10));
 
-//   function set(
-//     state: (string | null)[][],
-//     i: number,
-//     j: number,
-//     str: string
-//   ): void {
-//     const current = state[i][j];
-//     if (current == null || str.length < current.length) {
-//       state[i][j] = str;
-//     } else if (str.length === current.length && Math.random() < 0.5) {
-//       // if two strings are the same length, pick randomly so that
-//       // we generate more possible inputs to Compression II
-//       state[i][j] = str;
-//     }
-//   }
+  function set(
+    state: (string | null)[][],
+    i: number,
+    j: number,
+    str: string
+  ): void {
+    const current = state[i][j];
+    if (current == null || str.length < current.length) {
+      state[i][j] = str;
+    } else if (str.length === current.length && Math.random() < 0.5) {
+      // if two strings are the same length, pick randomly so that
+      // we generate more possible inputs to Compression II
+      state[i][j] = str;
+    }
+  }
 
-//   // initial state is a literal of length 1
-//   cur_state[0][1] = '';
+  // initial state is a literal of length 1
+  curState[0][1] = '';
 
-//   for (let i = 1; i < plain.length; ++i) {
-//     for (const row of new_state) {
-//       row.fill(null);
-//     }
-//     const c = plain[i];
+  for (let i = 1; i < plain.length; i += 1) {
+    for (const row of newState) {
+      row.fill(null);
+    }
+    const c = plain[i];
 
-//     // handle literals
-//     for (let length = 1; length <= 9; ++length) {
-//       const string = cur_state[0][length];
-//       if (string == null) {
-//         continue;
-//       }
+    // handle literals
+    for (let length = 1; length <= 9; length += 1) {
+      const string = curState[0][length];
+      if (string == null) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-//       if (length < 9) {
-//         // extend current literal
-//         set(new_state, 0, length + 1, string);
-//       } else {
-//         // start new literal
-//         set(new_state, 0, 1, `${string}9${plain.substring(i - 9, i)}0`);
-//       }
+      if (length < 9) {
+        // extend current literal
+        set(newState, 0, length + 1, string);
+      } else {
+        // start new literal
+        set(newState, 0, 1, `${string}9${plain.substring(i - 9, i)}0`);
+      }
 
-//       for (let offset = 1; offset <= Math.min(9, i); ++offset) {
-//         if (plain[i - offset] === c) {
-//           // start new backreference
-//           set(
-//             new_state,
-//             offset,
-//             1,
-//             string + String(length) + plain.substring(i - length, i)
-//           );
-//         }
-//       }
-//     }
+      for (let offset = 1; offset <= Math.min(9, i); offset += 1) {
+        if (plain[i - offset] === c) {
+          // start new backreference
+          set(
+            newState,
+            offset,
+            1,
+            string + String(length) + plain.substring(i - length, i)
+          );
+        }
+      }
+    }
 
-//     // handle backreferences
-//     for (let offset = 1; offset <= 9; ++offset) {
-//       for (let length = 1; length <= 9; ++length) {
-//         const string = cur_state[offset][length];
-//         if (string == null) {
-//           continue;
-//         }
+    // handle backreferences
+    for (let offset = 1; offset <= 9; offset += 1) {
+      for (let length = 1; length <= 9; length += 1) {
+        const string = curState[offset][length];
+        if (string == null) {
+          // eslint-disable-next-line no-continue
+          continue;
+        }
 
-//         if (plain[i - offset] === c) {
-//           if (length < 9) {
-//             // extend current backreference
-//             set(new_state, offset, length + 1, string);
-//           } else {
-//             // start new backreference
-//             set(new_state, offset, 1, `${string}9${String(offset)}0`);
-//           }
-//         }
+        if (plain[i - offset] === c) {
+          if (length < 9) {
+            // extend current backreference
+            set(newState, offset, length + 1, string);
+          } else {
+            // start new backreference
+            set(newState, offset, 1, `${string}9${String(offset)}0`);
+          }
+        }
 
-//         // start new literal
-//         set(new_state, 0, 1, string + String(length) + String(offset));
+        // start new literal
+        set(newState, 0, 1, string + String(length) + String(offset));
 
-//         // end current backreference and start new backreference
-//         for (let new_offset = 1; new_offset <= Math.min(9, i); ++new_offset) {
-//           if (plain[i - new_offset] === c) {
-//             set(
-//               new_state,
-//               new_offset,
-//               1,
-//               `${string + String(length) + String(offset)}0`
-//             );
-//           }
-//         }
-//       }
-//     }
+        // end current backreference and start new backreference
+        for (let newOffset = 1; newOffset <= Math.min(9, i); newOffset += 1) {
+          if (plain[i - newOffset] === c) {
+            set(
+              newState,
+              newOffset,
+              1,
+              `${string + String(length) + String(offset)}0`
+            );
+          }
+        }
+      }
+    }
 
-//     const tmp_state = new_state;
-//     new_state = cur_state;
-//     cur_state = tmp_state;
-//   }
+    const tmpState = newState;
+    newState = curState;
+    curState = tmpState;
+  }
 
-//   let result = null;
+  let result = null;
 
-//   for (let len = 1; len <= 9; ++len) {
-//     let string = cur_state[0][len];
-//     if (string == null) {
-//       continue;
-//     }
+  for (let len = 1; len <= 9; len += 1) {
+    let string = curState[0][len];
+    if (string == null) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
 
-//     string += String(len) + plain.substring(plain.length - len, plain.length);
-//     if (result == null || string.length < result.length) {
-//       result = string;
-//     } else if (string.length == result.length && Math.random() < 0.5) {
-//       result = string;
-//     }
-//   }
+    string += String(len) + plain.substring(plain.length - len, plain.length);
+    if (result == null || string.length < result.length) {
+      result = string;
+    } else if (string.length === result.length && Math.random() < 0.5) {
+      result = string;
+    }
+  }
 
-//   for (let offset = 1; offset <= 9; ++offset) {
-//     for (let len = 1; len <= 9; ++len) {
-//       let string = cur_state[offset][len];
-//       if (string == null) {
-//         continue;
-//       }
+  for (let offset = 1; offset <= 9; offset += 1) {
+    for (let len = 1; len <= 9; len += 1) {
+      let string = curState[offset][len];
+      if (string == null) {
+        // eslint-disable-next-line no-continue
+        continue;
+      }
 
-//       string += `${String(len)}${String(offset)}`;
-//       if (result == null || string.length < result.length) {
-//         result = string;
-//       } else if (string.length == result.length && Math.random() < 0.5) {
-//         result = string;
-//       }
-//     }
-//   }
+      string += `${String(len)}${String(offset)}`;
+      if (result == null || string.length < result.length) {
+        result = string;
+      } else if (string.length === result.length && Math.random() < 0.5) {
+        result = string;
+      }
+    }
+  }
 
-//   return result ?? '';
-// }
+  return result ?? '';
+}
 
 // decompress LZ-compressed string, or return null if input is invalid
 export function comprLZDecode(compr: string): string | null {
@@ -620,60 +624,41 @@ solvers['Array Jumping Game II'] = (_data: any) => {
 //       );
 //     }
 
-// name: 'Generate IP Addresses',
-//     solver: (data: unknown, ans: string): boolean => {
-//       if (typeof data !== 'string') throw new Error('solver expected string');
-//       const ret: string[] = [];
-//       for (let a = 1; a <= 3; ++a) {
-//         for (let b = 1; b <= 3; ++b) {
-//           for (let c = 1; c <= 3; ++c) {
-//             for (let d = 1; d <= 3; ++d) {
-//               if (a + b + c + d === data.length) {
-//                 const A = parseInt(data.substring(0, a), 10);
-//                 const B = parseInt(data.substring(a, a + b), 10);
-//                 const C = parseInt(data.substring(a + b, a + b + c), 10);
-//                 const D = parseInt(
-//                   data.substring(a + b + c, a + b + c + d),
-//                   10
-//                 );
-//                 if (A <= 255 && B <= 255 && C <= 255 && D <= 255) {
-//                   const ip: string = [
-//                     A.toString(),
-//                     '.',
-//                     B.toString(),
-//                     '.',
-//                     C.toString(),
-//                     '.',
-//                     D.toString(),
-//                   ].join('');
-//                   if (ip.length === data.length + 3) {
-//                     ret.push(ip);
-//                   }
-//                 }
-//               }
-//             }
-//           }
-//         }
-//       }
+// ******** Generate IP Addresses
+solvers['Generate IP Addresses'] = (data: any) => {
+  if (typeof data !== 'string') throw new Error('solver expected string');
+  const ret: string[] = [];
+  for (let a = 1; a <= 3; a += 1) {
+    for (let b = 1; b <= 3; b += 1) {
+      for (let c = 1; c <= 3; c += 1) {
+        for (let d = 1; d <= 3; d += 1) {
+          if (a + b + c + d === data.length) {
+            const A = parseInt(data.substring(0, a), 10);
+            const B = parseInt(data.substring(a, a + b), 10);
+            const C = parseInt(data.substring(a + b, a + b + c), 10);
+            const D = parseInt(data.substring(a + b + c, a + b + c + d), 10);
+            if (A <= 255 && B <= 255 && C <= 255 && D <= 255) {
+              const ip: string = [
+                A.toString(),
+                '.',
+                B.toString(),
+                '.',
+                C.toString(),
+                '.',
+                D.toString(),
+              ].join('');
+              if (ip.length === data.length + 3) {
+                ret.push(ip);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
-//       const sanitizedAns: string = removeBracketsFromArrayString(ans).replace(
-//         /\s/g,
-//         ''
-//       );
-//       const ansArr: string[] = sanitizedAns
-//         .split(',')
-//         .map((ip) => ip.replace(/^(?<quote>['"])([\d.]*)\k<quote>$/g, '$2'));
-//       if (ansArr.length !== ret.length) {
-//         return false;
-//       }
-//       for (const ipInAns of ansArr) {
-//         if (!ret.includes(ipInAns)) {
-//           return false;
-//         }
-//       }
-
-//       return true;
-//     }
+  return ret;
+};
 
 // ******** Algorithmic Stock Trader I
 solvers['Algorithmic Stock Trader I'] = (_data: any) => {
@@ -756,19 +741,19 @@ solvers['Algorithmic Stock Trader IV'] = (_data: any) => {
   return rele[k];
 };
 
-// name: 'Minimum Path Sum in a Triangle',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[][];
-//       const n: number = data.length;
-//       const dp: number[] = data[n - 1].slice();
-//       for (let i = n - 2; i > -1; --i) {
-//         for (let j = 0; j < data[i].length; ++j) {
-//           dp[j] = Math.min(dp[j], dp[j + 1]) + data[i][j];
-//         }
-//       }
+// ******** Minimum Path Sum in a Triangle
+solvers['Minimum Path Sum in a Triangle'] = (_data: any) => {
+  const data = _data as number[][];
+  const n: number = data.length;
+  const dp: number[] = data[n - 1].slice();
+  for (let i = n - 2; i > -1; i -= 1) {
+    for (let j = 0; j < data[i].length; j += 1) {
+      dp[j] = Math.min(dp[j], dp[j + 1]) + data[i][j];
+    }
+  }
 
-//       return dp[0] === parseInt(ans);
-//     }
+  return dp[0];
+};
 
 // ******** Unique Paths in a Grid I
 solvers['Unique Paths in a Grid I'] = (_data: any) => {
@@ -1158,14 +1143,11 @@ solvers['Compression II: LZ Decompression'] = (data: any) => {
   return comprLZDecode(data);
 };
 
-// name: 'Compression III: LZ Compression',
-//     solver: (plain: unknown, ans: string): boolean => {
-//       if (typeof plain !== 'string') throw new Error('solver expected string');
-//       return (
-//         comprLZDecode(ans) === plain &&
-//         ans.length <= comprLZEncode(plain).length
-//       );
-//     }
+// ******** Compression III: LZ Compression
+solvers['Compression III: LZ Compression'] = (data: any) => {
+  if (typeof data !== 'string') throw new Error('solver expected string');
+  return comprLZEncode(data);
+};
 
 // ******** Encryption I: Caesar Cipher
 solvers['Encryption I: Caesar Cipher'] = (_data: any) => {

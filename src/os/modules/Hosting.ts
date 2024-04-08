@@ -25,49 +25,49 @@ export async function main(ns: NS) {
 
   let serverRam = hostingStartRam;
 
-  function getReserve() {
-    const stage = ControlCache.read(ns, 'control')?.stage;
-    const sCount = ns.getPurchasedServers().length;
+  // function getReserve() {
+  //   const stage = ControlCache.read(ns, 'control')?.stage;
+  //   const sCount = ns.getPurchasedServers().length;
 
-    switch (stage) {
-      case 1: {
-        return CONFIGS.shoppingPrices.tor; // tor: 200e3, // 200 K
-      }
-      case 2: {
-        if (sCount < 4) {
-          return 0;
-        }
-        return CONFIGS.shoppingPrices.ssh; // ssh: 500e3, // 500 K
-      }
-      case 4: {
-        if (sCount < 8) {
-          return 0;
-        }
-        return CONFIGS.shoppingPrices.ftp; // ftp: 1.5e6, // 1.5 Million
-      }
-      case 6: {
-        return CONFIGS.shoppingPrices.smtp; // smtp: 5e6, // 5 Million
-      }
-      case 8: {
-        return CONFIGS.shoppingPrices.http; // http: 30e6, // 30 Million
-      }
-      case 10: {
-        return CONFIGS.shoppingPrices.sql; // sql: 250e6, // 250 Million
-      }
-      default: {
-        return 0;
-      }
-    }
-  }
+  //   switch (stage) {
+  //     case 1: {
+  //       return CONFIGS.shoppingPrices.tor; // tor: 200e3, // 200 K
+  //     }
+  //     case 2: {
+  //       if (sCount < 4) {
+  //         return 0;
+  //       }
+  //       return CONFIGS.shoppingPrices.ssh; // ssh: 500e3, // 500 K
+  //     }
+  //     case 4: {
+  //       if (sCount < 8) {
+  //         return 0;
+  //       }
+  //       return CONFIGS.shoppingPrices.ftp; // ftp: 1.5e6, // 1.5 Million
+  //     }
+  //     case 6: {
+  //       return CONFIGS.shoppingPrices.smtp; // smtp: 5e6, // 5 Million
+  //     }
+  //     case 8: {
+  //       return CONFIGS.shoppingPrices.http; // http: 30e6, // 30 Million
+  //     }
+  //     case 10: {
+  //       return CONFIGS.shoppingPrices.sql; // sql: 250e6, // 250 Million
+  //     }
+  //     default: {
+  //       return 0;
+  //     }
+  //   }
+  // }
 
-  function getMoney() {
+  function getMoney(reserve: number) {
     return (
-      (ns.getServerMoneyAvailable('home') - (moneyReserve + getReserve())) *
+      (ns.getServerMoneyAvailable('home') - (moneyReserve + reserve)) *
       hostingMoneyRatio
     );
   }
 
-  function updateShop() {
+  function updateShop(reserve: number) {
     const shop = [];
     const servers = ns.getPurchasedServers();
     const serverCount = servers.length;
@@ -81,7 +81,7 @@ export async function main(ns: NS) {
       });
     }
 
-    ns.print(`💸 ${getReserve()}`);
+    ns.print(`💸 ${ns.formatNumber(reserve, 1)}`);
     ns.printf(' %2s %-5s %4s %5s ', 'ID', 'HOST', 'RAM', 'Cost');
     servers
       .map((hostname, index) => ({
@@ -140,58 +140,63 @@ export async function main(ns: NS) {
   const repeat = true;
   while (repeat) {
     ns.clearLog();
-    const purchase = updateShop();
+    const control = ControlCache.read(ns, 'control');
+    const isShopHosting = control?.isShopHosting;
+    const isReserve = control?.isReserve;
+    const purchase = updateShop(isReserve);
 
     if (
       purchase.length === 0 &&
       ns.getPurchasedServers().length >= hostingTargetCount
     ) {
-      const past = ControlCache.read(ns, 'control');
-      const control = ControlInfo.details(ns, past);
-      control.isShopHosting = false;
-      await ControlCache.update(ns, control);
+      // const past = ControlCache.read(ns, 'control');
+      // const control = ControlInfo.details(ns, past);
+      // control.isShopHosting = false;
+      // await ControlCache.update(ns, control);
       return;
     }
 
-    if (purchase.length > 0 && getMoney() > purchase[0].cost) {
-      purchase.forEach((next: any) => {
-        if (getMoney() > next.cost) {
-          // ns.print(
-          //   ` Buying [${next.id ? next.id : 'New'}] ${
-          //     next.text
-          //   } | ${ns.formatNumber(next.cost, 2)}`
-          // );
+    if (isShopHosting) {
+      if (purchase.length > 0 && getMoney(isReserve) > purchase[0].cost) {
+        purchase.forEach((next: any) => {
+          if (getMoney(isReserve) > next.cost) {
+            // ns.print(
+            //   ` Buying [${next.id ? next.id : 'New'}] ${
+            //     next.text
+            //   } | ${ns.formatNumber(next.cost, 2)}`
+            // );
 
-          switch (next.type) {
-            case 'SERVER_NEW': {
-              const serverID = ns.getPurchasedServers().length || 0;
-              const name = `ps-${serverID}`;
-              const ref = ns.purchaseServer(name, serverRam);
-              deployScripts(ns, name);
-              break;
-            }
-            case 'SERVER_RAM': {
-              // buyServerRAM();
-              const upgrade = next.ram * 2;
-              ns.upgradePurchasedServer(next.name, upgrade);
-              if (upgrade > serverRam) {
-                serverRam = upgrade;
+            switch (next.type) {
+              case 'SERVER_NEW': {
+                const serverID = ns.getPurchasedServers().length || 0;
+                const name = `ps-${serverID}`;
+                const ref = ns.purchaseServer(name, serverRam);
+                deployScripts(ns, name);
+                break;
               }
-              break;
+              case 'SERVER_RAM': {
+                // buyServerRAM();
+                const upgrade = next.ram * 2;
+                ns.upgradePurchasedServer(next.name, upgrade);
+                if (upgrade > serverRam) {
+                  serverRam = upgrade;
+                }
+                break;
+              }
+              default: {
+                ns.print('Could not detect type of purchase');
+              }
             }
-            default: {
-              ns.print('Could not detect type of purchase');
-            }
+          } else if (purchase.length > 0) {
+            const next = purchase[0];
+            // ns.print(
+            //   ` Saving [${next.id ? next.id : 'New'}] ${
+            //     next.text
+            //   } | ${ns.formatNumber(next.cost, 2)}`
+            // );
           }
-        } else if (purchase.length > 0) {
-          const next = purchase[0];
-          // ns.print(
-          //   ` Saving [${next.id ? next.id : 'New'}] ${
-          //     next.text
-          //   } | ${ns.formatNumber(next.cost, 2)}`
-          // );
-        }
-      });
+        });
+      }
     }
     // const servers = ns.getPurchasedServers();
     // servers.forEach((s) => {

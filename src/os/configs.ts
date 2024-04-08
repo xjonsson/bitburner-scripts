@@ -1,19 +1,23 @@
 // TODO: Augments path
+// Best University 4x Multiplier [Volhaven] - ZB Institute of Technology
+// Best Gym 10x Multiplier [Sector 12] - Powerhouse Gym
+// Best Infiltrate [Aevum] - ECorp
+
 /* Augments path could go
  * [x] Netburners - Hacknet
  * [x] Sector-12
  * [x] CyberSec (CSEC) - Milestone
  * [x] Tian Di Hui
- * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep]
+ * [ ] NiteSec (avmnite-02h) - Milestone [112.500k rep]
  * [x] Aevum (40m)
- * [x] The Black Hand (I.I.I.I) - Milestone [175.000k rep]
- * [x] Chongqing
- * [?] New Tokyo (Uneeded, but can do with Chongqing)
- * [?] Ishima (Uneeded, but can do with Chongqing)
- * [ ] Clarke Inc (Aevum) 400k [H 225 Software Engineering] ?
+ * [ ] The Black Hand (I.I.I.I) - Milestone [175.000k rep]
+ * [ ] Chongqing
+ * [ ] New Tokyo (Uneeded, but can do with Chongqing)
+ * [ ] Ishima (Uneeded, but can do with Chongqing)
+ * [ ] Clarke Inc (Aevum) 400k [H 225 Software Engineering] ? (ZB best rates)
  * [ ] Bachman & Associates (Aevum) 400k [H 225 Software Engineering] ?
  * [ ] NWO (Volhaven) 400k [H 250 IT Intern]
- * [x] Bitrunners (run4theh111z) - Milestone
+ * [ ] Bitrunners (run4theh111z) - Milestone
  * [ ] OmniTek Incorporated (Volhaven) 400k [H 225 IT Intern]
  * [ ] Fulcrum Technologies (Aevum) Backdoor 1585 400k [H 225 IT Intern]
  * [ ] Daedalus [Augmentations: a / 30] | Money: m / $100.000b | Hacking: 2500]

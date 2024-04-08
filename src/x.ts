@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
+import { ServerInfo, Server } from '/os/modules/Server';
 /* eslint-enable */
 
 // ******** Styling
@@ -69,28 +70,51 @@ export async function main(ns: NS) {
         name: nTarget.location.name,
         city: nTarget.location.city,
         type: nTarget.location.types,
-        // location: {
-        //   costMult: 0,
-        //   expMult: 0,
-        //   techVendorMaxRam: 0,
-        //   techVendorMinRam: 0,
-        //   infiltrationData: {
-        //     maxClearanceLevel: 12,
-        //     startingSecurityLevel: 8.18,
-        //   },
-        // },
-        // reward: {
-        //   tradeRep: 23212.875441934077,
-        //   sellCash: 355253920.8514189,
-        //   SoARep: 2403.0552291421855,
-        // },
+        expMult: nTarget.location.expMult,
+        security: nTarget.location.infiltrationData.maxClearanceLevel,
+        rewardRep: nTarget.reward.tradeRep,
+        rewardCash: nTarget.reward.sellCash,
+        rewardSOA: nTarget.reward.SoARep,
       };
     })
-    .sort((a: any, b: any) => a.challenge - b.challenge);
+    .sort((a: any, b: any) => b.rewardRep - a.rewardRep);
+
+  const rowStyle = '%3s %-9s %4s %1s %-25s %2s %4s %4s %4s';
+  ns.printf(
+    rowStyle,
+    'lvl',
+    'Location',
+    '💪🎓💼',
+    'x',
+    'Company',
+    'C',
+    'Rep',
+    'Cash',
+    'SoA'
+  );
 
   iTargets.forEach((i: any) => {
-    ns.print(`${i.challenge} | ${i.name} (${i.city}) [${i.type}]`);
+    // ns.print(`${i.challenge} | ${i.name} (${i.city}) [${i.type}]`);
+    ns.printf(
+      rowStyle,
+      ns.formatNumber(i.challenge, 0),
+      i.city,
+      `${i.type.includes('Gym') ? '💪' : '❌'}${
+        i.type.includes('University') ? '🎓' : '❌'
+      }${i.type.includes('Company') ? '💼' : '❌'}`,
+      i.expMult,
+      i.name,
+      ns.formatNumber(i.security, 0),
+      ns.formatNumber(i.rewardRep, 0),
+      ns.formatNumber(i.rewardCash, 0),
+      ns.formatNumber(i.rewardSOA, 0)
+    );
   });
+
+  const check = ServerInfo.list(ns).includes('w0r1d_d43m0n');
+
+  // const check = ns.getServer('w0r1d_d43m0n');
+  ns.print(check);
 
   // ns.formatNumber(
   //   ns.getPurchasedServerUpgradeCost(existing.name, existing.ram * 2),
