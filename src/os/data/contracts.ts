@@ -566,30 +566,30 @@ solvers['Total Ways to Sum II'] = (data: any) => {
 //       return (ans === '1' && solution) || (ans === '0' && !solution);
 //     }
 
-// name: 'Array Jumping Game II',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       const n: number = data.length;
-//       let reach = 0;
-//       let jumps = 0;
-//       let lastJump = -1;
-//       while (reach < n - 1) {
-//         let jumpedFrom = -1;
-//         for (let i = reach; i > lastJump; i--) {
-//           if (i + data[i] > reach) {
-//             reach = i + data[i];
-//             jumpedFrom = i;
-//           }
-//         }
-//         if (jumpedFrom === -1) {
-//           jumps = 0;
-//           break;
-//         }
-//         lastJump = jumpedFrom;
-//         jumps++;
-//       }
-//       return jumps === parseInt(ans, 10);
-//     }
+// ******** Array Jumping Game II
+solvers['Array Jumping Game II'] = (_data: any) => {
+  const data = _data as number[];
+  const n: number = data.length;
+  let reach = 0;
+  let jumps = 0;
+  let lastJump = -1;
+  while (reach < n - 1) {
+    let jumpedFrom = -1;
+    for (let i = reach; i > lastJump; i -= 1) {
+      if (i + data[i] > reach) {
+        reach = i + data[i];
+        jumpedFrom = i;
+      }
+    }
+    if (jumpedFrom === -1) {
+      jumps = 0;
+      break;
+    }
+    lastJump = jumpedFrom;
+    jumps += 1;
+  }
+  return jumps;
+};
 
 // name: 'Merge Overlapping Intervals',
 //     solver: (_data: unknown, ans: string): boolean => {

@@ -4,7 +4,7 @@
  * [x] Sector-12
  * [x] CyberSec (CSEC) - Milestone
  * [x] Tian Di Hui
- * [ ] NiteSec (avmnite-02h) - Milestone [112.500k rep]
+ * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep]
  * [ ] Aevum (40m)
  * [ ] The Black Hand (I.I.I.I) - Milestone
  * [ ] Chongqing
