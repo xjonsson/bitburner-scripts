@@ -6,18 +6,18 @@
 /* Augments path could go
  * [x] Netburners - Hacknet
  * [x] Sector-12
- * [x] CyberSec (CSEC) - Milestone
+ * [x] CyberSec (CSEC) - Milestone m1
  * [x] Tian Di Hui
- * [ ] NiteSec (avmnite-02h) - Milestone [112.500k rep]
+ * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep] m2
  * [x] Aevum (40m)
- * [ ] The Black Hand (I.I.I.I) - Milestone [175.000k rep]
+ * [x] The Black Hand (I.I.I.I) - Milestone [175.000k rep] m3
  * [ ] Chongqing
  * [ ] New Tokyo (Uneeded, but can do with Chongqing)
  * [ ] Ishima (Uneeded, but can do with Chongqing)
  * [ ] Clarke Inc (Aevum) 400k [H 225 Software Engineering] ? (ZB best rates)
  * [ ] Bachman & Associates (Aevum) 400k [H 225 Software Engineering] ?
  * [ ] NWO (Volhaven) 400k [H 250 IT Intern]
- * [ ] Bitrunners (run4theh111z) - Milestone
+ * [x] Bitrunners (run4theh111z) - Milestone m4
  * [ ] OmniTek Incorporated (Volhaven) 400k [H 225 IT Intern]
  * [ ] Fulcrum Technologies (Aevum) Backdoor 1585 400k [H 225 IT Intern]
  * [ ] Daedalus [Augmentations: a / 30] | Money: m / $100.000b | Hacking: 2500]
@@ -29,9 +29,9 @@ export const CONFIGS: any = {
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
-    hacknetMoneyRatio: 0.3, // 50% of money will be used on hacknet
-    hostingMoneyRatio: 0.6, // 30% of money will be used on servers
-    savingsMoneyRatio: 0.1, // 20% of money will be used for savings
+    hacknetMoneyRatio: 0.2, // 50% of money will be used on hacknet
+    hostingMoneyRatio: 0.8, // 30% of money will be used on servers
+    savingsMoneyRatio: 0.2, // 20% of money will be used for savings
   },
   shoppingPrices: {
     tor: 200e3, // 200 K
@@ -69,7 +69,7 @@ export const CONFIGS: any = {
   },
   hosting: {
     hostingTargetCount: 25, // 25 (Real Max)
-    hostingStartRam: 16,
+    hostingStartRam: 8,
     hostingTargetRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {

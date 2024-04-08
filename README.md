@@ -43,6 +43,12 @@ Backdoor all possible servers
 alias doors="run /os/utils/backdoor.js"
 ```
 
+Generate Milestone alias (m1-m4)
+
+```
+alias milestones="run os/utils/milestoneRoutes.js"
+```
+
 Automatically Complete all Infiltrations
 
 ```

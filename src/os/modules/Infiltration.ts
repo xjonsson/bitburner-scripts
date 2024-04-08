@@ -2,6 +2,8 @@
 // AUTHOR: GenesisStrongshield. Contributors Particular-Ad2739, Grandasse, Mogria
 // NOTE: This script is overpowered. Using it on NWO in Volhaven gains 150k Rep
 // Overusing this will make all other aspects of the game pointless.
+// WARNING: This breaks the game. 0 Stats allows you to beat most BitNodes in under an hour.
+// Most would consider this 100% cheating, but its a singleplayer game so you do you.
 
 // ******** Main Consts
 const state: any = {

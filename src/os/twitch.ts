@@ -6,6 +6,8 @@ import { ControlCache, PlayerCache } from '/os/modules/Cache';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
+const debug = '/os/modules/Contract.js';
+
 const updateControl = async (ns: NS) => {
   while (true) {
     await launch(ns, CACHE.CONTROL);
@@ -55,6 +57,12 @@ export async function main(ns: NS) {
   updateHacknet(ns).catch(console.error); // TODO: Improve timings
   updateHosting(ns).catch(console.error); // TODO: Improve performance
   updateContracts(ns).catch(console.error); // TODO: Complete solutions
+
+  // FIXME: TEMPORARY
+  if (!ns.isRunning(debug, 'home')) {
+    await launch(ns, debug);
+  }
+  // TEMPORARY
 
   // Keep the game loop going
   while (true) {

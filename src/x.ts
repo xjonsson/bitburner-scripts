@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { ServerInfo, Server } from '/os/modules/Server';
+import { Scan } from '/os/utils/scan';
 /* eslint-enable */
 
 // ******** Styling
@@ -111,10 +112,10 @@ export async function main(ns: NS) {
     );
   });
 
-  const check = ServerInfo.list(ns).includes('w0r1d_d43m0n');
+  // const check = ServerInfo.list(ns).includes('w0r1d_d43m0n');
 
   // const check = ns.getServer('w0r1d_d43m0n');
-  ns.print(check);
+  // ns.print(check);
 
   // ns.formatNumber(
   //   ns.getPurchasedServerUpgradeCost(existing.name, existing.ram * 2),

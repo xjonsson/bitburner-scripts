@@ -51,9 +51,20 @@ function updateRam(nodes: Server[]): any {
 }
 
 // ******** Server Targets
-function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
+function updateServers(
+  ns: NS,
+  cServers: any[],
+  cTargets: string[],
+  pLevel: number
+) {
   let tServers = cServers;
   let tTargets = cTargets;
+  let hackTargetsMaxOffset =
+    pLevel > 1000 && hackTargetsMax < 15 ? 15 : hackTargetsMax;
+  hackTargetsMaxOffset =
+    pLevel > 1500 && hackTargetsMax < 20 ? 20 : hackTargetsMax;
+  hackTargetsMaxOffset =
+    pLevel > 2000 && hackTargetsMax < 25 ? 25 : hackTargetsMax;
   const tRamMax = updateRam(updateNodes(ns)).max;
 
   if (tTargets.length === 0) {
@@ -67,7 +78,7 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
         // Sort so n00dles is first on first run
         // (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
       )
-      .slice(0, hackTargetsMax);
+      .slice(0, hackTargetsMaxOffset);
 
     hackTargets.forEach((s: ServerTarget) => {
       tTargets.push(s.hostname);
@@ -90,7 +101,7 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
       .sort(
         (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
       )
-      .slice(0, hackTargetsMax);
+      .slice(0, hackTargetsMaxOffset);
   }
 
   // **** Calculate Switching
@@ -104,8 +115,8 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
 
   // ns.tprint(`Batchercount: ${batcherCount}`);
   // if (batcherCount > hackTargetsPrepMax || tServers.length < hackTargetsMax) { // FIXME:
-  if (batcherCount > hackMinBatches || tServers.length < hackTargetsMax) {
-    let offset = hackTargetsMax - tServers.length;
+  if (batcherCount > hackMinBatches || tServers.length < hackTargetsMaxOffset) {
+    let offset = hackTargetsMaxOffset - tServers.length;
     offset = offset < 0 ? 0 : offset;
     // **** Calculate new targets
     const newServers = ServerInfo.list(ns)
@@ -132,7 +143,7 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
         const tCheck = tServers[0];
         tTargets.push(s.hostname);
         tServers.push(s);
-        if (tServers.length > hackTargetsMax) {
+        if (tServers.length > hackTargetsMaxOffset) {
           tTargets = tTargets.filter((h: string) => h !== tCheck.hostname);
           tServers = tServers
             .filter((t: ServerTarget) => t.hostname !== tCheck.hostname)
@@ -453,7 +464,7 @@ export async function main(ns: NS) {
     if (pLevel > cLevel) {
       cLevel = pLevel;
       networkRam = updateRam(updateNodes(ns)).total;
-      servers = updateServers(ns, servers, hackTargets);
+      servers = updateServers(ns, servers, hackTargets, pLevel);
     }
 
     // ******** Servers each tick

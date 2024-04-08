@@ -97,7 +97,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.tor) {
           return {
             done: false,
-            msg: 'SAVE_TOR',
+            msg: 'SAVE_TOR 200K',
             hacknet: false,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.tor,
@@ -105,7 +105,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_TOR',
+          msg: 'BUY_TOR 200K',
           hacknet: false,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.tor,
@@ -125,7 +125,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.ssh) {
           return {
             done: false,
-            msg: 'SAVE_SSH',
+            msg: 'SAVE_SSH 500K',
             hacknet: false,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.ssh,
@@ -133,7 +133,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_SSH',
+          msg: 'BUY_SSH 500K',
           hacknet: false,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.ssh,
@@ -174,7 +174,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (!host.backdoorInstalled) {
           return {
             done: false,
-            msg: 'DOOR_CSEC',
+            msg: 'DOOR_CSEC (m1)',
             hacknet: false,
             hosting: true,
             reserve: 0,
@@ -203,7 +203,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.ftp) {
           return {
             done: false,
-            msg: 'SAVE_FTP',
+            msg: 'SAVE_FTP 1.5M',
             hacknet: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.ftp,
@@ -211,7 +211,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_FTP',
+          msg: 'BUY_FTP 1.5M',
           hacknet: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.ftp,
@@ -252,7 +252,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (!host.backdoorInstalled) {
           return {
             done: false,
-            msg: 'DOOR_avmnite-02h',
+            msg: 'DOOR_avmnite-02h (m2)',
             hacknet: true,
             hosting: true,
             reserve: 0,
@@ -281,7 +281,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.smtp) {
           return {
             done: false,
-            msg: 'SAVE_SMTP',
+            msg: 'SAVE_SMTP 5M',
             hacknet: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.smtp,
@@ -289,7 +289,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_SMTP',
+          msg: 'BUY_SMTP 5M',
           hacknet: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.smtp,
@@ -330,7 +330,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (!host.backdoorInstalled) {
           return {
             done: false,
-            msg: 'DOOR_I.I.I.I',
+            msg: 'DOOR_I.I.I.I (m3)',
             hacknet: true,
             hosting: true,
             reserve: 0,
@@ -359,7 +359,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.http) {
           return {
             done: false,
-            msg: 'SAVE_HTTP',
+            msg: 'SAVE_HTTP 30M',
             hacknet: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.http,
@@ -367,7 +367,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_HTTP',
+          msg: 'BUY_HTTP 30M',
           hacknet: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.http,
@@ -408,7 +408,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (!host.backdoorInstalled) {
           return {
             done: false,
-            msg: 'DOOR_run4theh111z',
+            msg: 'DOOR_run4theh111z (m4)',
             hacknet: true,
             hosting: true,
             reserve: 0,
@@ -437,7 +437,7 @@ export function osLogic(ns: NS, stage: number): any {
         if (p?.money < CONFIGS.shoppingPrices.sql) {
           return {
             done: false,
-            msg: 'SAVE_SQL',
+            msg: 'SAVE_SQL 250M',
             hacknet: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.sql,
@@ -445,7 +445,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: 'BUY_SQL',
+          msg: 'BUY_SQL 250M',
           hacknet: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.sql,
@@ -517,7 +517,7 @@ export function osLogic(ns: NS, stage: number): any {
         }
         return {
           done: false,
-          msg: `BACKDOOR_w0r1d_d43m0n`,
+          msg: `BACKDOOR_w0r1d_d43m0n (m5)`,
           hacknet: true,
           hosting: true,
           reserve: 0,
