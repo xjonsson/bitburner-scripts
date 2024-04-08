@@ -456,20 +456,20 @@ solvers['Find Largest Prime Factor'] = (data: any) => {
 //       return parseInt(ans, 10) === Math.max(...nums);
 //     },
 
-// name: 'Total Ways to Sum',
-//     solver: (data: unknown, ans: string): boolean => {
-//       if (typeof data !== 'number') throw new Error('solver expected number');
-//       const ways: number[] = [1];
-//       ways.length = data + 1;
-//       ways.fill(0, 1);
-//       for (let i = 1; i < data; ++i) {
-//         for (let j: number = i; j <= data; ++j) {
-//           ways[j] += ways[j - i];
-//         }
-//       }
+// ******** Total Ways to Sum
+solvers['Total Ways to Sum'] = (data: any) => {
+  if (typeof data !== 'number') throw new Error('solver expected number');
+  const ways: number[] = [1];
+  ways.length = data + 1;
+  ways.fill(0, 1);
+  for (let i = 1; i < data; i += 1) {
+    for (let j: number = i; j <= data; j += 1) {
+      ways[j] += ways[j - i];
+    }
+  }
 
-//       return ways[data] === parseInt(ans, 10);
-//     },
+  return ways[data];
+};
 
 // ******** Total Ways to Sum II
 solvers['Total Ways to Sum II'] = (data: any) => {

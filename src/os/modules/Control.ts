@@ -31,6 +31,7 @@ export class Control {
     this.isPlayerCheck = past ? past.isPlayerCheck : true;
     // this.isShopHacknet = past ? past.isShopHacknet : true;
     // this.isShopHosting = past ? past.isShopHosting : true;
+    // this.isReserve = past ? past.isReserve : 0;
     this.hackTargets = past ? past.hackTargets : [];
 
     // ******** Update shopping based on logic

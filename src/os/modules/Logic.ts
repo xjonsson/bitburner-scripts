@@ -83,7 +83,13 @@ export function osLogic(ns: NS, stage: number): any {
             reserve: 0,
           };
         }
-        return { done: false, msg: 'JOIN_NetBurners' };
+        return {
+          done: false,
+          msg: 'JOIN_NetBurners',
+          hacknet: false,
+          hosting: true,
+          reserve: 0,
+        };
       }
 
       // ******** Get Tor
