@@ -7,13 +7,13 @@
  * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep]
  * [x] Aevum (40m)
  * [x] The Black Hand (I.I.I.I) - Milestone [175.000k rep]
- * [ ] Chongqing
- * [ ] New Tokyo
- * [ ] Ishima
- * [ ] Clarke Inc (Aevum) 400k [H 225 IT Intern]
- * [ ] Bachman & Associates (Aevum) 400k [H 225 IT Intern]
+ * [x] Chongqing
+ * [?] New Tokyo (Uneeded, but can do with Chongqing)
+ * [?] Ishima (Uneeded, but can do with Chongqing)
+ * [ ] Clarke Inc (Aevum) 400k [H 225 Software Engineering] ?
+ * [ ] Bachman & Associates (Aevum) 400k [H 225 Software Engineering] ?
  * [ ] NWO (Volhaven) 400k [H 250 IT Intern]
- * [ ] Bitrunners (run4theh111z) - Milestone
+ * [x] Bitrunners (run4theh111z) - Milestone
  * [ ] OmniTek Incorporated (Volhaven) 400k [H 225 IT Intern]
  * [ ] Fulcrum Technologies (Aevum) Backdoor 1585 400k [H 225 IT Intern]
  * [ ] Daedalus [Augmentations: a / 30] | Money: m / $100.000b | Hacking: 2500]

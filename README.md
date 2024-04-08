@@ -37,6 +37,12 @@ Route and door (host: string, door: boolean)
 alias route="run os/modules/Route.js"
 ```
 
+Backdoor all possible servers
+
+```
+alias doors="run /os/utils/backdoor.js"
+```
+
 Automatically Complete all Infiltrations
 
 ```

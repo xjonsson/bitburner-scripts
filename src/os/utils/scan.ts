@@ -48,8 +48,8 @@ export const Scan = {
     const { route } = scanner(ns, target);
     return `connect ${route.join('; connect ')};`;
   },
-  // routeTerminal(ns: NS, target = '') {
-  //   const { route } = scanner(ns, target);
-  //   return `connect ${route.join('; connect ')}; backdoor;`;
-  // },
+  routeTerminalBackdoor(ns: NS, target = '') {
+    const { route } = scanner(ns, target);
+    return `connect ${route.join('; connect ')}; backdoor;`;
+  },
 };

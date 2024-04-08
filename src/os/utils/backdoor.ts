@@ -2,12 +2,13 @@
 import { NS } from '@ns';
 import { Scan } from '/os/utils/scan';
 import { PlayerCache } from '/os/modules/Cache';
+import { ServerInfo, Server } from '/os/modules/Server';
 /* eslint-enable */
 
 // NOTE: You must be on the terminal tab for injection to work.
 
 // const terminalInput = document.getElementById('terminal-input');
-const terminalInput = document.getElementById(
+const terminalInput: any = document.getElementById(
   'terminal-input'
 ) as HTMLInputElement;
 const handler = Object?.keys(terminalInput)[1];
@@ -23,10 +24,6 @@ function backdoor(ns: NS, route: string) {
   });
 }
 
-function sortDoor(doorA: any, doorB: any) {
-  return doorA.level - doorB.level;
-}
-
 export async function main(ns: NS) {
   ns.disableLog('disableLog');
   ns.disableLog('asleep');
@@ -37,66 +34,47 @@ export async function main(ns: NS) {
 
   // Launch modules
   const p = PlayerCache.read(ns, 'player');
-  const s = Scan.list(ns)
-    .filter((hostname) => hostname !== 'home')
-    .map((hostname) => {
-      const data = ns.getServer(hostname as string);
-      const server = {
-        hostname: data.hostname,
-        server: data.purchasedByPlayer,
-        level: data.requiredHackingSkill || 9999,
-        root: data.hasAdminRights,
-        challenge: data.numOpenPortsRequired,
-        open: data.openPortCount,
-        door: data.backdoorInstalled,
-      };
 
-      return server;
-    })
-    .filter((node) => {
-      if (node.root && node.level <= p.level && !node.door && !node.server) {
-        return true;
-      }
-      return false;
-    })
-    .sort(sortDoor);
+  const servers = ServerInfo.list(ns)
+    .filter((h: string) => h !== 'home')
+    .map((h: string) => new Server(ns, h))
+    .filter(
+      (s: Server) => s.isRoot && !s.isServer && s.level <= p.level && !s.isDoor
+    )
+    .sort((a: Server, b: Server) => a.level - b.level);
 
   const doors: any = [];
 
-  s.forEach((node) => {
+  servers.forEach((s: Server) => {
     // const msgRoot = node.level <= p.hacking ? '✓  ' : '⛌  ';
-    const msgRoute = Scan.routeTerminal(ns, node.hostname);
+    const msgRoute = Scan.routeTerminalBackdoor(ns, s.hostname);
     const door = {
-      hostname: node.hostname,
-      level: node.level,
+      hostname: s.hostname,
+      level: s.level,
       route: msgRoute,
+      time: ns.getHackTime(s.hostname) / 4,
     };
     doors.push(door);
     // ns.printf(rowHeader, node.level, msgRoot, node.hostname, msgRoute);
   });
 
-  const rowHeader = ' %5s | %5s | %-20s | %-24s ';
-  ns.print(`[Doors]  ${doors.length}`);
-  ns.printf(rowHeader, 'Door', 'Level', 'Server', 'Time');
-  ns.printf(
-    rowHeader,
-    '-----',
-    '-----',
-    '------------------',
-    '------------------'
-  );
+  const rowHeader = ' %2s %3s %-18s %-24s ';
+  ns.print(`[Doors] ${doors.length}`);
+  ns.printf(rowHeader, '  ', 'Lvl', 'Server', 'Time');
+  ns.printf(rowHeader, '--', '--', '------------------', '------------------');
 
   while (doors.length > 0) {
-    const delay = ns.getHackTime(doors[0].hostname) / 4 + 1000;
-    if (doors[0].level <= p.level) {
+    const next = doors[0];
+    const delay = next.time + 1000;
+    if (next.level <= p.level) {
       ns.printf(
         rowHeader,
         doors.length,
-        doors[0].level,
-        doors[0].hostname,
-        ns.tFormat(delay - 1000)
+        next.level,
+        next.hostname,
+        `(${ns.tFormat(next.time)})`
       );
-      backdoor(ns, doors[0].route);
+      backdoor(ns, next.route);
       doors.shift();
     }
     await ns.sleep(delay);
