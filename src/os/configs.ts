@@ -5,8 +5,8 @@
  * [x] CyberSec (CSEC) - Milestone
  * [x] Tian Di Hui
  * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep]
- * [ ] Aevum (40m)
- * [ ] The Black Hand (I.I.I.I) - Milestone
+ * [x] Aevum (40m)
+ * [x] The Black Hand (I.I.I.I) - Milestone [175.000k rep]
  * [ ] Chongqing
  * [ ] New Tokyo
  * [ ] Ishima
@@ -80,6 +80,8 @@ export const CONFIGS: any = {
     hackBatches: 128, // 128, // Batch 128 hack, weak, grow, weak
     hackTargetsMax: 10, // Only work on 25 servers
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
+    hackMinBatches: 5, // Min number of batches before switching
+    hackSwap: 3, // How many targets to swap at once (make less than min batches)
     /* hack Batches is the number of perfect HWGW being fired
      * we only target servers where our largest server can perfect batch to prevent locks
      * Target max is the amount of targets to focus on at the same time

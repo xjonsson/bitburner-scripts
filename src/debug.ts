@@ -15,7 +15,9 @@ const {
   hackDelay,
   hackBatches,
   hackTargetsMax,
-  hackTargetsPrepMax,
+  // hackTargetsPrepMax, // FIXME:
+  hackMinBatches,
+  hackSwap,
 } = CONFIGS.hacking;
 const defaultUpdate = TIME.SERVERS;
 
@@ -101,7 +103,8 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
   });
 
   // ns.tprint(`Batchercount: ${batcherCount}`);
-  if (batcherCount > hackTargetsPrepMax || tServers.length < hackTargetsMax) {
+  // if (batcherCount > hackTargetsPrepMax || tServers.length < hackTargetsMax) { // FIXME:
+  if (batcherCount > hackMinBatches || tServers.length < hackTargetsMax) {
     let offset = hackTargetsMax - tServers.length;
     offset = offset < 0 ? 0 : offset;
     // **** Calculate new targets
@@ -113,7 +116,8 @@ function updateServers(ns: NS, cServers: any[], cTargets: string[]) {
       .sort(
         (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
       )
-      .slice(-(hackTargetsPrepMax + offset))
+      .slice(-(hackSwap + offset)) // FIXME:
+      // .slice(-(hackTargetsPrepMax + offset)) // FIXME:
       .filter((s: ServerTarget) => {
         // const tCheck = tServers[tServers.length - 1];
         const tCheck = tServers[0];
@@ -245,8 +249,13 @@ function prepWeak(ns: NS, s: ServerTarget): number {
 
       // If we have threads
       if (tWeak > 0 && n.ram.now > 0) {
-        const dWeak = dStart + nSpacer * hackBuffer;
-        dEnd += nSpacer * hackBuffer;
+        // const dWeak = dStart + nSpacer * hackBuffer;
+        // dEnd += nSpacer * hackBuffer;
+        // ns.exec(xWeak, n.hostname, tWeak, s.hostname, false, dWeak);
+        // rWeak -= tWeak;
+        // nSpacer += 1;
+        const dWeak = dStart + hackBuffer; // Remove spacer timing
+        dEnd += hackBuffer; // Removing spacer timing
         ns.exec(xWeak, n.hostname, tWeak, s.hostname, false, dWeak);
         rWeak -= tWeak;
         nSpacer += 1;
@@ -280,8 +289,13 @@ function prepGrow(ns: NS, s: ServerTarget): number {
 
       // If we have threads
       if (tGrow > 0 && n.ram.now > 0) {
-        const dGrow = dStart + nSpacer * hackBuffer;
-        dEnd += nSpacer * hackBuffer;
+        // const dGrow = dStart + nSpacer * hackBuffer;
+        // dEnd += nSpacer * hackBuffer;
+        // ns.exec(xGrow, n.hostname, tGrow, s.hostname, false, dGrow);
+        // rGrow -= tGrow;
+        // nSpacer += 1;
+        const dGrow = dStart + hackBuffer; // Remove spacer timing
+        dEnd += hackBuffer; // Remove spacer timing
         ns.exec(xGrow, n.hostname, tGrow, s.hostname, false, dGrow);
         rGrow -= tGrow;
         nSpacer += 1;

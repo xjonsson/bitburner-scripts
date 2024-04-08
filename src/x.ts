@@ -60,8 +60,37 @@ export async function main(ns: NS) {
   // const p = ns.getPlayer();
   // ns.print(p);
 
-  const price = ns.getPurchasedServerCost(64);
-  ns.print(ns.formatNumber(price, 1));
+  const iLocations = ns.infiltration.getPossibleLocations();
+  const iTargets = iLocations
+    .map((iLoc: any) => {
+      const nTarget = ns.infiltration.getInfiltration(iLoc.name);
+      return {
+        challenge: nTarget.difficulty,
+        name: nTarget.location.name,
+        city: nTarget.location.city,
+        type: nTarget.location.types,
+        // location: {
+        //   costMult: 0,
+        //   expMult: 0,
+        //   techVendorMaxRam: 0,
+        //   techVendorMinRam: 0,
+        //   infiltrationData: {
+        //     maxClearanceLevel: 12,
+        //     startingSecurityLevel: 8.18,
+        //   },
+        // },
+        // reward: {
+        //   tradeRep: 23212.875441934077,
+        //   sellCash: 355253920.8514189,
+        //   SoARep: 2403.0552291421855,
+        // },
+      };
+    })
+    .sort((a: any, b: any) => a.challenge - b.challenge);
+
+  iTargets.forEach((i: any) => {
+    ns.print(`${i.challenge} | ${i.name} (${i.city}) [${i.type}]`);
+  });
 
   // ns.formatNumber(
   //   ns.getPurchasedServerUpgradeCost(existing.name, existing.ram * 2),
@@ -74,7 +103,33 @@ export async function main(ns: NS) {
   //   // updateHeaders(ns, now, start, networkRam);
 
   //   // ******** Each tick
+  //   // ns.print(`[Locations] ${iLocations.length}`);
+  //   ns.print('========DEBUG========');
+  //   // ns.print(iLocations[0]);
+  //   // const iTarget = ns.infiltration.getInfiltration('AeroCorp');
+  //   // ns.print(iTarget);
 
   //   await ns.asleep(1000);
   // }
 }
+
+// ******** SAMPLES
+// const sampleLocation = { city: 'Aevum', name: 'AeroCorp' };
+// const sampleTarget = {
+//   location: {
+//     city: 'Aevum',
+//     costMult: 0,
+//     expMult: 0,
+//     name: 'AeroCorp',
+//     types: ['Company'],
+//     techVendorMaxRam: 0,
+//     techVendorMinRam: 0,
+//     infiltrationData: { maxClearanceLevel: 12, startingSecurityLevel: 8.18 },
+//   },
+//   reward: {
+//     tradeRep: 23212.875441934077,
+//     sellCash: 355253920.8514189,
+//     SoARep: 2403.0552291421855,
+//   },
+//   difficulty: 3,
+// };

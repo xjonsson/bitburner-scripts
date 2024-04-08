@@ -770,25 +770,25 @@ solvers['Algorithmic Stock Trader IV'] = (_data: any) => {
 //       return dp[0] === parseInt(ans);
 //     }
 
-// name: 'Unique Paths in a Grid I',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       const n: number = data[0]; // Number of rows
-//       const m: number = data[1]; // Number of columns
-//       const currentRow: number[] = [];
-//       currentRow.length = n;
+// ******** Unique Paths in a Grid I
+solvers['Unique Paths in a Grid I'] = (_data: any) => {
+  const data = _data as number[];
+  const n: number = data[0]; // Number of rows
+  const m: number = data[1]; // Number of columns
+  const currentRow: number[] = [];
+  currentRow.length = n;
 
-//       for (let i = 0; i < n; i++) {
-//         currentRow[i] = 1;
-//       }
-//       for (let row = 1; row < m; row++) {
-//         for (let i = 1; i < n; i++) {
-//           currentRow[i] += currentRow[i - 1];
-//         }
-//       }
+  for (let i = 0; i < n; i += 1) {
+    currentRow[i] = 1;
+  }
+  for (let row = 1; row < m; row += 1) {
+    for (let i = 1; i < n; i += 1) {
+      currentRow[i] += currentRow[i - 1];
+    }
+  }
 
-//       return parseInt(ans) === currentRow[n - 1];
-//     }
+  return currentRow[n - 1];
+};
 
 // ******** Unique Paths in a Grid II
 solvers['Unique Paths in a Grid II'] = (data: any) => {

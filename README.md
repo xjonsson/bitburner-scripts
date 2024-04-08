@@ -37,6 +37,13 @@ Route and door (host: string, door: boolean)
 alias route="run os/modules/Route.js"
 ```
 
+Automatically Complete all Infiltrations
+
+```
+alias infilStart="run /os/modules/Infiltration.js --start"
+alias infilStop="run /os/modules/Infiltration.js --stop"
+```
+
 ## Logic
 
 Add image of logic flow here

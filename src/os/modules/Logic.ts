@@ -10,11 +10,14 @@ export function osLogic(ns: NS, stage: number): any {
   const p = PlayerCache.read(ns, 'player');
   switch (stage) {
     // ******** Minimal startup
-    // TODO: less than faction (than start working for money)
     // TODO: home ram < 64 save 11m (Less makes it impossible to run)
     // TODO: home ram < 128 save 32m
     // TODO: home ram < 256 save 100m
     case 0: {
+      // ******** Get a job
+      if (p?.work.jobs.length === 0) {
+        return { done: false, msg: 'S0 - GET JOB' };
+      }
       // ******** Setup Hacknet
       if (ns.hacknet.numNodes() >= 8) {
         return { done: true, msg: 'STAGE_0_COMPLETE' };
@@ -145,9 +148,9 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Get HTTP
       if (!p?.programs.http) {
         if (p?.money < CONFIGS.shoppingPrices.http) {
-          return { done: false, msg: 'SAVE_HTTP' };
+          return { done: false, msg: 'SAVE_HTTP (30m)' };
         }
-        return { done: false, msg: 'BUY_HTTP' };
+        return { done: false, msg: 'BUY_HTTP (30m)' };
       }
       return { done: true, msg: 'STAGE_8_COMPLETE' };
     }
@@ -175,9 +178,9 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Get SQL
       if (!p?.programs.sql) {
         if (p?.money < CONFIGS.shoppingPrices.sql) {
-          return { done: false, msg: 'SAVE_SQL' };
+          return { done: false, msg: 'SAVE_SQL (250m)' };
         }
-        return { done: false, msg: 'BUY_SQL' };
+        return { done: false, msg: 'BUY_SQL (250m)' };
       }
       return { done: true, msg: 'STAGE_10_COMPLETE' };
     }
