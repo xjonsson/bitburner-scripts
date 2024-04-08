@@ -1183,27 +1183,26 @@ solvers['Encryption I: Caesar Cipher'] = (_data: any) => {
   return cipher;
 };
 
-// name: 'Encryption II: Vigenère Cipher',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       if (!Array.isArray(_data))
-//         throw new Error('data should be array of string');
-//       const data = _data as [string, string];
-//       // data = [plaintext, keyword]
-//       // build char array, shifting via map and corresponding keyword letter and join to final results
-//       const cipher = [...data[0]]
-//         .map((a, i) =>
-//           a === ' '
-//             ? a
-//             : String.fromCharCode(
-//                 ((a.charCodeAt(0) -
-//                   2 * 65 +
-//                   data[1].charCodeAt(i % data[1].length)) %
-//                   26) +
-//                   65
-//               )
-//         )
-//         .join('');
-//       return cipher === ans;
-//     }
+// ******** Encryption II: Vigenère Cipher
+solvers['Encryption II: Vigenère Cipher'] = (_data: any) => {
+  if (!Array.isArray(_data)) throw new Error('data should be array of string');
+  const data = _data as [string, string];
+  // data = [plaintext, keyword]
+  // build char array, shifting via map and corresponding keyword letter and join to final results
+  const cipher = [...data[0]]
+    .map((a, i) =>
+      a === ' '
+        ? a
+        : String.fromCharCode(
+            ((a.charCodeAt(0) -
+              2 * 65 +
+              data[1].charCodeAt(i % data[1].length)) %
+              26) +
+              65
+          )
+    )
+    .join('');
+  return cipher;
+};
 
 // ******** CONTRACT SOLVERS END ******** //
