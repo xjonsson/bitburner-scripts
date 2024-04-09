@@ -504,12 +504,13 @@ export function osLogic(ns: NS, stage: number): any {
     }
 
     case 12: {
-      // ******** Crack
+      // ******** w0r1d_d43m0n
       if (ServerInfo.list(ns).includes('w0r1d_d43m0n')) {
-        if (p?.level < 3000) {
+        const host = ns.getServer('w0r1d_d43m0n');
+        if (p?.level < host.requiredHackingSkill) {
           return {
             done: false,
-            msg: `LVL_3000`,
+            msg: `LVL_${host.requiredHackingSkill}`,
             hacknet: true,
             hosting: true,
             reserve: 0,

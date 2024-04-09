@@ -444,17 +444,16 @@ solvers['Find Largest Prime Factor'] = (data: any) => {
   return n === 1 ? fac - 1 : n;
 };
 
-// name: 'Subarray with Maximum Sum',
-//     numTries: 10,
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       const nums: number[] = data.slice();
-//       for (let i = 1; i < nums.length; i++) {
-//         nums[i] = Math.max(nums[i], nums[i] + nums[i - 1]);
-//       }
+// ******** Subarray with Maximum Sum
+solvers['Subarray with Maximum Sum'] = (_data: any) => {
+  const data = _data as number[];
+  const nums: number[] = data.slice();
+  for (let i = 1; i < nums.length; i += 1) {
+    nums[i] = Math.max(nums[i], nums[i] + nums[i - 1]);
+  }
 
-//       return parseInt(ans, 10) === Math.max(...nums);
-//     },
+  return Math.max(...nums);
+};
 
 // ******** Total Ways to Sum
 solvers['Total Ways to Sum'] = (data: any) => {
@@ -487,76 +486,61 @@ solvers['Total Ways to Sum II'] = (data: any) => {
   return ways[n];
 };
 
-// name: 'Spiralize Matrix',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[][];
-//       const spiral: number[] = [];
-//       const m: number = data.length;
-//       const n: number = data[0].length;
-//       let u = 0;
-//       let d: number = m - 1;
-//       let l = 0;
-//       let r: number = n - 1;
-//       let k = 0;
-//       let done = false;
-//       while (!done) {
-//         // Up
-//         for (let col: number = l; col <= r; col++) {
-//           spiral[k] = data[u][col];
-//           ++k;
-//         }
-//         if (++u > d) {
-//           done = true;
-//           continue;
-//         }
+// ******** Spiralize Matrix
+solvers['Spiralize Matrix'] = (data: any) => {
+  const spiral = [];
+  const m = data.length;
+  const n = data[0].length;
+  let u = 0;
+  let d = m - 1;
+  let l = 0;
+  let r = n - 1;
+  let k = 0;
 
-//         // Right
-//         for (let row: number = u; row <= d; row++) {
-//           spiral[k] = data[row][r];
-//           ++k;
-//         }
-//         if (--r < l) {
-//           done = true;
-//           continue;
-//         }
+  while (true) {
+    // Up
+    for (let col = l; col <= r; col += 1) {
+      spiral[k] = data[u][col];
+      k += 1;
+    }
+    // eslint-disable-next-line no-plusplus
+    if (++u > d) {
+      break;
+    }
 
-//         // Down
-//         for (let col: number = r; col >= l; col--) {
-//           spiral[k] = data[d][col];
-//           ++k;
-//         }
-//         if (--d < u) {
-//           done = true;
-//           continue;
-//         }
+    // Right
+    for (let row = u; row <= d; row += 1) {
+      spiral[k] = data[row][r];
+      k += 1;
+    }
+    // eslint-disable-next-line no-plusplus
+    if (--r < l) {
+      break;
+    }
 
-//         // Left
-//         for (let row: number = d; row >= u; row--) {
-//           spiral[k] = data[row][l];
-//           ++k;
-//         }
-//         if (++l > r) {
-//           done = true;
-//           continue;
-//         }
-//       }
+    // Down
+    for (let col = r; col >= l; col -= 1) {
+      spiral[k] = data[d][col];
+      k += 1;
+    }
+    // eslint-disable-next-line no-plusplus
+    if (--d < u) {
+      break;
+    }
 
-//       const sanitizedPlayerAns = removeBracketsFromArrayString(ans).replace(
-//         /\s/g,
-//         ''
-//       );
-//       const playerAns = sanitizedPlayerAns.split(',').map((s) => parseInt(s));
-//       if (spiral.length !== playerAns.length) {
-//         return false;
-//       }
-//       for (let i = 0; i < spiral.length; ++i) {
-//         if (spiral[i] !== playerAns[i]) {
-//           return false;
-//         }
-//       }
+    // Left
+    for (let row = d; row >= u; row -= 1) {
+      spiral[k] = data[row][l];
+      k += 1;
+    }
+    // eslint-disable-next-line no-plusplus
+    if (++l > r) {
+      break;
+    }
+  }
 
-//       return true;
-//     }
+  return spiral;
+};
 
 // name: 'Array Jumping Game',
 //     solver: (_data: unknown, ans: string): boolean => {
@@ -1097,45 +1081,28 @@ solvers['HammingCodes: Integer to Encoded Binary'] = (data: any) => {
 //       return false;
 //     }
 
-// name: 'Compression I: RLE Compression',
-//     solver: (plain: unknown, ans: string): boolean => {
-//       if (typeof plain !== 'string') throw new Error('solver expected string');
-//       if (ans.length % 2 !== 0) {
-//         return false;
-//       }
+// ******** Compression I: RLE Compression
+solvers['Compression I: RLE Compression'] = (data: any) => {
+  let encoding = '';
 
-//       let ans_plain = '';
-//       for (let i = 0; i + 1 < ans.length; i += 2) {
-//         const length = ans.charCodeAt(i) - 0x30;
-//         if (length < 0 || length > 9) {
-//           return false;
-//         }
+  for (let i = 0; i < data.length; ) {
+    let runLength = 1;
+    while (i + 1 < data.length && data[i + 1] === data[i]) {
+      runLength += 1;
+      i += 1;
+    }
 
-//         ans_plain += ans[i + 1].repeat(length);
-//       }
-//       if (ans_plain !== plain) {
-//         return false;
-//       }
+    while (runLength > 9) {
+      runLength -= 9;
+      encoding += `9${data[i]}`;
+    }
+    encoding += runLength.toString() + data[i];
 
-//       let length = 0;
-//       for (let i = 0; i < plain.length; ) {
-//         let run_length = 1;
-//         while (
-//           i + run_length < plain.length &&
-//           plain[i + run_length] === plain[i]
-//         ) {
-//           ++run_length;
-//         }
-//         i += run_length;
+    i += 1;
+  }
 
-//         while (run_length > 0) {
-//           run_length -= 9;
-//           length += 2;
-//         }
-//       }
-
-//       return ans.length <= length;
-//     }
+  return encoding;
+};
 
 // ******** Compression II: LZ Decompression
 solvers['Compression II: LZ Decompression'] = (data: any) => {
