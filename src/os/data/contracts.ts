@@ -389,43 +389,45 @@ export function HammingEncode(data: number): string {
 //   return enc.join("");
 // }
 
-// export function HammingDecode(data: string): number {
-//   let err = 0;
-//   const bits: number[] = [];
+export function HammingDecode(data: string): number {
+  let err = 0;
+  const bits: number[] = [];
 
-//   /* TODO why not just work with an array of digits from the start? */
-//   for (const i in data.split("")) {
-//     const bit = parseInt(data[i]);
-//     bits[i] = bit;
+  /* TODO why not just work with an array of digits from the start? */
+  /* eslint-disable */
+  for (const i in data.split('')) {
+    const bit = parseInt(data[i]);
+    bits[i] = bit;
 
-//     if (bit) {
-//       err ^= +i;
-//     }
-//   }
+    if (bit) {
+      err ^= +i;
+    }
+  }
 
-//   /* If err != 0 then it spells out the index of the bit that was flipped */
-//   if (err) {
-//     /* Flip to correct */
-//     bits[err] = bits[err] ? 0 : 1;
-//   }
+  /* If err != 0 then it spells out the index of the bit that was flipped */
+  if (err) {
+    /* Flip to correct */
+    bits[err] = bits[err] ? 0 : 1;
+  }
 
-//   /* Now we have to read the message, bit 0 is unused (it's the overall parity bit
-//    * which we don't care about). Each bit at an index that is a power of 2 is
-//    * a parity bit and not part of the actual message. */
+  /* Now we have to read the message, bit 0 is unused (it's the overall parity bit
+   * which we don't care about). Each bit at an index that is a power of 2 is
+   * a parity bit and not part of the actual message. */
 
-//   let ans = "";
+  let ans = '';
 
-//   for (let i = 1; i < bits.length; i++) {
-//     /* i is not a power of two so it's not a parity bit */
-//     if ((i & (i - 1)) != 0) {
-//       ans += bits[i];
-//     }
-//   }
+  for (let i = 1; i < bits.length; i += 1) {
+    /* i is not a power of two so it's not a parity bit */
+    if ((i & (i - 1)) != 0) {
+      ans += bits[i];
+    }
+  }
+  /* eslint-enable */
 
-//   /* TODO to avoid ambiguity about endianness why not let the player return the extracted (and corrected)
-//    * data bits, rather than guessing at how to convert it to a decimal string? */
-//   return parseInt(ans, 2);
-// }
+  /* TODO to avoid ambiguity about endianness why not let the player return the extracted (and corrected)
+   * data bits, rather than guessing at how to convert it to a decimal string? */
+  return parseInt(ans, 2);
+}
 
 // ******** CONTRACT HELPERS END ******** //
 
@@ -991,11 +993,11 @@ solvers['HammingCodes: Integer to Encoded Binary'] = (data: any) => {
   return HammingEncode(data);
 };
 
-// name: 'HammingCodes: Encoded Binary to Integer',
-//     solver: (data: unknown, ans: string): boolean => {
-//       if (typeof data !== 'string') throw new Error('solver expected string');
-//       return parseInt(ans, 10) === HammingDecode(data);
-//     }
+// ******** HammingCodes: HammingCodes: Encoded Binary to Integer
+solvers['HammingCodes: Encoded Binary to Integer'] = (data: any) => {
+  if (typeof data !== 'string') throw new Error('solver expected string');
+  return HammingDecode(data);
+};
 
 // name: 'Proper 2-Coloring of a Graph',
 //     solver: (_data: unknown, ans: string): boolean => {
