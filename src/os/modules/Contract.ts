@@ -48,6 +48,7 @@ export function attemptContract(ns: NS, contract: any) {
       ns.tprint(
         `ERROR: Failed to solve "${contract.type}" on ${contract.host}`
       );
+      ns.exit();
     }
   } else {
     ns.tprint(`WARNING: No solver for "${contract.type}" on ${contract.host}`);

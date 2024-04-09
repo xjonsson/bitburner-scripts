@@ -999,89 +999,50 @@ solvers['HammingCodes: Encoded Binary to Integer'] = (data: any) => {
   return HammingDecode(data);
 };
 
-// name: 'Proper 2-Coloring of a Graph',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       // Helper function to get neighbourhood of a vertex
-//       function neighbourhood(vertex: number): number[] {
-//         const adjLeft = data[1].filter(([a]) => a == vertex).map(([, b]) => b);
-//         const adjRight = data[1].filter(([, b]) => b == vertex).map(([a]) => a);
-//         return adjLeft.concat(adjRight);
-//       }
+// ******** Proper 2-Coloring of a Graph
+solvers['Proper 2-Coloring of a Graph'] = (data: any) => {
+  // This code is too janky to change, just ignore it
+  /* eslint-disable */
+  // Helper function to get neighbourhood of a vertex
+  function neighbourhood(check: any, vertex: any) {
+    const adjLeft = check[1]
+      // @ts-expect-error: Functioning 2-Coloring graph code
+      .filter(([a, _]) => a === vertex)
+      // @ts-expect-error: Functioning 2-Coloring graph code
+      .map(([_, b]) => b);
+    const adjRight = check[1]
+      // @ts-expect-error: Functioning 2-Coloring graph code
+      .filter(([_, b]) => b === vertex)
+      // @ts-expect-error: Functioning 2-Coloring graph code
+      .map(([a, _]) => a);
+    return adjLeft.concat(adjRight);
+  }
 
-//       const data = _data as [number, [number, number][]];
-
-//       // Sanitize player input
-//       const sanitizedPlayerAns = removeBracketsFromArrayString(ans);
-
-//       // Case where the player believes there is no solution.
-//       // Attempt to construct one to check if this is correct.
-//       if (sanitizedPlayerAns === '') {
-//         // Verify that there is no solution by attempting to create a proper 2-coloring.
-//         const coloring: (number | undefined)[] = Array(data[0]).fill(undefined);
-//         while (coloring.some((val) => val === undefined)) {
-//           // Color a vertex in the graph
-//           const initialVertex: number = coloring.findIndex(
-//             (val) => val === undefined
-//           );
-//           coloring[initialVertex] = 0;
-//           const frontier: number[] = [initialVertex];
-
-//           // Propagate the coloring throughout the component containing v greedily
-//           while (frontier.length > 0) {
-//             const v: number = frontier.pop() || 0;
-//             const neighbors: number[] = neighbourhood(v);
-
-//             // For each vertex u adjacent to v
-//             for (const id in neighbors) {
-//               const u: number = neighbors[id];
-
-//               // Set the color of u to the opposite of v's color if it is new,
-//               // then add u to the frontier to continue the algorithm.
-//               if (coloring[u] === undefined) {
-//                 if (coloring[v] === 0) coloring[u] = 1;
-//                 else coloring[u] = 0;
-
-//                 frontier.push(u);
-//               }
-
-//               // Assert u,v do not have the same color
-//               else if (coloring[u] === coloring[v]) {
-//                 // If u,v do have the same color, no proper 2-coloring exists, meaning
-//                 // the player was correct to say there is no proper 2-coloring of the graph.
-//                 return true;
-//               }
-//             }
-//           }
-//         }
-
-//         // If this code is reached, there exists a proper 2-coloring of the input
-//         // graph, and thus the player was incorrect in submitting no answer.
-//         return false;
-//       }
-
-//       // Solution provided case
-//       const sanitizedPlayerAnsArr: string[] = sanitizedPlayerAns.split(',');
-//       const coloring: number[] = sanitizedPlayerAnsArr.map((val) =>
-//         parseInt(val)
-//       );
-//       if (coloring.length == data[0]) {
-//         const edges = data[1];
-//         const validColors = [0, 1];
-//         // Check that the provided solution is a proper 2-coloring
-//         return edges.every(([a, b]) => {
-//           const aColor = coloring[a];
-//           const bColor = coloring[b];
-//           return (
-//             validColors.includes(aColor) && // Enforce the first endpoint is color 0 or 1
-//             validColors.includes(bColor) && // Enforce the second endpoint is color 0 or 1
-//             aColor != bColor // Enforce the endpoints are different colors
-//           );
-//         });
-//       }
-
-//       // Return false if the coloring is the wrong size
-//       return false;
-//     }
+  // Solution provided case
+  const coloring: number[] = Array(data[0]).fill(undefined);
+  while (coloring.some((e) => e === undefined)) {
+    // Color a vertex in the graph
+    const initialVertex = coloring.findIndex((e) => e === undefined);
+    coloring[initialVertex] = 0;
+    const frontier = [initialVertex];
+    // Propagate the coloring throughout the component containing v greedily
+    while (frontier.length > 0) {
+      const v = frontier.pop();
+      for (const u of neighbourhood(data, v)) {
+        if (coloring[u] === undefined) {
+          // @ts-expect-error: Functioning 2-Coloring graph code
+          coloring[u] = coloring[v] ^ 1; // Set the color of u to the opposite of the color of v
+          frontier.push(u); // Check u next
+        }
+        // Assert that u and v do not have the same color if they are already colored
+        // @ts-expect-error: Functioning 2-Coloring graph code
+        else if (coloring[u] === coloring[v]) return '[]';
+      }
+    }
+  }
+  /* eslint-enable */
+  return coloring;
+};
 
 // ******** Compression I: RLE Compression
 solvers['Compression I: RLE Compression'] = (data: any) => {
