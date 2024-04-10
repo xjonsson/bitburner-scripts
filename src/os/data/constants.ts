@@ -32,3 +32,12 @@ export const ServerConstants: {
   PurchasedServerLimit: 25,
   PurchasedServerMaxRam: 1048576, // 2^20
 };
+
+export const CITIES = [
+  'Sector-12', // 0
+  'Aevum', // 1
+  'Chongqing', // 2
+  'New Tokyo', // 3
+  'Ishima', // 4
+  'Volhaven', // 5
+];

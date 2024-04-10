@@ -215,7 +215,7 @@ export const DEPLOY: any = {
 
 // ******** Corporations Configurations
 export const CORP: any = {
-  corpName: 'cosy-co', // Corporations name
+  corpName: 'cosyco', // Corporations name
   farmName: 'Agrico', // Agriculture division name
   smokeName: 'Tobaco', // Tobacco division name
 };

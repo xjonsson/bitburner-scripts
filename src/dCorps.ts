@@ -138,10 +138,10 @@ function updateOffices(
       //       0
       //     )}`
       //   : '',
-      ns.formatNumber(mHardware, 1),
-      ns.formatNumber(mRobots, 1),
-      ns.formatNumber(mAI, 1),
-      ns.formatNumber(mReal, 1),
+      mHardware > 0 ? ns.formatNumber(mHardware, 1) : '',
+      mRobots > 0 ? ns.formatNumber(mRobots, 1) : '',
+      mAI > 0 ? ns.formatNumber(mAI, 1) : '',
+      mReal > 0 ? ns.formatNumber(mReal, 1) : '',
       actions[city]
     );
   });
@@ -162,76 +162,80 @@ export async function main(ns: NS) {
   // ******** Single run code
   ns.print('========DEBUG========');
   // const check = ServerInfo.list(ns).includes('w0r1d_d43m0n');
-  // const c = ns.corporation.hasCorporation();
-  const corp = ns.corporation.getCorporation();
-  const { divisions } = corp;
+  const isRegistered = ns.corporation.hasCorporation();
+  if (isRegistered) {
+    const corp = ns.corporation.getCorporation();
+    const { divisions } = corp;
 
-  // Agrico
-  const agricoName = divisions[0];
-  const agrico = ns.corporation.getDivision(agricoName);
-  const agricoCities = agrico.cities;
-  const agricoActions = {
-    'Sector-12': 'READ',
-    Aevum: '',
-    Chongqing: '',
-    'New Tokyo': '',
-    Ishima: '',
-    Volhaven: 'DEBUG',
-  };
-  // const sample = ns.corporation.getIndustryData('Agriculture');
-  // const sample = ns.corporation.getOffice(agricoName, 'Sector-12');
-  // ns.print(agricoCities, agricoCities.length);
-  // ns.print(sample);
+    // Agrico
+    const agricoName = divisions[0];
+    const agrico = ns.corporation.getDivision(agricoName);
+    const agricoCities = agrico.cities;
+    const agricoActions = {
+      'Sector-12': 'READ',
+      Aevum: '',
+      Chongqing: '',
+      'New Tokyo': '',
+      Ishima: '',
+      Volhaven: 'DEBUG',
+    };
 
-  while (true) {
-    ns.clearLog();
-    // ******** Tick Vars
-    // const now = performance.now(); // DEBUG
-    // ns.print(`[Running] ${formatTime(ns, now - start)}`);
+    // const sample = ns.corporation.getIndustryData('Agriculture');
+    // const sample = ns.corporation.getOffice(agricoName, 'Sector-12');
+    // ns.print(agricoCities, agricoCities.length);
+    // ns.print(sample);
 
-    // ******** EACH CYCLE
-    // ns.print('========DEBUG========');
-    ns.clearLog();
-    ns.print(`[Cycles] ${cycles}`);
-    updateHeader(ns);
-    updateOffices(ns, agricoName, agricoCities, agricoActions);
+    while (true) {
+      ns.clearLog();
+      // ******** Tick Vars
+      // const now = performance.now(); // DEBUG
+      // ns.print(`[Running] ${formatTime(ns, now - start)}`);
 
-    // ******** EACH START
-    while (ns.corporation.getCorporation().state === 'START') {
-      // updateOffices(ns, agricoName, agricoCities);
-      agricoActions.Aevum = 'RECHECK';
-      // await ns.asleep(100);
-      await ns.corporation.nextUpdate();
+      // ******** EACH CYCLE
+      // ns.print('========DEBUG========');
+      ns.clearLog();
+      ns.print(`[Cycles] ${cycles}`);
+      updateHeader(ns);
+      updateOffices(ns, agricoName, agricoCities, agricoActions);
+
+      // ******** EACH START
+      while (ns.corporation.getCorporation().state === 'START') {
+        // updateOffices(ns, agricoName, agricoCities);
+        agricoActions.Aevum = 'RECHECK';
+        // await ns.asleep(100);
+        await ns.corporation.nextUpdate();
+      }
+
+      while (ns.corporation.getCorporation().state === 'PURCHASE') {
+        // updateOffices(ns, agricoName, agricoCities);
+        // await ns.asleep(100);
+        await ns.corporation.nextUpdate();
+      }
+
+      while (ns.corporation.getCorporation().state === 'PRODUCTION') {
+        // updateOffices(ns, agricoName, agricoCities);
+        // await ns.asleep(100);
+        await ns.corporation.nextUpdate();
+      }
+
+      while (ns.corporation.getCorporation().state === 'EXPORT') {
+        // updateOffices(ns, agricoName, agricoCities);
+        // await ns.asleep(100);
+        await ns.corporation.nextUpdate();
+      }
+
+      while (ns.corporation.getCorporation().state === 'SALE') {
+        // updateOffices(ns, agricoName, agricoCities);
+        // await ns.asleep(100);
+        await ns.corporation.nextUpdate();
+      }
+      await checkEnergyMorale(ns, agricoName, agricoCities);
+
+      cycles += 1;
+      await ns.asleep(100); // Maybe 10 seconds
     }
-
-    while (ns.corporation.getCorporation().state === 'PURCHASE') {
-      // updateOffices(ns, agricoName, agricoCities);
-      // await ns.asleep(100);
-      await ns.corporation.nextUpdate();
-    }
-
-    while (ns.corporation.getCorporation().state === 'PRODUCTION') {
-      // updateOffices(ns, agricoName, agricoCities);
-      // await ns.asleep(100);
-      await ns.corporation.nextUpdate();
-    }
-
-    while (ns.corporation.getCorporation().state === 'EXPORT') {
-      // updateOffices(ns, agricoName, agricoCities);
-      // await ns.asleep(100);
-      await ns.corporation.nextUpdate();
-    }
-
-    while (ns.corporation.getCorporation().state === 'SALE') {
-      // updateOffices(ns, agricoName, agricoCities);
-      // await ns.asleep(100);
-      await ns.corporation.nextUpdate();
-    }
-    await checkEnergyMorale(ns, agricoName, agricoCities);
-
-    cycles += 1;
-    await ns.asleep(100); // Maybe 10 seconds
   }
+  ns.print('No company registered');
 }
 
 // ******** SAMPLES
