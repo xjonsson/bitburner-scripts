@@ -28,6 +28,8 @@
  * Use this section to disable certain modules.
  * This can be useful for certain Bitnodes
  */
+
+// ******** Game Modules
 export const MODULES: any = {};
 (function () {
   // System
@@ -39,7 +41,8 @@ export const MODULES: any = {};
   MODULES.GANGS = false; // true will run a gang (~TBD)
 })();
 
-// These have been found for steady rampup
+// ******** General Configurations
+// These have been set for steady rampup, changes can cause errors
 export const CONFIGS: any = {
   ramReserve: 32, // 8GB reserved ram
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
@@ -114,6 +117,7 @@ export const CONFIGS: any = {
   },
 };
 
+// ******** OS PATHS
 export const PATHS: any = {
   OS: '/os',
   // DATA: '/os/data',
@@ -122,11 +126,11 @@ export const PATHS: any = {
   CACHE: '/os/cache',
 };
 
+// ******** CORE PATHS
 export const CORE: any = {};
 (function () {
   // System
   CORE.LAUNCHER = `${PATHS.OS}/launcher.js`;
-  // CORE.MINIMAL = `${PATHS.OS}/minimal.js`;
   CORE.TWITCH = `${PATHS.OS}/twitch.js`;
 
   // Modules
@@ -138,6 +142,7 @@ export const CORE: any = {};
   // CORE.GANGS = `/debug.js`;
 })();
 
+// ******** TIMING CALCULATIONS
 export const TIME: any = {};
 (function () {
   TIME.LAUNCHING = 1 * 1000; // 1 second launch wait
@@ -162,6 +167,7 @@ export const TIME: any = {};
 //   FILE: `${PATHS.TMP}/Active.txt`,
 // };
 
+// ******** PORTS CONFIGURATIONS
 export const PORTS: any = {};
 (function () {
   PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
@@ -177,6 +183,7 @@ export const PORTS: any = {};
   // PORTS[(PORTS.STOCKS = 12)] = 'STOCKS'; // TODO: Add stocks
 })();
 
+// ******** CACHE Configurations
 export const CACHE: any = {};
 (function () {
   CACHE.CONTROL = `${PATHS.CACHE}/cacheControl.js`;
@@ -192,6 +199,7 @@ export const CACHE: any = {};
   // CACHE.STOCKS = `${PATHS.CACHE}/cacheStocks.js`; // TODO: Add stocks cache
 })();
 
+// ******** Puppeteer HWGW
 export const DEPLOY: any = {
   xMin: `${PATHS.DEPLOY}/xmin.js`, // Minimal script
   xMinRam: 2.41, // Minimal script RAM required
@@ -205,26 +213,9 @@ export const DEPLOY: any = {
   xShareRam: 4.0, // Rep Share RAM required
 };
 
-/* 
-  Server Target RAM
-  L1  2GB (2)
-  L2  4GB (2*2)
-  L3  8GB (2*2*2)
-  L4  16GB (2*2*2)
-  L5  32GB (2*2*2*2*2)
-  L6  64GB (2*2*2*2*2*2)
-  L7  128GB (2*2*2*2*2*2*2)
-  L8  256GB (2*2*2*2*2*2*2*2)
-  L9  512GB (2*2*2*2*2*2*2*2*2)
-  L10 1024GB (2*2*2*2*2*2*2*2*2*2) **
-  L11 2048GB (2*2*2*2*2*2*2*2*2*2*2)
-  L12 4096GB (2*2*2*2*2*2*2*2*2*2*2*2)
-  L13 8192GB (2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L14 16384GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L15 32768GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L16 65536GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L17 131072GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L18 262144GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L19 524288GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-  L20 1048576GB (2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2*2)
-*/
+// ******** Corporations Configurations
+export const CORP: any = {
+  corpName: 'cosy-co', // Corporations name
+  farmName: 'Agrico', // Agriculture division name
+  smokeName: 'Tobaco', // Tobacco division name
+};
