@@ -544,17 +544,23 @@ solvers['Spiralize Matrix'] = (data: any) => {
   return spiral;
 };
 
-// name: 'Array Jumping Game',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[];
-//       const n: number = data.length;
-//       let i = 0;
-//       for (let reach = 0; i < n && i <= reach; ++i) {
-//         reach = Math.max(i + data[i], reach);
-//       }
-//       const solution: boolean = i === n;
-//       return (ans === '1' && solution) || (ans === '0' && !solution);
-//     }
+// ******** Array Jumping Game
+function arrayJumpingSolver(data: any) {
+  const reachable = new Array(data.length).fill(Infinity);
+  reachable[0] = 0;
+  for (let i = 0; i < data.length; i += 1) {
+    const num = data[i];
+    for (let j = 1; j <= num; j += 1) {
+      if (i + j === data.length) break;
+      reachable[i + j] = Math.min(reachable[i + j], reachable[i] + 1);
+    }
+  }
+  return reachable;
+}
+
+solvers['Array Jumping Game'] = (data: any) =>
+  // Needs to be recursive
+  arrayJumpingSolver(data).includes(Infinity) ? 0 : 1;
 
 // ******** Array Jumping Game II
 solvers['Array Jumping Game II'] = (_data: any) => {
@@ -786,89 +792,72 @@ solvers['Unique Paths in a Grid II'] = (data: any) => {
   return obstacleGrid[obstacleGrid.length - 1][obstacleGrid[0].length - 1];
 };
 
-// name: 'Shortest Path in a Grid',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[][];
-//       const width = data[0].length;
-//       const height = data.length;
-//       const dstY = height - 1;
-//       const dstX = width - 1;
-
-//       const distance: [number][] = new Array(height);
-//       // const prev: [[number, number] | undefined][] = new Array(height);
-//       const queue = new MinHeap<[number, number]>();
-
-//       for (let y = 0; y < height; y++) {
-//         distance[y] = new Array(width).fill(Infinity) as [number];
-//         // prev[y] = new Array(width).fill(undefined) as [undefined];
-//       }
-
-//       function validPosition(y: number, x: number): boolean {
-//         return y >= 0 && y < height && x >= 0 && x < width && data[y][x] == 0;
-//       }
-
-//       // List in-bounds and passable neighbors
-//       function* neighbors(y: number, x: number): Generator<[number, number]> {
-//         if (validPosition(y - 1, x)) yield [y - 1, x]; // Up
-//         if (validPosition(y + 1, x)) yield [y + 1, x]; // Down
-//         if (validPosition(y, x - 1)) yield [y, x - 1]; // Left
-//         if (validPosition(y, x + 1)) yield [y, x + 1]; // Right
-//       }
-
-//       // Prepare starting point
-//       distance[0][0] = 0;
-//       queue.push([0, 0], 0);
-
-//       // Take next-nearest position and expand potential paths from there
-//       while (queue.size > 0) {
-//         const [y, x] = queue.pop() as [number, number];
-//         for (const [yN, xN] of neighbors(y, x)) {
-//           const d = distance[y][x] + 1;
-//           if (d < distance[yN][xN]) {
-//             if (distance[yN][xN] == Infinity)
-//               // Not reached previously
-//               queue.push([yN, xN], d);
-//             // Found a shorter path
-//             else queue.changeWeight(([yQ, xQ]) => yQ == yN && xQ == xN, d);
-//             // prev[yN][xN] = [y, x];
-//             distance[yN][xN] = d;
-//           }
-//         }
-//       }
-
-//       // No path at all?
-//       if (distance[dstY][dstX] == Infinity) return ans == '';
-
-//       // There is a solution, require that the answer path is as short as the shortest
-//       // path we found
-//       if (ans.length > distance[dstY][dstX]) return false;
-
-//       // Further verify that the answer path is a valid path
-//       let ansX = 0;
-//       let ansY = 0;
-//       for (const direction of ans) {
-//         switch (direction) {
-//           case 'U':
-//             ansY -= 1;
-//             break;
-//           case 'D':
-//             ansY += 1;
-//             break;
-//           case 'L':
-//             ansX -= 1;
-//             break;
-//           case 'R':
-//             ansX += 1;
-//             break;
-//           default:
-//             return false; // Invalid character
-//         }
-//         if (!validPosition(ansY, ansX)) return false;
-//       }
-
-//       // Path was valid, finally verify that the answer path brought us to the end coordinates
-//       return ansY == dstY && ansX == dstX;
-//     }
+// ******** Shortest Path in a Grid
+solvers['Shortest Path in a Grid'] = (data: any) => {
+  const dist = data.map((arr: any) => new Array(arr.length).fill(Infinity));
+  const prev = data.map((arr: any) => new Array(arr.length).fill(undefined));
+  const path = data.map((arr: any) => new Array(arr.length).fill(undefined));
+  const queue: any = [];
+  data.forEach((arr: any, i: any) =>
+    arr.forEach((a: any, j: any) => {
+      if (a === 0) queue.push([i, j]);
+    })
+  );
+  dist[0][0] = 0;
+  const height = data.length;
+  const { length } = data[height - 1];
+  const target = [height - 1, length - 1];
+  while (queue.length > 0) {
+    let u;
+    let d = Infinity;
+    let idx;
+    // @ts-expect-error: Functioning shortest path code
+    queue.forEach(([i, j], k) => {
+      if (dist[i][j] < d) {
+        u = [i, j];
+        d = dist[i][j];
+        idx = k;
+      }
+    });
+    if (JSON.stringify(u) === JSON.stringify(target)) {
+      let str = '';
+      // eslint-disable-next-line no-shadow
+      let [a, b] = target;
+      if (prev[a][b] || (a === 0 && b === 0)) {
+        while (prev[a][b]) {
+          str = path[a][b] + str;
+          [a, b] = prev[a][b];
+        }
+      }
+      return str;
+    }
+    queue.splice(idx, 1);
+    /* eslint-disable */
+    if (u === undefined) continue;
+    // @ts-expect-error: Functioning shortest path code
+    const [a, b] = u;
+    for (const [s, i, j] of [
+      ['D', a + 1, b],
+      ['U', a - 1, b],
+      ['R', a, b + 1],
+      ['L', a, b - 1],
+    ]) {
+      // @ts-expect-error: Functioning shortest path code
+      if (i < 0 || i >= height || j < 0 || j >= length) continue; // Index over edge
+      if (data[i][j] === 1) continue; // We've hit a wall;
+      // @ts-expect-error: Functioning shortest path code
+      if (!queue.some(([k, l]) => k === i && l === j)) continue; // Vertex not in queue
+      const alt = dist[a][b] + 1;
+      if (alt < dist[i][j]) {
+        dist[i][j] = alt;
+        prev[i][j] = u;
+        path[i][j] = s;
+      }
+    }
+    /* eslint-enable */
+  }
+  return '';
+};
 
 // ******** Sanitize Parentheses in Expression
 solvers['Sanitize Parentheses in Expression'] = (data: any) => {

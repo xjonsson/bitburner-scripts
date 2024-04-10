@@ -24,6 +24,22 @@
  * [ ] w0rld_d43m0n [H 3000]
  */
 
+/*
+ * Use this section to disable certain modules.
+ * This can be useful for certain Bitnodes
+ */
+export const MODULES: any = {};
+(function () {
+  // System
+  MODULES.HACKNET = true; // true will buy hacknets (~6 GB)
+  MODULES.HOSTING = true; // true will buy servers (~8 GB)
+  MODULES.CONTRACTS = true; // true will solve contracts (~27 GB)
+  MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
+  MODULES.CORPORATIONS = true; // true will run a corporation (~100 GB)
+  MODULES.GANGS = false; // true will run a gang (~TBD)
+})();
+
+// These have been found for steady rampup
 export const CONFIGS: any = {
   ramReserve: 32, // 8GB reserved ram
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
@@ -117,6 +133,9 @@ export const CORE: any = {};
   CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
   CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
   CORE.CONTRACTS = `${PATHS.MODULES}/Contract.js`;
+  CORE.PUPPETEER = `/debug.js`;
+  CORE.CORPORATIONS = `/dCorps.js`;
+  // CORE.GANGS = `/debug.js`;
 })();
 
 export const TIME: any = {};

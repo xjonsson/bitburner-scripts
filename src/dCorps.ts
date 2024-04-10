@@ -151,8 +151,11 @@ function updateOffices(
 export async function main(ns: NS) {
   // ******** Single Vars
   ns.disableLog('ALL');
-  ns.tail();
   ns.clearLog();
+  ns.tail();
+  ns.setTitle('Corporation');
+  ns.resizeTail(926, 230);
+  ns.moveTail(60, 780);
   // const start = performance.now(); // DEBUG
   let cycles = 0;
 

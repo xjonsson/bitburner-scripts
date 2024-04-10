@@ -70,6 +70,9 @@ export async function main(ns: NS) {
   ns.disableLog('asleep');
   ns.disableLog('clearLog');
   ns.tail();
+  ns.setTitle('Contracts');
+  ns.resizeTail(200, 90);
+  ns.moveTail(1720, 640);
   ns.clearLog();
   // const start = performance.now();
   let count = 0;

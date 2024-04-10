@@ -49,13 +49,13 @@ export class Control {
       const p = PlayerCache.read(ns, 'player');
       if (p?.challenge > this.challenge) {
         this.challenge = p?.challenge;
-        ns.tprint(`Programs Updated: ${this.challenge}`);
+        // ns.tprint(`Programs Updated: ${this.challenge}`);
         reclaimer(ns, this.challenge);
       }
 
       if (p?.level > this.level) {
         this.level = p?.level;
-        ns.tprint(`Level Updated: ${this.level}`);
+        // ns.tprint(`Level Updated: ${this.level}`);
       }
 
       // Disable the player check after X

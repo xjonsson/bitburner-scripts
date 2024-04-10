@@ -11,6 +11,9 @@ export async function main(ns: NS) {
   ns.disableLog('sleep');
   ns.clearLog();
   ns.tail();
+  ns.setTitle('Hacknet');
+  ns.resizeTail(250, 520);
+  ns.moveTail(1470, 440);
 
   // ******** Initialize
   const { moneyReserve } = CONFIGS;
@@ -193,6 +196,7 @@ export async function main(ns: NS) {
           // const control = ControlInfo.details(ns, past);
           // control.isShopHacknet = false;
           // await ControlCache.update(ns, control);
+          // ns.closeTail();
           return;
         }
 

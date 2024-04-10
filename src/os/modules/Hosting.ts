@@ -15,6 +15,9 @@ export async function main(ns: NS) {
   ns.disableLog('asleep');
   ns.clearLog();
   ns.tail();
+  ns.setTitle('Hosting');
+  ns.resizeTail(220, 680);
+  ns.moveTail(1248, 440);
 
   // ******** Initialize
   const { moneyReserve } = CONFIGS;

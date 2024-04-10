@@ -442,8 +442,11 @@ function prepHWGW(ns: NS, s: ServerTarget): number {
 // ******** Main function
 export async function main(ns: NS) {
   ns.disableLog('ALL');
-  ns.tail();
   ns.clearLog();
+  ns.tail();
+  ns.setTitle('Puppeteer');
+  ns.resizeTail(1040, 440);
+  ns.moveTail(680, 0);
   const start = performance.now();
 
   // NOTE: ONETIME CODE
