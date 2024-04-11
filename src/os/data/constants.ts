@@ -33,6 +33,7 @@ export const ServerConstants: {
   PurchasedServerMaxRam: 1048576, // 2^20
 };
 
+// NOTE: These are ordered for arrays and slice. Dont change order.
 export const CITIES = [
   'Sector-12', // 0
   'Aevum', // 1
@@ -40,4 +41,24 @@ export const CITIES = [
   'New Tokyo', // 3
   'Ishima', // 4
   'Volhaven', // 5
+];
+
+export const UPGRADES = [
+  'FocusWires', // 0
+  'Neural Accelerators', // 1
+  'Speech Processor Implants', // 2
+  'Nuoptimal Nootropic Injector Implants', // 3
+  'Smart Factories', // 4
+  'Smart Storage', // 5
+  'DreamSense', // 6
+  'Wilson Analytics', // 7
+  'ABC SalesBots', // 8
+  'Project Insight', // 9
+];
+
+export const BOOST = [
+  'Hardware', // 0
+  'Robots', // 1
+  'AI Cores', // 2
+  'Real Estate', // 3
 ];

@@ -1,16 +1,17 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CORP } from '/os/configs';
-import { CITIES } from '/os/data/constants';
+import { CITIES, UPGRADES, BOOST } from '/os/data/constants';
 /* eslint-enable */
 
-const { corpName, farmName } = CORP;
+const { cName, fName, farm } = CORP;
+let waitCycles = 0;
 
 // ******** Shared functions
 function checkEnergyMorale(ns: NS): boolean {
   let pass = true;
   CITIES.forEach((city: any) => {
-    const o = ns.corporation.getOffice(farmName, city);
+    const o = ns.corporation.getOffice(fName, city);
     if (o.avgEnergy < 0.95 * o.maxEnergy || o.avgMorale < 0.95 * o.maxMorale) {
       pass = false;
     }
@@ -19,20 +20,10 @@ function checkEnergyMorale(ns: NS): boolean {
   return false;
 }
 
-// const d = [
-//   1, // d[0] Operations
-//   1, // d[1] Engineer
-//   1, // d[2] Business
-//   0, // d[3] Management
-//   0, // d[4] Research & Development
-//   0, // d[5] Intern
-//   0, // d[6] "Unassigned"
-// ];
-
 function checkOfficeAssignments(ns: NS, e: number, d: number[]): boolean {
   let pass = true;
   CITIES.forEach((city: any) => {
-    const o = ns.corporation.getOffice(farmName, city);
+    const o = ns.corporation.getOffice(fName, city);
     if (
       o.numEmployees !== e ||
       o.employeeJobs.Operations !== d[0] ||
@@ -51,49 +42,108 @@ function checkOfficeAssignments(ns: NS, e: number, d: number[]): boolean {
   return false;
 }
 
-function actionOfficeAssignments(ns: NS, e: number, d: number[]): boolean {
-  let pass = true;
+function actionOfficeAssignments(ns: NS, e: number, d: number[]) {
   CITIES.forEach((city: any) => {
-    const n = ns.corporation;
-    const o = n.getOffice(farmName, city);
+    const c = ns.corporation;
+    const o = c.getOffice(fName, city);
+    if (e > o.size) {
+      const price = c.getOfficeSizeUpgradeCost(fName, city, e - o.size);
+      if (c.getCorporation().funds > price) {
+        c.upgradeOfficeSize(fName, city, e - o.size);
+      }
+    }
+
     let h = e - o.numEmployees;
     while (h > 0 && e <= o.size) {
-      n.hireEmployee(farmName, city);
+      c.hireEmployee(fName, city);
       h -= 1;
     }
-    if (o.numEmployees !== e) {
-      pass = false;
-    } else if (o.numEmployees === e) {
+    if (o.numEmployees === e) {
       if (o.employeeJobs.Unassigned === 0) {
         // Clear assignments
-        n.setAutoJobAssignment(farmName, city, 'Intern', 0);
-        n.setAutoJobAssignment(farmName, city, 'Research & Development', 0);
-        n.setAutoJobAssignment(farmName, city, 'Management', 0);
-        n.setAutoJobAssignment(farmName, city, 'Business', d[2]);
-        n.setAutoJobAssignment(farmName, city, 'Engineer', d[1]);
-        n.setAutoJobAssignment(farmName, city, 'Operations', d[0]);
+        c.setAutoJobAssignment(fName, city, 'Intern', 0);
+        c.setAutoJobAssignment(fName, city, 'Research & Development', 0);
+        c.setAutoJobAssignment(fName, city, 'Management', 0);
+        c.setAutoJobAssignment(fName, city, 'Business', d[2]);
+        c.setAutoJobAssignment(fName, city, 'Engineer', d[1]);
+        c.setAutoJobAssignment(fName, city, 'Operations', d[0]);
       }
-      n.setAutoJobAssignment(farmName, city, 'Operations', d[0]);
-      n.setAutoJobAssignment(farmName, city, 'Engineer', d[1]);
-      n.setAutoJobAssignment(farmName, city, 'Business', d[2]);
-      n.setAutoJobAssignment(farmName, city, 'Management', d[3]);
-      n.setAutoJobAssignment(farmName, city, 'Research & Development', d[4]);
-      n.setAutoJobAssignment(farmName, city, 'Intern', d[5]);
-      n.setAutoJobAssignment(farmName, city, 'Unassigned', d[6]);
+      c.setAutoJobAssignment(fName, city, 'Operations', d[0]);
+      c.setAutoJobAssignment(fName, city, 'Engineer', d[1]);
+      c.setAutoJobAssignment(fName, city, 'Business', d[2]);
+      c.setAutoJobAssignment(fName, city, 'Management', d[3]);
+      c.setAutoJobAssignment(fName, city, 'Research & Development', d[4]);
+      c.setAutoJobAssignment(fName, city, 'Intern', d[5]);
+      c.setAutoJobAssignment(fName, city, 'Unassigned', d[6]);
+    }
+  });
+}
+
+function checkWarehouse(ns: NS, storage: number): boolean {
+  let pass = true;
+  CITIES.forEach((city: any) => {
+    const w = ns.corporation.getWarehouse(fName, city);
+    if (w.size < storage) {
+      pass = false;
     }
   });
   if (pass) return true;
   return false;
 }
 
+function actionWarehouse(ns: NS, storage: number, bulk = 1) {
+  CITIES.forEach((city: any) => {
+    const w = ns.corporation.getWarehouse(fName, city);
+    const cost = ns.corporation.getUpgradeWarehouseCost(fName, city, bulk);
+    if (w.size < storage && ns.corporation.getCorporation().funds > cost) {
+      ns.print(`[Upgrade Warehouse x ${bulk}] ${city}`);
+      ns.corporation.upgradeWarehouse(fName, city, bulk);
+    }
+  });
+}
+
+function checkBoostMaterials(ns: NS, s: number): boolean {
+  let pass = true;
+
+  CITIES.forEach((city: any) => {
+    BOOST.forEach((material: any) => {
+      const m = ns.corporation.getMaterial(fName, city, material);
+      if (m.stored < farm.boost[material][s]) {
+        pass = false;
+      } else {
+        // Clear it after the check
+        ns.corporation.buyMaterial(fName, city, material, 0);
+      }
+    });
+  });
+  if (pass) return true;
+  return false;
+}
+
+function actionBoostMaterials(ns: NS, s: number): boolean {
+  if (waitCycles === 0) {
+    CITIES.forEach((city: any) => {
+      BOOST.forEach((m: any) => {
+        ns.corporation.buyMaterial(fName, city, m, farm.boost[m][s] / 10);
+      });
+    });
+  }
+  waitCycles += 1;
+  if (waitCycles >= 10) {
+    waitCycles = 0;
+    return true;
+  }
+  return false;
+}
+
 const phase1 = [
   {
     // [1][0] Buy Smart Supply
-    check(ns: NS) {
+    check(ns: NS): boolean {
       if (ns.corporation.hasUnlock('Smart Supply')) return true;
       return false;
     },
-    action(ns: NS) {
+    action(ns: NS): number {
       const c = ns.corporation;
       if (c.getCorporation().funds > c.getUnlockCost('Smart Supply')) {
         c.purchaseUnlock('Smart Supply');
@@ -103,28 +153,28 @@ const phase1 = [
   },
   {
     // [1][1] Expand to Agriculture
-    check(ns: NS) {
+    check(ns: NS): boolean {
       if (ns.corporation.getCorporation().divisions.length > 0) return true;
       return false;
     },
-    action(ns: NS) {
-      ns.corporation.expandIndustry('Agriculture', farmName);
+    action(ns: NS): number {
+      ns.corporation.expandIndustry('Agriculture', fName);
       return 1;
     },
   },
   {
     // [1][2] Expand to all cities in Agriculture (Warehouses 3 employees, 1 Ops, 1 Eng, 1 Business
-    check(ns: NS) {
-      if (ns.corporation.getDivision(farmName).cities.length === 6) return true;
+    check(ns: NS): boolean {
+      if (ns.corporation.getDivision(fName).cities.length === 6) return true;
       return false;
     },
-    action(ns: NS) {
+    action(ns: NS): number {
       const c = ns.corporation;
-      const { cities } = c.getDivision(farmName);
+      const { cities } = c.getDivision(fName);
       CITIES.filter((n: any) => !cities.includes(n)).forEach((city: any) => {
         if (city !== CITIES[0]) {
           if (c.getCorporation().funds > 4e9) {
-            c.expandCity(farmName, city);
+            c.expandCity(fName, city);
           }
         }
       });
@@ -133,28 +183,27 @@ const phase1 = [
   },
   {
     // [1][3] Warehouses
-    check(ns: NS) {
+    check(ns: NS): boolean {
       const c = ns.corporation;
       let pass = true;
       CITIES.forEach((city: any) => {
-        if (!c.hasWarehouse(farmName, city)) {
+        if (!c.hasWarehouse(fName, city)) {
           pass = false;
-        } else if (!c.getWarehouse(farmName, city).smartSupplyEnabled) {
+        } else if (!c.getWarehouse(fName, city).smartSupplyEnabled) {
           pass = false;
         }
       });
       if (pass) return true;
       return false;
     },
-    action(ns: NS) {
+    action(ns: NS): number {
       const c = ns.corporation;
-      // const { cities } = c.getDivision(farmName);
-      CITIES.filter((n: any) => !c.hasWarehouse(farmName, n)).forEach(
+      CITIES.filter((n: any) => !c.hasWarehouse(fName, n)).forEach(
         (city: any) => {
           if (c.getCorporation().funds > 5e9) {
-            c.purchaseWarehouse(farmName, city);
-            if (c.hasWarehouse(farmName, city)) {
-              c.setSmartSupply(farmName, city, true);
+            c.purchaseWarehouse(fName, city);
+            if (c.hasWarehouse(fName, city)) {
+              c.setSmartSupply(fName, city, true);
             }
           }
         }
@@ -164,45 +213,36 @@ const phase1 = [
   },
   {
     // [1][4] Employees
-    check(ns: NS) {
-      const e = 3;
-      // Pointer 0, 1, 2, 3, 4, 5, 6
-      // Office  O, E, B, M, R, I, U
-      const d = [1, 1, 1, 0, 0, 0, 0];
-      return checkOfficeAssignments(ns, e, d);
+    check(ns: NS): boolean {
+      return checkOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
     },
-    action(ns: NS) {
-      const e = 3;
-      // Pointer 0, 1, 2, 3, 4, 5, 6
-      // Office  O, E, B, M, R, I, U
-      const d = [1, 1, 1, 0, 0, 0, 0];
-      actionOfficeAssignments(ns, e, d);
+    action(ns: NS): number {
+      actionOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
       return 4;
     },
   },
   {
     // [1][5] Buy 1 advert
-    check(ns: NS) {
+    check(ns: NS): boolean {
       const c = ns.corporation;
-      if (c.getHireAdVertCount(farmName) >= 1) return true;
+      if (c.getHireAdVertCount(fName) >= 1) return true;
       return false;
     },
-    action(ns: NS) {
+    action(ns: NS): number {
       const c = ns.corporation;
-      if (c.getCorporation().funds > c.getHireAdVertCost(farmName)) {
-        c.hireAdVert(farmName);
+      if (c.getCorporation().funds > c.getHireAdVertCost(fName)) {
+        c.hireAdVert(fName);
       }
       return 5;
     },
   },
   {
     // [1][6] Set produced materials to be sold
-    check(ns: NS) {
-      const c = ns.corporation;
+    check(ns: NS): boolean {
       let pass = true;
       CITIES.forEach((city: any) => {
-        const mFood = c.getMaterial(farmName, city, 'Food');
-        const mPlants = c.getMaterial(farmName, city, 'Plants');
+        const mFood = ns.corporation.getMaterial(fName, city, 'Food');
+        const mPlants = ns.corporation.getMaterial(fName, city, 'Plants');
         if (
           mFood.desiredSellPrice !== 'MP' ||
           mFood.desiredSellAmount !== 'MAX' ||
@@ -215,149 +255,169 @@ const phase1 = [
       if (pass) return true;
       return false;
     },
-    action(ns: NS) {
-      const c = ns.corporation;
+    action(ns: NS): number {
       CITIES.forEach((city: any) => {
-        c.sellMaterial(farmName, city, 'Plants', 'MAX', 'MP');
-        c.sellMaterial(farmName, city, 'Food', 'MAX', 'MP');
+        ns.corporation.sellMaterial(fName, city, 'Plants', 'MAX', 'MP');
+        ns.corporation.sellMaterial(fName, city, 'Food', 'MAX', 'MP');
       });
       return 6;
     },
   },
   {
     // [1][7] Staff EnergyMorale > 95%
-    check(ns: NS) {
+    check(ns: NS): boolean {
       return checkEnergyMorale(ns);
     },
-    action(ns: NS) {
+    action(ns: NS): number {
       return 7;
+    },
+  },
+  {
+    // [1][8] Upgrade each city's warehouse twice (300)
+    check(ns: NS) {
+      return checkWarehouse(ns, farm.warehouse[1]);
+    },
+    action(ns: NS): number {
+      actionWarehouse(ns, farm.warehouse[1], 2);
+      return 8;
+    },
+  },
+  {
+    // [1][9] Buy 2 of each first 5 upgrades (FW, NA, SPI, NNII, SF)
+    check(ns: NS) {
+      // return checkWarehouse(ns, farm.warehouse[1]);
+      let pass = true;
+      UPGRADES.slice(0, 5).forEach((u: any) => {
+        if (ns.corporation.getUpgradeLevel(u) < 2) {
+          pass = false;
+        }
+      });
+      if (pass) return true;
+      return false;
+    },
+    action(ns: NS): number {
+      const c = ns.corporation;
+      // Upgrade to 2
+      for (let i = 0; i < 2; i += 1) {
+        UPGRADES.slice(0, 5).forEach((u: any) => {
+          const { funds } = c.getCorporation();
+          if (
+            c.getUpgradeLevel(u) < i + 1 &&
+            funds > c.getUpgradeLevelCost(u)
+          ) {
+            c.levelUpgrade(u);
+            ns.print(`[Upgraded] ${u} to ${i + 1}`);
+          }
+        });
+      }
+      return 9;
+    },
+  },
+  {
+    // [1][10] Staff EnergyMorale > 95%
+    check(ns: NS): boolean {
+      return checkEnergyMorale(ns);
+    },
+    action(ns: NS): number {
+      return 10;
+    },
+  },
+  {
+    // [1][11] Get Materials
+    check(ns: NS) {
+      return checkBoostMaterials(ns, 0);
+    },
+    action(ns: NS): number {
+      if (!actionBoostMaterials(ns, 0)) {
+        ns.print(`[Waiting] ${waitCycles} cycles`);
+      }
+      return 11;
+    },
+  },
+  {
+    // [1][14] 1st investor round ~ 210b
+    // FIXME: INVESTOR ROUND 1 (100 -> 60%)
+    check(ns: NS) {
+      // return checkBoostMaterials(ns, 0);
+      // if (c.getCorporation().numShares / c.getCorporation().totalShares === 1) {
+      //   return { phase: 1, stage: 14 };
+      // }
+      return true;
+    },
+    action(ns: NS): number {
+      // if (!actionBoostMaterials(ns, 0)) {
+      //   ns.print(`[Waiting] ${waitCycles} cycles`);
+      // }
+      return 12;
+    },
+  },
+  {
+    // [1][13] Upgrade each office to size of 9 and set them to 1 Ops, 1 Eng, 1 Bus, 1 Man, 5 R&D
+    check(ns: NS): boolean {
+      return checkOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
+    },
+    action(ns: NS): number {
+      actionOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
+      return 13;
+    },
+  },
+  {
+    // [1][14] Upgrade Smart Factories and Smart Storage to level 10
+    check(ns: NS) {
+      let pass = true;
+      // TODO: Upgrade to 10
+      const upgrades = [UPGRADES[4], UPGRADES[5]];
+      upgrades.forEach((u: any) => {
+        if (ns.corporation.getUpgradeLevel(u) < 10) {
+          pass = false;
+        }
+      });
+      if (pass) return true;
+      return false;
+    },
+    action(ns: NS): number {
+      const c = ns.corporation;
+      const upgrades = [UPGRADES[4], UPGRADES[5]];
+      // Upgrade to 10
+      for (let i = 0; i < 10; i += 1) {
+        upgrades.forEach((u: any) => {
+          const { funds } = c.getCorporation();
+          if (
+            c.getUpgradeLevel(u) < i + 1 &&
+            funds > c.getUpgradeLevelCost(u)
+          ) {
+            c.levelUpgrade(u);
+            ns.tprint(`[Upgraded] ${u} to ${i + 1}`);
+          } else {
+            ns.print(`Not enough money for ${u}`);
+          }
+        });
+      }
+      return 14;
     },
   },
 ];
 
-export function corpLogicPhase1(ns: NS): any {
+export function corpLogicPhase1(ns: NS, _stage = 0): any {
   // ******** Phase 1
-  let phase = 1;
-  let stage = 0;
+  const phase = 1;
+  let stage = _stage;
 
-  // This will be a simple loop once we are done
-  // [1][0] Buy Smart Supply
-  stage = !phase1[0].check(ns) ? phase1[0].action(ns) : (stage += 1);
-  // [1][1] Expand to Agriculture
-  stage = !phase1[1].check(ns) ? phase1[1].action(ns) : (stage += 1);
-  // [1][2] Expand to all cities in Agriculture (Warehouses 3 employees, 1 Ops, 1 Eng, 1 Business
-  stage = !phase1[2].check(ns) ? phase1[2].action(ns) : (stage += 1);
-  // [1][3] Warehouses
-  stage = !phase1[3].check(ns) ? phase1[3].action(ns) : (stage += 1);
-  // [1][4] Employees
-  stage = !phase1[4].check(ns) ? phase1[4].action(ns) : (stage += 1);
-  // [1][5] Buy 1 advert
-  stage = !phase1[5].check(ns) ? phase1[5].action(ns) : (stage += 1);
-  // [1][6] Set produced materials to be sold
-  stage = !phase1[6].check(ns) ? phase1[6].action(ns) : (stage += 1);
-  // [1][7] Staff EnergyMorale > 95%
-  stage = !phase1[7].check(ns) ? phase1[7].action(ns) : (stage += 1);
-  // [1][8] Upgrade each city's warehouse twice
-
-  // Completed phase
-  if (stage >= 30) {
-    phase += 1;
-    stage = 0;
+  if (stage <= phase1.length - 1) {
+    stage = !phase1[stage].check(ns) ? phase1[stage].action(ns) : (stage += 1);
+  } else {
+    ns.print(`We are at Stage: ${stage}`);
   }
+
+  // TODO: Completed phase
+  // if (stage >= 30) {
+  //   phase += 1;
+  //   stage = 0;
+  // }
   return { phase, stage };
 }
 
-// [1][8] Upgrade each city's warehouse twice
-// CITIES.forEach((city: any) => {
-//   const w = c.getWarehouse(farmName, city);
-//   if (w.size < 300) {
-//     loopReturn = { phase: 1, stage: 8 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][9] Buy 2 of each: FocusWires, Neural Accelerators, Speech Processor Implants, Nuoptimal Nootropic Injector Implants and Smart Factories
-// UPGRADES.slice(0, 5).forEach((u: any) => {
-//   if (c.getUpgradeLevel(u) < 2) {
-//     loopReturn = { phase: 1, stage: 9 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][10] Staff EnergyMorale > 95%
-// CITIES.forEach((city: any) => {
-//   const o = c.getOffice(farmName, city);
-//   if (
-//     o.avgEnergy < 0.95 * o.maxEnergy ||
-//     o.avgMorale < 0.95 * o.maxMorale
-//   ) {
-//     loopReturn = { phase: 1, stage: 10 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][11] Materials - Hardware +125 @ 12.5/s [125]
-// CITIES.forEach((city: any) => {
-//   const mHardware = c.getMaterial(farmName, city, BOOST[0]);
-//   if (mHardware.stored < 125) {
-//     loopReturn = { phase: 1, stage: 11 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][12] Materials - AI Cores +75 @ 7.5/s [75]
-// CITIES.forEach((city: any) => {
-//   const mAI = c.getMaterial(farmName, city, BOOST[2]);
-//   if (mAI.stored < 75) {
-//     loopReturn = { phase: 1, stage: 12 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][13] Materials - Real Estate +27,000 @ 2700.0/s [27,000]
-// CITIES.forEach((city: any) => {
-//   const mReal = c.getMaterial(farmName, city, BOOST[3]);
-//   if (mReal.stored < 27000) {
-//     loopReturn = { phase: 1, stage: 13 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][14] 1st investor round ~ 210b
-// if (c.getCorporation().numShares / c.getCorporation().totalShares === 1) {
-//   return { phase: 1, stage: 14 };
-// }
-
-// // [1][15] Upgrade each office to size of 9 and set them to 1 Ops, 1 Eng, 1 Bus, 1 Man, 5 R&D
-// CITIES.forEach((city: any) => {
-//   const o = c.getOffice(farmName, city);
-//   if (
-//     o.numEmployees < 9 ||
-//     o.employeeJobs.Operations < 1 ||
-//     o.employeeJobs.Engineer < 1 ||
-//     o.employeeJobs.Business < 1 ||
-//     o.employeeJobs.Management < 1 ||
-//     o.employeeJobs['Research & Development'] < 5
-//   ) {
-//     loopReturn = { phase: 1, stage: 15 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][16] Upgrade Smart Factories and Smart Storage to level 10
-// if (c.getUpgradeLevel(UPGRADES[4]) < 10) {
-//   return { phase: 1, stage: 16 };
-// }
-// if (c.getUpgradeLevel(UPGRADES[5]) < 10) {
-//   return { phase: 1, stage: 17 };
-// }
+// ******** DEBUG UNDER HERE ********
 
 // // [1][18] Upgrade each warehouse 7 times (should end up with 2 000 storage)
 // CITIES.forEach((city: any) => {

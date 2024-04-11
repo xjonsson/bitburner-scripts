@@ -3,7 +3,7 @@ import { NS } from '@ns';
 import { CORP } from '/os/configs';
 /* eslint-enable */
 
-const { corpName } = CORP;
+const { cName } = CORP;
 
 const phase0 = [
   {
@@ -13,7 +13,12 @@ const phase0 = [
       return false;
     },
     action(ns: NS) {
-      ns.corporation.createCorporation(corpName, false);
+      try {
+        ns.corporation.createCorporation(cName, false);
+      } catch (e) {
+        ns.print('Not on Bitnode 3');
+        ns.corporation.createCorporation(cName, true);
+      }
       return 0;
     },
   },

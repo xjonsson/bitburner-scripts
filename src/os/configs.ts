@@ -215,7 +215,25 @@ export const DEPLOY: any = {
 
 // ******** Corporations Configurations
 export const CORP: any = {
-  corpName: 'cosyco', // Corporations name
-  farmName: 'Agrico', // Agriculture division name
-  smokeName: 'Tobaco', // Tobacco division name
+  cName: 'cosyco', // Corporations name (Corp Name)
+  fName: 'Agrico', // Agriculture division name (Farm Name)
+  tName: 'Tobaco', // Tobacco division name (Tobacco Name)
+  farm: {
+    hires: [3, 9],
+    roles: [
+      // 0, 1, 2, 3, 4, 5, 6
+      // O, E, B, M, R, I, U
+      [1, 1, 1, 0, 0, 0, 0], // (3) Initial setup
+      [1, 1, 1, 1, 5, 0, 0], // (9) Upgrade
+      [3, 2, 2, 2, 0, 0, 0], // (9) Reasign
+    ],
+    warehouse: [100, 300, 2000, 3800], // Max amounts at each stage
+    boost: {
+      // Max amounts at each stage (Names match game constants -.-)
+      Hardware: [125, 2800, 9300],
+      Robots: [0, 96, 726],
+      'AI Cores': [75, 2520, 6270],
+      'Real Estate': [2700, 146400, 230400],
+    },
+  },
 };

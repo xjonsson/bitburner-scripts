@@ -334,3 +334,23 @@ export async function main(ns: NS) {
 //     Unassigned: 0,
 //   },
 // };
+
+// const sGetWarehouse = {
+//   level: 3,
+//   city: 'Volhaven',
+//   size: 300,
+//   sizeUsed: 0,
+//   smartSupplyEnabled: true,
+// };
+
+// const sGetMaterial = {
+//   marketPrice: 70000.98012962344,
+//   desiredSellPrice: '',
+//   desiredSellAmount: 0,
+//   name: 'Real Estate',
+//   stored: 0,
+//   quality: 1,
+//   productionAmount: 0,
+//   actualSellAmount: 0,
+//   exports: [],
+// };

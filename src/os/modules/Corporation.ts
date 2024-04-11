@@ -5,37 +5,7 @@ import { corpLogicPhase0 } from '/os/modules/CorporationPhase0';
 import { corpLogicPhase1 } from '/os/modules/CorporationPhase1';
 /* eslint-enable */
 
-const { corpName, farmName, smokeName } = CORP;
-const CITIES = [
-  'Sector-12', // 0
-  'Aevum', // 1
-  'Chongqing', // 2
-  'New Tokyo', // 3
-  'Ishima', // 4
-  'Volhaven', // 5
-];
-
-// NOTE: This is ordered by priorirty for slice. Dont change order.
-const UPGRADES = [
-  'FocusWires', // 0
-  'Neural Accelerators', // 1
-  'Speech Processor Implants', // 2
-  'Nuoptimal Nootropic Injector Implants', // 3
-  'Smart Factories', // 4
-  'Smart Storage', // 5
-  'DreamSense', // 6
-  'Wilson Analytics', // 7
-  'ABC SalesBots', // 8
-  'Project Insight', // 9
-];
-
-// NOTE: This is ordered. Dont change order.
-const BOOST = [
-  'Hardware', // 0
-  'Robots', // 1
-  'AI Cores', // 2
-  'Real Estate', // 3
-];
+const { cName, fName, sName } = CORP;
 
 export class Corp {
   // ******** Base
@@ -48,7 +18,7 @@ export class Corp {
   constructor(ns: NS) {
     this.ns = ns;
     this.exists = ns.corporation.hasCorporation();
-    this.name = this.exists ? ns.corporation.getCorporation().name : corpName;
+    this.name = this.exists ? ns.corporation.getCorporation().name : cName;
     this.phase = -1;
     this.stage = -1;
 
@@ -74,12 +44,59 @@ export class Corp {
     }
 
     if (phase === 1) {
-      ({ phase, stage } = corpLogicPhase1(ns));
+      ({ phase, stage } = corpLogicPhase1(ns, stage));
       ns.print(`[DEBUG] P:${phase} S:${stage}`);
       // ns.tprint(`[P1] End P:${phase} S:${stage}`);
     }
 
     return { phase, stage };
+  }
+
+  async checkEnergyMorale(ns: NS, dName?: string) {
+    const c = ns.corporation;
+    let pass = true;
+
+    function checkOffice(d: any, o: any) {
+      // Check Energy Levels
+      // ns.tprint(`Checking: ${d} - ${o.city}`);
+      if (o.avgEnergy < 0.95 * o.maxEnergy) {
+        pass = false;
+        if (c.getCorporation().funds > o.size * 500e3) {
+          // ns.tprint(`Buying Tea: ${d} | ${o.city}`);
+          c.buyTea(d, o.city);
+        }
+      }
+
+      if (o.avgMorale < 0.95 * o.maxMorale) {
+        pass = false;
+        if (c.getCorporation().funds > o.size * 500e3) {
+          // ns.tprint(`Party: ${d} | ${o.city}`);
+          c.throwParty(d, o.city, 500e3);
+        }
+      }
+    }
+
+    if (this.exists) {
+      if (c.getCorporation().divisions.length > 0) {
+        const divs = c.getCorporation().divisions;
+        if (dName && divs.includes(dName)) {
+          const d = c.getDivision(dName);
+          d.cities.forEach((city: any) => {
+            checkOffice(dName, c.getOffice(dName, city));
+          });
+        } else {
+          divs.forEach((tName: any) => {
+            const d = c.getDivision(tName);
+            d.cities.forEach((city: any) => {
+              checkOffice(tName, c.getOffice(tName, city));
+            });
+          });
+        }
+        return pass;
+      }
+      return false;
+    }
+    return false;
   }
 
   // checkProgress(ns: NS): { phase: number; stage: number } {

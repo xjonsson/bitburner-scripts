@@ -5,19 +5,7 @@ import { CORP } from '/os/configs';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
-const { corpName, farmName, smokeName } = CORP;
-const UPGRADES = [
-  'FocusWires', // 0
-  'Neural Accelerators', // 1
-  'Speech Processor Implants', // 2
-  'Nuoptimal Nootropic Injector Implants', // 3
-  'Smart Factories', // 4
-  'Smart Storage', // 5
-  'DreamSense', // 6
-  'Wilson Analytics', // 7
-  'ABC SalesBots', // 8
-  'Project Insight', // 9
-];
+const { cName, fName, sName } = CORP;
 
 // ******** Styling
 
@@ -26,12 +14,13 @@ export async function main(ns: NS) {
   ns.disableLog('ALL');
   ns.tail();
   ns.clearLog();
-  const start = performance.now(); // DEBUG
+  // const start = performance.now(); // DEBUG
+  let cycles = 0;
 
   // ******** Single run code
-  const c = new Corp(ns);
-  let phase = 0;
-  let stage = 0;
+  const corp = new Corp(ns);
+  let phase = 1; // FIXME: should be 0 if not debugging
+  let stage = 11; // FIXME: should be 0 if not debugging
 
   // const sample = ns.corporation.getCorporation();
   // const sCities = ns.corporation.getDivision(farmName).cities;
@@ -47,19 +36,44 @@ export async function main(ns: NS) {
   //     0.6
   // );
   // ns.print(sample);
-  ns.print(`P${phase} `, `S${stage}`);
+  // ns.print(`P${phase} `, `S${stage}`);
 
   // ******** Loop run code
   while (true) {
     ns.clearLog();
-    const now = performance.now(); // DEBUG
-    ({ phase, stage } = c.state(phase, stage));
+    // const now = performance.now(); // DEBUG
+    ns.print(`[Cycles] ${cycles}`);
 
     // ******** Each tick
-    ns.print(`[Time] ${formatTime(ns, now - start)}`);
+    // ns.print(`[Time] ${formatTime(ns, now - start)}`);
     ns.print('========DEBUG========');
-    ns.print(`[Phase] ${phase} | [Stage] ${stage}`);
 
-    await ns.asleep(5000);
+    // ******** EACH START
+    while (ns.corporation.getCorporation().nextState === 'START') {
+      // We check the state right before start
+      ({ phase, stage } = corp.state(phase, stage));
+      ns.print(`[Phase] ${phase} | [Stage] ${stage}`);
+      await ns.corporation.nextUpdate();
+    }
+
+    while (ns.corporation.getCorporation().nextState === 'PURCHASE') {
+      await ns.corporation.nextUpdate();
+    }
+
+    while (ns.corporation.getCorporation().nextState === 'PRODUCTION') {
+      await ns.corporation.nextUpdate();
+    }
+
+    while (ns.corporation.getCorporation().nextState === 'EXPORT') {
+      await ns.corporation.nextUpdate();
+    }
+
+    while (ns.corporation.getCorporation().nextState === 'SALE') {
+      await ns.corporation.nextUpdate();
+    }
+    await corp.checkEnergyMorale(ns);
+
+    cycles += 1;
+    await ns.asleep(100);
   }
 }
