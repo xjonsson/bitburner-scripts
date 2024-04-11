@@ -20,7 +20,7 @@ export async function main(ns: NS) {
   // ******** Single run code
   const corp = new Corp(ns);
   let phase = 1; // FIXME: should be 0 if not debugging
-  let stage = 11; // FIXME: should be 0 if not debugging
+  let stage = 0; // FIXME: should be 0 if not debugging
 
   // const sample = ns.corporation.getCorporation();
   // const sCities = ns.corporation.getDivision(farmName).cities;

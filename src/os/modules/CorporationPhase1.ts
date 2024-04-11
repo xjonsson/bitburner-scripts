@@ -139,263 +139,269 @@ function actionBoostMaterials(ns: NS, s: number): boolean {
 const phase1 = [
   {
     // [1][0] Buy Smart Supply
-    check(ns: NS): boolean {
-      if (ns.corporation.hasUnlock('Smart Supply')) return true;
-      return false;
-    },
-    action(ns: NS): number {
+    step(ns: NS): boolean {
       const c = ns.corporation;
+      if (c.hasUnlock('Smart Supply')) {
+        ns.print(`:: We have Smart Supply`);
+        return true;
+      }
+
       if (c.getCorporation().funds > c.getUnlockCost('Smart Supply')) {
+        ns.print(`[Buying] Smart Supply`);
         c.purchaseUnlock('Smart Supply');
       }
-      return 0;
+      return false;
     },
   },
   {
     // [1][1] Expand to Agriculture
-    check(ns: NS): boolean {
-      if (ns.corporation.getCorporation().divisions.length > 0) return true;
+    step(ns: NS): boolean {
+      const c = ns.corporation;
+      const divs = c.getCorporation().divisions;
+      if (divs.length > 0 && divs.includes(fName)) {
+        ns.print(`:: We have ${fName}`);
+        return true;
+      }
+      ns.print(`[Expanding] Agriculture (${fName})`);
+      c.expandIndustry('Agriculture', fName);
       return false;
-    },
-    action(ns: NS): number {
-      ns.corporation.expandIndustry('Agriculture', fName);
-      return 1;
     },
   },
   {
     // [1][2] Expand to all cities in Agriculture (Warehouses 3 employees, 1 Ops, 1 Eng, 1 Business
-    check(ns: NS): boolean {
-      if (ns.corporation.getDivision(fName).cities.length === 6) return true;
-      return false;
-    },
-    action(ns: NS): number {
+    step(ns: NS): boolean {
       const c = ns.corporation;
+      if (ns.corporation.getDivision(fName).cities.length === 6) {
+        ns.print(`:: We have offices in 6 cities`);
+        return true;
+      }
+
       const { cities } = c.getDivision(fName);
       CITIES.filter((n: any) => !cities.includes(n)).forEach((city: any) => {
         if (city !== CITIES[0]) {
           if (c.getCorporation().funds > 4e9) {
+            ns.print(`[Expanding] Opening ${city}`);
             c.expandCity(fName, city);
           }
         }
       });
-      return 2;
+      return false;
     },
   },
   {
     // [1][3] Warehouses
-    check(ns: NS): boolean {
+    step(ns: NS): boolean {
       const c = ns.corporation;
       let pass = true;
+
       CITIES.forEach((city: any) => {
-        if (!c.hasWarehouse(fName, city)) {
-          pass = false;
-        } else if (!c.getWarehouse(fName, city).smartSupplyEnabled) {
-          pass = false;
-        }
-      });
-      if (pass) return true;
-      return false;
-    },
-    action(ns: NS): number {
-      const c = ns.corporation;
-      CITIES.filter((n: any) => !c.hasWarehouse(fName, n)).forEach(
-        (city: any) => {
-          if (c.getCorporation().funds > 5e9) {
-            c.purchaseWarehouse(fName, city);
-            if (c.hasWarehouse(fName, city)) {
-              c.setSmartSupply(fName, city, true);
-            }
-          }
-        }
-      );
-      return 3;
-    },
-  },
-  {
-    // [1][4] Employees
-    check(ns: NS): boolean {
-      return checkOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
-    },
-    action(ns: NS): number {
-      actionOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
-      return 4;
-    },
-  },
-  {
-    // [1][5] Buy 1 advert
-    check(ns: NS): boolean {
-      const c = ns.corporation;
-      if (c.getHireAdVertCount(fName) >= 1) return true;
-      return false;
-    },
-    action(ns: NS): number {
-      const c = ns.corporation;
-      if (c.getCorporation().funds > c.getHireAdVertCost(fName)) {
-        c.hireAdVert(fName);
-      }
-      return 5;
-    },
-  },
-  {
-    // [1][6] Set produced materials to be sold
-    check(ns: NS): boolean {
-      let pass = true;
-      CITIES.forEach((city: any) => {
-        const mFood = ns.corporation.getMaterial(fName, city, 'Food');
-        const mPlants = ns.corporation.getMaterial(fName, city, 'Plants');
         if (
-          mFood.desiredSellPrice !== 'MP' ||
-          mFood.desiredSellAmount !== 'MAX' ||
-          mPlants.desiredSellPrice !== 'MP' ||
-          mPlants.desiredSellAmount !== 'MAX'
+          c.hasWarehouse(fName, city) &&
+          c.getWarehouse(fName, city).smartSupplyEnabled
         ) {
-          pass = false;
-        }
-      });
-      if (pass) return true;
-      return false;
-    },
-    action(ns: NS): number {
-      CITIES.forEach((city: any) => {
-        ns.corporation.sellMaterial(fName, city, 'Plants', 'MAX', 'MP');
-        ns.corporation.sellMaterial(fName, city, 'Food', 'MAX', 'MP');
-      });
-      return 6;
-    },
-  },
-  {
-    // [1][7] Staff EnergyMorale > 95%
-    check(ns: NS): boolean {
-      return checkEnergyMorale(ns);
-    },
-    action(ns: NS): number {
-      return 7;
-    },
-  },
-  {
-    // [1][8] Upgrade each city's warehouse twice (300)
-    check(ns: NS) {
-      return checkWarehouse(ns, farm.warehouse[1]);
-    },
-    action(ns: NS): number {
-      actionWarehouse(ns, farm.warehouse[1], 2);
-      return 8;
-    },
-  },
-  {
-    // [1][9] Buy 2 of each first 5 upgrades (FW, NA, SPI, NNII, SF)
-    check(ns: NS) {
-      // return checkWarehouse(ns, farm.warehouse[1]);
-      let pass = true;
-      UPGRADES.slice(0, 5).forEach((u: any) => {
-        if (ns.corporation.getUpgradeLevel(u) < 2) {
-          pass = false;
-        }
-      });
-      if (pass) return true;
-      return false;
-    },
-    action(ns: NS): number {
-      const c = ns.corporation;
-      // Upgrade to 2
-      for (let i = 0; i < 2; i += 1) {
-        UPGRADES.slice(0, 5).forEach((u: any) => {
-          const { funds } = c.getCorporation();
-          if (
-            c.getUpgradeLevel(u) < i + 1 &&
-            funds > c.getUpgradeLevelCost(u)
-          ) {
-            c.levelUpgrade(u);
-            ns.print(`[Upgraded] ${u} to ${i + 1}`);
+          ns.print(`:: We have a warehouse ${city} (Smart Supply enabled)`);
+        } else if (c.getCorporation().funds > 5e9) {
+          ns.print(`[Buying] Warehouse ${city}`);
+          c.purchaseWarehouse(fName, city);
+          if (c.hasWarehouse(fName, city)) {
+            ns.print(`:: [Smart supply] Enabled`);
+            c.setSmartSupply(fName, city, true);
           }
-        });
-      }
-      return 9;
-    },
-  },
-  {
-    // [1][10] Staff EnergyMorale > 95%
-    check(ns: NS): boolean {
-      return checkEnergyMorale(ns);
-    },
-    action(ns: NS): number {
-      return 10;
-    },
-  },
-  {
-    // [1][11] Get Materials
-    check(ns: NS) {
-      return checkBoostMaterials(ns, 0);
-    },
-    action(ns: NS): number {
-      if (!actionBoostMaterials(ns, 0)) {
-        ns.print(`[Waiting] ${waitCycles} cycles`);
-      }
-      return 11;
-    },
-  },
-  {
-    // [1][14] 1st investor round ~ 210b
-    // FIXME: INVESTOR ROUND 1 (100 -> 60%)
-    check(ns: NS) {
-      // return checkBoostMaterials(ns, 0);
-      // if (c.getCorporation().numShares / c.getCorporation().totalShares === 1) {
-      //   return { phase: 1, stage: 14 };
-      // }
-      return true;
-    },
-    action(ns: NS): number {
-      // if (!actionBoostMaterials(ns, 0)) {
-      //   ns.print(`[Waiting] ${waitCycles} cycles`);
-      // }
-      return 12;
-    },
-  },
-  {
-    // [1][13] Upgrade each office to size of 9 and set them to 1 Ops, 1 Eng, 1 Bus, 1 Man, 5 R&D
-    check(ns: NS): boolean {
-      return checkOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
-    },
-    action(ns: NS): number {
-      actionOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
-      return 13;
-    },
-  },
-  {
-    // [1][14] Upgrade Smart Factories and Smart Storage to level 10
-    check(ns: NS) {
-      let pass = true;
-      // TODO: Upgrade to 10
-      const upgrades = [UPGRADES[4], UPGRADES[5]];
-      upgrades.forEach((u: any) => {
-        if (ns.corporation.getUpgradeLevel(u) < 10) {
           pass = false;
         }
       });
-      if (pass) return true;
-      return false;
-    },
-    action(ns: NS): number {
-      const c = ns.corporation;
-      const upgrades = [UPGRADES[4], UPGRADES[5]];
-      // Upgrade to 10
-      for (let i = 0; i < 10; i += 1) {
-        upgrades.forEach((u: any) => {
-          const { funds } = c.getCorporation();
-          if (
-            c.getUpgradeLevel(u) < i + 1 &&
-            funds > c.getUpgradeLevelCost(u)
-          ) {
-            c.levelUpgrade(u);
-            ns.tprint(`[Upgraded] ${u} to ${i + 1}`);
-          } else {
-            ns.print(`Not enough money for ${u}`);
-          }
-        });
-      }
-      return 14;
+
+      return pass;
     },
   },
+  // { // TODO: FIXME: NEXT
+  //   // [1][4] Employees
+  //   check(ns: NS): boolean {
+  //     return checkOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
+  //   },
+  //   action(ns: NS): number {
+  //     actionOfficeAssignments(ns, farm.hires[0], farm.roles[0]);
+  //     return 4;
+  //   },
+  // },
+  // {
+  //   // [1][5] Buy 1 advert
+  //   check(ns: NS): boolean {
+  //     const c = ns.corporation;
+  //     if (c.getHireAdVertCount(fName) >= 1) return true;
+  //     return false;
+  //   },
+  //   action(ns: NS): number {
+  //     const c = ns.corporation;
+  //     if (c.getCorporation().funds > c.getHireAdVertCost(fName)) {
+  //       c.hireAdVert(fName);
+  //     }
+  //     return 5;
+  //   },
+  // },
+  // {
+  //   // [1][6] Set produced materials to be sold
+  //   check(ns: NS): boolean {
+  //     let pass = true;
+  //     CITIES.forEach((city: any) => {
+  //       const mFood = ns.corporation.getMaterial(fName, city, 'Food');
+  //       const mPlants = ns.corporation.getMaterial(fName, city, 'Plants');
+  //       if (
+  //         mFood.desiredSellPrice !== 'MP' ||
+  //         mFood.desiredSellAmount !== 'MAX' ||
+  //         mPlants.desiredSellPrice !== 'MP' ||
+  //         mPlants.desiredSellAmount !== 'MAX'
+  //       ) {
+  //         pass = false;
+  //       }
+  //     });
+  //     if (pass) return true;
+  //     return false;
+  //   },
+  //   action(ns: NS): number {
+  //     CITIES.forEach((city: any) => {
+  //       ns.corporation.sellMaterial(fName, city, 'Plants', 'MAX', 'MP');
+  //       ns.corporation.sellMaterial(fName, city, 'Food', 'MAX', 'MP');
+  //     });
+  //     return 6;
+  //   },
+  // },
+  // {
+  //   // [1][7] Staff EnergyMorale > 95%
+  //   check(ns: NS): boolean {
+  //     return checkEnergyMorale(ns);
+  //   },
+  //   action(ns: NS): number {
+  //     return 7;
+  //   },
+  // },
+  // {
+  //   // [1][8] Upgrade each city's warehouse twice (300)
+  //   check(ns: NS) {
+  //     return checkWarehouse(ns, farm.warehouse[1]);
+  //   },
+  //   action(ns: NS): number {
+  //     actionWarehouse(ns, farm.warehouse[1], 2);
+  //     return 8;
+  //   },
+  // },
+  // {
+  //   // [1][9] Buy 2 of each first 5 upgrades (FW, NA, SPI, NNII, SF)
+  //   check(ns: NS) {
+  //     // return checkWarehouse(ns, farm.warehouse[1]);
+  //     let pass = true;
+  //     UPGRADES.slice(0, 5).forEach((u: any) => {
+  //       if (ns.corporation.getUpgradeLevel(u) < 2) {
+  //         pass = false;
+  //       }
+  //     });
+  //     if (pass) return true;
+  //     return false;
+  //   },
+  //   action(ns: NS): number {
+  //     const c = ns.corporation;
+  //     // Upgrade to 2
+  //     for (let i = 0; i < 2; i += 1) {
+  //       UPGRADES.slice(0, 5).forEach((u: any) => {
+  //         const { funds } = c.getCorporation();
+  //         if (
+  //           c.getUpgradeLevel(u) < i + 1 &&
+  //           funds > c.getUpgradeLevelCost(u)
+  //         ) {
+  //           c.levelUpgrade(u);
+  //           ns.print(`[Upgraded] ${u} to ${i + 1}`);
+  //         }
+  //       });
+  //     }
+  //     return 9;
+  //   },
+  // },
+  // {
+  //   // [1][10] Staff EnergyMorale > 95%
+  //   check(ns: NS): boolean {
+  //     return checkEnergyMorale(ns);
+  //   },
+  //   action(ns: NS): number {
+  //     return 10;
+  //   },
+  // },
+  // {
+  //   // [1][11] Get Materials
+  //   check(ns: NS) {
+  //     return checkBoostMaterials(ns, 0);
+  //   },
+  //   action(ns: NS): number {
+  //     if (!actionBoostMaterials(ns, 0)) {
+  //       ns.print(`[Waiting] ${waitCycles} cycles`);
+  //     }
+  //     return 11;
+  //   },
+  // },
+  // {
+  //   // [1][14] 1st investor round ~ 210b
+  //   // FIXME: INVESTOR ROUND 1 (100 -> 60%)
+  //   check(ns: NS) {
+  //     // return checkBoostMaterials(ns, 0);
+  //     // if (c.getCorporation().numShares / c.getCorporation().totalShares === 1) {
+  //     //   return { phase: 1, stage: 14 };
+  //     // }
+  //     return true;
+  //   },
+  //   action(ns: NS): number {
+  //     // if (!actionBoostMaterials(ns, 0)) {
+  //     //   ns.print(`[Waiting] ${waitCycles} cycles`);
+  //     // }
+  //     return 12;
+  //   },
+  // },
+  // {
+  //   // [1][13] Upgrade each office to size of 9 and set them to 1 Ops, 1 Eng, 1 Bus, 1 Man, 5 R&D
+  //   check(ns: NS): boolean {
+  //     return checkOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
+  //   },
+  //   action(ns: NS): number {
+  //     actionOfficeAssignments(ns, farm.hires[1], farm.roles[1]);
+  //     return 13;
+  //   },
+  // },
+  // {
+  //   // [1][14] Upgrade Smart Factories and Smart Storage to level 10
+  //   check(ns: NS) {
+  //     let pass = true;
+  //     // TODO: Upgrade to 10
+  //     const upgrades = [UPGRADES[4], UPGRADES[5]];
+  //     upgrades.forEach((u: any) => {
+  //       if (ns.corporation.getUpgradeLevel(u) < 10) {
+  //         pass = false;
+  //       }
+  //     });
+  //     if (pass) return true;
+  //     return false;
+  //   },
+  //   action(ns: NS): number {
+  //     const c = ns.corporation;
+  //     const upgrades = [UPGRADES[4], UPGRADES[5]];
+  //     // Upgrade to 10
+  //     for (let i = 0; i < 10; i += 1) {
+  //       const pass = upgrades.every(function (u: any) {
+  //         const { funds } = c.getCorporation();
+  //         const price = c.getUpgradeLevelCost(u);
+  //         if (c.getUpgradeLevel(u) < i + 1 && funds > price) {
+  //           c.levelUpgrade(u);
+  //           ns.tprint(`[Upgraded] ${u} to ${i + 1}`);
+  //         } else {
+  //           ns.print(`[No Funds] ${i + 1} ${u} Need ${price - funds}`);
+  //           return false; // Breaks it
+  //         }
+  //         return true;
+  //       });
+  //       if (!pass) {
+  //         break;
+  //       }
+  //     }
+  //     return 14;
+  //   },
+  // },
 ];
 
 export function corpLogicPhase1(ns: NS, _stage = 0): any {
@@ -403,8 +409,9 @@ export function corpLogicPhase1(ns: NS, _stage = 0): any {
   const phase = 1;
   let stage = _stage;
 
+  ns.print(`[Phase 1] Agriculture`);
   if (stage <= phase1.length - 1) {
-    stage = !phase1[stage].check(ns) ? phase1[stage].action(ns) : (stage += 1);
+    stage = !phase1[stage].step(ns) ? stage : (stage += 1);
   } else {
     ns.print(`We are at Stage: ${stage}`);
   }
