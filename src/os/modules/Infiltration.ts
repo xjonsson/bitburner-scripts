@@ -1,3 +1,6 @@
+/* eslint-disable */
+import { NS } from '@ns';
+/* eslint-enable */
 // FROM REDIT https://www.reddit.com/r/Bitburner/comments/xycccn/automating_infiltration_suggestions_needed/
 // AUTHOR: GenesisStrongshield. Contributors Particular-Ad2739, Grandasse, Mogria
 // NOTE: This script is overpowered. Using it on NWO in Volhaven gains 150k Rep
@@ -7,38 +10,335 @@
 
 // ******** Main Consts
 const state: any = {
-  // Name of the company that's infiltrated.
-  company: '',
-
-  // Whether infiltration started. False means, we're
-  // waiting to arrive on the infiltration screen.
-  started: false,
-
-  // Details/state of the current mini game.
-  // Is reset after every game.
-  game: {},
+  company: '', // Name of the company that's infiltrated.
+  started: false, // False means, we're waiting to arrive on the infiltration screen.
+  game: {}, // Details/state of the current mini game. (resets after each game)
 };
 
-// Speed of game actions, in milliseconds.
-const speed = 22;
+const speed = 22; // Speed of game actions, in milliseconds.
 
-// Small hack to save RAM.
-// This will work smoothly, because the script does not use
-// any "ns" functions, it's a pure browser automation tool.
+// Saves RAM by not using 'ns', only browser automation
 // eslint-disable-next-line no-eval
 const wnd = eval('window');
 const doc = wnd.document;
+
+// ******** INFILTRATION HELPERS START ******** //
+// ******** Get Lines
+function getLines(elements: any): string[] {
+  // elements: NodeList
+  // Returns an array with the text-contents of the given elements.
+  const lines: any = [];
+  elements.forEach((el: any) => lines.push(el.textContent));
+
+  return lines;
+}
+
+// ******** Get Element
+function getEl(_parent: any, _selector?: any) {
+  // Returns a list of DOM elements from the main game container.
+  let prefix = ':scope';
+  let parent = _parent;
+  let selector = _selector;
+
+  if (typeof parent === 'string') {
+    selector = parent;
+    parent = doc;
+
+    prefix = '.MuiBox-root>.MuiBox-root>.MuiBox-root';
+
+    if (!doc.querySelectorAll(prefix).length) {
+      prefix = '.MuiBox-root>.MuiBox-root>.MuiGrid-root';
+    }
+    if (!doc.querySelectorAll(prefix).length) {
+      prefix = '.MuiContainer-root>.MuiPaper-root';
+    }
+    if (!doc.querySelectorAll(prefix).length) {
+      return [];
+    }
+  }
+
+  selector = selector.split(',');
+  selector = selector.map((item: any) => `${prefix} ${item}`);
+  selector = selector.join(',');
+
+  return parent.querySelectorAll(selector);
+}
+
+// ******** Returns the first element with matching text content.
+function filterByText(elements: any, _text: any) {
+  const text = _text.toLowerCase();
+
+  for (let i = 0; i < elements.length; i += 1) {
+    const content = elements[i].textContent.toLowerCase();
+
+    if (content.indexOf(text) !== -1) {
+      return elements[i];
+    }
+  }
+
+  return null;
+}
+
+// ******** Simulate keyboard event (keydown + key up)
+function pressKey(keyOrCode: string | number) {
+  // keyOrCode A single letter (string) or key-code to send.
+  let keyCode = 0;
+  let key = '';
+
+  if (typeof keyOrCode === 'string' && keyOrCode.length > 0) {
+    key = keyOrCode.toLowerCase().substr(0, 1);
+    keyCode = key.charCodeAt(0);
+  } else if (typeof keyOrCode === 'number') {
+    keyCode = keyOrCode;
+    key = String.fromCharCode(keyCode);
+  }
+
+  if (!keyCode || key.length !== 1) {
+    return;
+  }
+
+  function sendEvent(event: any) {
+    const keyboardEvent = new KeyboardEvent(event, {
+      key,
+      keyCode,
+    });
+
+    doc.dispatchEvent(keyboardEvent);
+  }
+
+  sendEvent('keydown');
+}
+
+// ******** Revert the "wrapEventListeners" changes.
+function unwrapEventListeners() {
+  if (doc._addEventListener) {
+    doc.addEventListener = doc._addEventListener;
+    delete doc._addEventListener;
+  }
+  if (doc._removeEventListener) {
+    doc.removeEventListener = doc._removeEventListener;
+    delete doc._removeEventListener;
+  }
+  delete doc.eventListeners;
+}
+
+// ******** Wraps all event listeners
+function wrapEventListeners() {
+  /**
+   * Wrap all event listeners with a custom function that injects
+   * the "isTrusted" flag.
+   *
+   * Is this cheating? Or is it real hacking? Don't care, as long
+   * as it's working :)
+   */
+  if (!doc._addEventListener) {
+    doc._addEventListener = doc.addEventListener;
+
+    doc.addEventListener = function (type: any, callback: any, options: any) {
+      if (typeof options === 'undefined') {
+        // eslint-disable-next-line no-param-reassign
+        options = false;
+      }
+      let handler: any = false;
+
+      // For this script, we only want to modify "keydown" events.
+      if (type === 'keydown') {
+        handler = function (...args: any) {
+          if (!args[0].isTrusted) {
+            const hackedEv: any = {};
+
+            // eslint-disable-next-line no-restricted-syntax
+            for (const key in args[0]) {
+              if (key === 'isTrusted') {
+                hackedEv.isTrusted = true;
+              } else if (typeof args[0][key] === 'function') {
+                hackedEv[key] = args[0][key].bind(args[0]);
+              } else {
+                hackedEv[key] = args[0][key];
+              }
+            }
+
+            args[0] = hackedEv;
+          }
+
+          return callback.apply(callback, args);
+        };
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const prop in callback) {
+          if (typeof callback[prop] === 'function') {
+            handler[prop] = callback[prop].bind(callback);
+          } else {
+            handler[prop] = callback[prop];
+          }
+        }
+      }
+
+      if (!this.eventListeners) {
+        this.eventListeners = {};
+      }
+      if (!this.eventListeners[type]) {
+        this.eventListeners[type] = [];
+      }
+      this.eventListeners[type].push({
+        listener: callback,
+        useCapture: options,
+        wrapped: handler,
+      });
+
+      return this._addEventListener(type, handler || callback, options);
+    };
+  }
+
+  if (!doc._removeEventListener) {
+    doc._removeEventListener = doc.removeEventListener;
+
+    doc.removeEventListener = function (
+      type: any,
+      callback: any,
+      options: any
+    ) {
+      if (typeof options === 'undefined') {
+        // eslint-disable-next-line no-param-reassign
+        options = false;
+      }
+
+      if (!this.eventListeners) {
+        this.eventListeners = {};
+      }
+      if (!this.eventListeners[type]) {
+        this.eventListeners[type] = [];
+      }
+
+      for (let i = 0; i < this.eventListeners[type].length; i += 1) {
+        if (
+          this.eventListeners[type][i].listener === callback &&
+          this.eventListeners[type][i].useCapture === options
+        ) {
+          if (this.eventListeners[type][i].wrapped) {
+            // eslint-disable-next-line no-param-reassign
+            callback = this.eventListeners[type][i].wrapped;
+          }
+
+          this.eventListeners[type].splice(i, 1);
+          break;
+        }
+      }
+
+      if (this.eventListeners[type].length === 0) {
+        delete this.eventListeners[type];
+      }
+
+      return this._removeEventListener(type, callback, options);
+    };
+  }
+}
+
+// ******** Reset the state after infiltration is done
+function endInfiltration() {
+  unwrapEventListeners();
+  state.company = '';
+  state.started = false;
+}
+
+// ******** Infiltration monitor to start automatic infiltration.
+function waitForStart() {
+  // This function runs asyn, after "main" ended, cant use 'ns'
+  if (state.started) {
+    return;
+  }
+
+  const h4 = getEl('h4');
+
+  if (!h4.length) {
+    return;
+  }
+  const title = h4[0].textContent;
+  if (title.indexOf('Infiltrating') !== 0) {
+    return;
+  }
+
+  const btnStart = filterByText(getEl('button'), 'Start');
+  if (!btnStart) {
+    return;
+  }
+
+  state.company = title.substr(13);
+  state.started = true;
+  wrapEventListeners();
+
+  console.log('Start automatic infiltration of', state.company);
+  btnStart.click();
+}
+
+// ******** Identify the current infiltration game.
+function playGame() {
+  const screens = doc.querySelectorAll('.MuiContainer-root');
+
+  if (!screens.length) {
+    endInfiltration();
+    return;
+  }
+  if (screens[0].children.length < 3) {
+    return;
+  }
+
+  const screen = screens[0].children[2];
+  const h4 = getEl(screen, 'h4');
+
+  if (!h4.length) {
+    endInfiltration();
+    return;
+  }
+
+  const title = h4[0].textContent.trim().toLowerCase().split(/[!.(]/)[0];
+
+  if (title === 'infiltration successful') {
+    endInfiltration();
+    return;
+  }
+
+  if (title === 'get ready') {
+    return;
+  }
+
+  // eslint-disable-next-line no-use-before-define, no-shadow
+  const game = infiltrationGames.find((game) => game.name === title);
+
+  if (game) {
+    if (state.game.current !== title) {
+      state.game.current = title;
+      game.init(screen);
+    }
+
+    game.play(screen);
+  } else {
+    console.error('Unknown game:', title);
+  }
+}
+
+// ******** The infiltration loop, which is called at a rapid interval
+function infLoop() {
+  if (!state.started) {
+    waitForStart();
+  } else {
+    playGame();
+  }
+}
+
+// ******** INFILTRATION HELPERS END ******** //
 
 // ******** GAME SOLVERS
 // List of all games and an automated solver.
 const infiltrationGames = [
   {
     name: 'type it backward',
-    init(screen) {
+    init(screen: any) {
       const lines = getLines(getEl(screen, 'p'));
       state.game.data = lines[0].split('');
     },
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    play(screen: any) {
       if (!state.game.data || !state.game.data.length) {
         delete state.game.data;
         return;
@@ -49,8 +349,9 @@ const infiltrationGames = [
   },
   {
     name: 'enter the code',
-    init(screen) {},
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    init(screen: any) {},
+    play(screen: any) {
       // const h4 = getEl(screen, 'h4');
       // const code = h4[1].textContent;
       const spans = getEl(screen, 'div span');
@@ -81,7 +382,7 @@ const infiltrationGames = [
   },
   {
     name: 'close the brackets',
-    init(screen) {
+    init(screen: any) {
       const data = getLines(getEl(screen, 'p'));
       const brackets = data.join('').split('');
       state.game.data = [];
@@ -100,7 +401,8 @@ const infiltrationGames = [
         }
       }
     },
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    play(screen: any) {
       if (!state.game.data || !state.game.data.length) {
         delete state.game.data;
         return;
@@ -112,10 +414,11 @@ const infiltrationGames = [
   {
     name: 'attack when his guard is down',
     // name: 'slash when his guard is down',
-    init(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    init(screen: any) {
       state.game.data = 'wait';
     },
-    play(screen) {
+    play(screen: any) {
       const data = getLines(getEl(screen, 'h4'));
 
       if (state.game.data === 'attack') {
@@ -133,8 +436,9 @@ const infiltrationGames = [
   },
   {
     name: 'say something nice about the guard',
-    init(screen) {},
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    init(screen: any) {},
+    play(screen: any) {
       const correct = [
         'affectionate',
         'agreeable',
@@ -169,7 +473,7 @@ const infiltrationGames = [
   },
   {
     name: 'remember all the mines',
-    init(screen) {
+    init(screen: any) {
       const rows = getEl(screen, 'p');
       let gridSize = null;
       switch (rows.length) {
@@ -215,17 +519,20 @@ const infiltrationGames = [
         }
       }
     },
-    play(screen) {},
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
+    play(screen: any) {},
   },
   {
     name: 'mark all the mines',
-    init(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    init(screen: any) {
       state.game.x = 0;
       state.game.y = 0;
       state.game.cols = state.game.data[0].length;
       state.game.dir = 1;
     },
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    play(screen: any) {
       let { data, x, y, cols, dir } = state.game;
 
       if (data[y][x]) {
@@ -252,10 +559,10 @@ const infiltrationGames = [
   },
   {
     name: 'match the symbols',
-    init(screen) {
+    init(screen: any) {
       const data = getLines(getEl(screen, 'h5 span'));
       const rows = getLines(getEl(screen, 'p'));
-      const keypad = [];
+      const keypad: any = [];
       const targets = [];
       let gridSize = null;
       switch (rows.length) {
@@ -311,7 +618,8 @@ const infiltrationGames = [
       state.game.x = 0;
       state.game.y = 0;
     },
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    play(screen: any) {
       const target = state.game.data[0];
       let { x, y } = state.game;
 
@@ -345,15 +653,15 @@ const infiltrationGames = [
   },
   {
     name: 'cut the wires with the following properties',
-    init(screen) {
+    init(screen: any) {
       const numberHack = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
-      const colors = {
+      const colors: any = {
         red: 'red',
         white: 'white',
         blue: 'blue',
         'rgb(255, 193, 7)': 'yellow',
       };
-      const wireColor = {
+      const wireColor: any = {
         red: [],
         white: [],
         blue: [],
@@ -383,6 +691,7 @@ const infiltrationGames = [
           const color = colors[node.style.color];
           if (!color) {
             index += 1;
+            // eslint-disable-next-line no-continue
             continue;
           }
           wireColor[color].push(j + 1);
@@ -390,10 +699,11 @@ const infiltrationGames = [
         }
       }
 
-      for (let i = 0; i < instructions.length; i++) {
+      for (let i = 0; i < instructions.length; i += 1) {
         const line = instructions[i].trim().toLowerCase();
 
         if (!line || line.length < 10) {
+          // eslint-disable-next-line no-continue
           continue;
         }
         if (line.indexOf('cut wires number') !== -1) {
@@ -406,17 +716,19 @@ const infiltrationGames = [
 
           if (!wireColor[color]) {
             // should never happen.
+            // eslint-disable-next-line no-continue
             continue;
           }
 
-          wireColor[color].forEach((num) => wires.push(num));
+          wireColor[color].forEach((num: any) => wires.push(num));
         }
       }
 
       // new Set() removes duplicate elements.
       state.game.data = [...new Set(wires)];
     },
-    play(screen) {
+    // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+    play(screen: any) {
       const wire = state.game.data;
       // state.game.data.shift();
       if (!wire) {
@@ -474,320 +786,4 @@ export async function main(ns: NS) {
 
   // Modify the addEventListener logic.
   wrapEventListeners();
-}
-
-/**
- * The infiltration loop, which is called at a rapid interval
- */
-function infLoop() {
-  if (!state.started) {
-    waitForStart();
-  } else {
-    playGame();
-  }
-}
-
-/**
- * Returns a list of DOM elements from the main game
- * container.
- */
-function getEl(parent: any, selector: any) {
-  let prefix = ':scope';
-
-  if (typeof parent === 'string') {
-    selector = parent;
-    parent = doc;
-
-    prefix = '.MuiBox-root>.MuiBox-root>.MuiBox-root';
-
-    if (!doc.querySelectorAll(prefix).length) {
-      prefix = '.MuiBox-root>.MuiBox-root>.MuiGrid-root';
-    }
-    if (!doc.querySelectorAll(prefix).length) {
-      prefix = '.MuiContainer-root>.MuiPaper-root';
-    }
-    if (!doc.querySelectorAll(prefix).length) {
-      return [];
-    }
-  }
-
-  selector = selector.split(',');
-  selector = selector.map((item: any) => `${prefix} ${item}`);
-  selector = selector.join(',');
-
-  return parent.querySelectorAll(selector);
-}
-
-/**
- * Returns the first element with matching text content.
- */
-function filterByText(elements: any, text: any) {
-  text = text.toLowerCase();
-
-  for (let i = 0; i < elements.length; i += 1) {
-    const content = elements[i].textContent.toLowerCase();
-
-    if (content.indexOf(text) !== -1) {
-      return elements[i];
-    }
-  }
-
-  return null;
-}
-
-/**
- * Returns an array with the text-contents of the given elements.
- *
- * @param {NodeList} elements
- * @returns {string[]}
- */
-function getLines(elements: any) {
-  const lines: any = [];
-  elements.forEach((el: any) => lines.push(el.textContent));
-
-  return lines;
-}
-
-/**
- * Reset the state after infiltration is done.
- */
-function endInfiltration() {
-  unwrapEventListeners();
-  state.company = '';
-  state.started = false;
-}
-
-/**
- * Simulate a keyboard event (keydown + keyup).
- *
- * @param {string|int} keyOrCode A single letter (string) or key-code to send.
- */
-function pressKey(keyOrCode: any) {
-  let keyCode = 0;
-  let key = '';
-
-  if (typeof keyOrCode === 'string' && keyOrCode.length > 0) {
-    key = keyOrCode.toLowerCase().substr(0, 1);
-    keyCode = key.charCodeAt(0);
-  } else if (typeof keyOrCode === 'number') {
-    keyCode = keyOrCode;
-    key = String.fromCharCode(keyCode);
-  }
-
-  if (!keyCode || key.length !== 1) {
-    return;
-  }
-
-  function sendEvent(event: any) {
-    const keyboardEvent = new KeyboardEvent(event, {
-      key,
-      keyCode,
-    });
-
-    doc.dispatchEvent(keyboardEvent);
-  }
-
-  sendEvent('keydown');
-}
-
-/**
- * Infiltration monitor to start automatic infiltration.
- *
- * This function runs asynchronously, after the "main" function ended,
- * so we cannot use any "ns" function here!
- */
-function waitForStart() {
-  if (state.started) {
-    return;
-  }
-
-  const h4 = getEl('h4');
-
-  if (!h4.length) {
-    return;
-  }
-  const title = h4[0].textContent;
-  if (title.indexOf('Infiltrating') !== 0) {
-    return;
-  }
-
-  const btnStart = filterByText(getEl('button'), 'Start');
-  if (!btnStart) {
-    return;
-  }
-
-  state.company = title.substr(13);
-  state.started = true;
-  wrapEventListeners();
-
-  console.log('Start automatic infiltration of', state.company);
-  btnStart.click();
-}
-
-/**
- * Identify the current infiltration game.
- */
-function playGame() {
-  const screens = doc.querySelectorAll('.MuiContainer-root');
-
-  if (!screens.length) {
-    endInfiltration();
-    return;
-  }
-  if (screens[0].children.length < 3) {
-    return;
-  }
-
-  const screen = screens[0].children[2];
-  const h4 = getEl(screen, 'h4');
-
-  if (!h4.length) {
-    endInfiltration();
-    return;
-  }
-
-  const title = h4[0].textContent.trim().toLowerCase().split(/[!.(]/)[0];
-
-  if (title === 'infiltration successful') {
-    endInfiltration();
-    return;
-  }
-
-  if (title === 'get ready') {
-    return;
-  }
-
-  const game = infiltrationGames.find((game) => game.name === title);
-
-  if (game) {
-    if (state.game.current !== title) {
-      state.game.current = title;
-      game.init(screen);
-    }
-
-    game.play(screen);
-  } else {
-    console.error('Unknown game:', title);
-  }
-}
-
-/**
- * Wrap all event listeners with a custom function that injects
- * the "isTrusted" flag.
- *
- * Is this cheating? Or is it real hacking? Don't care, as long
- * as it's working :)
- */
-function wrapEventListeners() {
-  if (!doc._addEventListener) {
-    doc._addEventListener = doc.addEventListener;
-
-    doc.addEventListener = function (type: any, callback: any, options: any) {
-      if (typeof options === 'undefined') {
-        options = false;
-      }
-      let handler = false;
-
-      // For this script, we only want to modify "keydown" events.
-      if (type === 'keydown') {
-        handler = function (...args) {
-          if (!args[0].isTrusted) {
-            const hackedEv = {};
-
-            for (const key in args[0]) {
-              if (key === 'isTrusted') {
-                hackedEv.isTrusted = true;
-              } else if (typeof args[0][key] === 'function') {
-                hackedEv[key] = args[0][key].bind(args[0]);
-              } else {
-                hackedEv[key] = args[0][key];
-              }
-            }
-
-            args[0] = hackedEv;
-          }
-
-          return callback.apply(callback, args);
-        };
-
-        for (const prop in callback) {
-          if (typeof callback[prop] === 'function') {
-            handler[prop] = callback[prop].bind(callback);
-          } else {
-            handler[prop] = callback[prop];
-          }
-        }
-      }
-
-      if (!this.eventListeners) {
-        this.eventListeners = {};
-      }
-      if (!this.eventListeners[type]) {
-        this.eventListeners[type] = [];
-      }
-      this.eventListeners[type].push({
-        listener: callback,
-        useCapture: options,
-        wrapped: handler,
-      });
-
-      return this._addEventListener(type, handler || callback, options);
-    };
-  }
-
-  if (!doc._removeEventListener) {
-    doc._removeEventListener = doc.removeEventListener;
-
-    doc.removeEventListener = function (
-      type: any,
-      callback: any,
-      options: any
-    ) {
-      if (typeof options === 'undefined') {
-        options = false;
-      }
-
-      if (!this.eventListeners) {
-        this.eventListeners = {};
-      }
-      if (!this.eventListeners[type]) {
-        this.eventListeners[type] = [];
-      }
-
-      for (let i = 0; i < this.eventListeners[type].length; i += 1) {
-        if (
-          this.eventListeners[type][i].listener === callback &&
-          this.eventListeners[type][i].useCapture === options
-        ) {
-          if (this.eventListeners[type][i].wrapped) {
-            callback = this.eventListeners[type][i].wrapped;
-          }
-
-          this.eventListeners[type].splice(i, 1);
-          break;
-        }
-      }
-
-      if (this.eventListeners[type].length === 0) {
-        delete this.eventListeners[type];
-      }
-
-      return this._removeEventListener(type, callback, options);
-    };
-  }
-}
-
-/**
- * Revert the "wrapEventListeners" changes.
- */
-function unwrapEventListeners() {
-  if (doc._addEventListener) {
-    doc.addEventListener = doc._addEventListener;
-    delete doc._addEventListener;
-  }
-  if (doc._removeEventListener) {
-    doc.removeEventListener = doc._removeEventListener;
-    delete doc._removeEventListener;
-  }
-  delete doc.eventListeners;
 }

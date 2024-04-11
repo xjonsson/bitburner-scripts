@@ -151,10 +151,11 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Join CSEC
       if (!p?.faction.factions.includes('CyberSec')) {
         const host = ns.getServer('CSEC');
-        if (p?.level < host.requiredHackingSkill) {
+        const sLevel = host.requiredHackingSkill || 9999;
+        if (p?.level < sLevel) {
           return {
             done: false,
-            msg: `LVL_${host.requiredHackingSkill}`,
+            msg: `LVL_${sLevel}`,
             hacknet: false,
             hosting: true,
             reserve: 0,
@@ -229,10 +230,11 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Join NiteSec
       if (!p?.faction.factions.includes('NiteSec')) {
         const host = ns.getServer('avmnite-02h');
-        if (p?.level < host.requiredHackingSkill) {
+        const sLevel = host.requiredHackingSkill || 9999;
+        if (p?.level < sLevel) {
           return {
             done: false,
-            msg: `LVL_${host.requiredHackingSkill}`,
+            msg: `LVL_${sLevel}`,
             hacknet: true,
             hosting: true,
             reserve: 0,
@@ -307,7 +309,8 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Join TheBlackHand
       if (!p?.faction.factions.includes('The Black Hand')) {
         const host = ns.getServer('I.I.I.I');
-        if (p?.level < host.requiredHackingSkill) {
+        const sLevel = host.requiredHackingSkill || 9999;
+        if (p?.level < sLevel) {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,
@@ -385,7 +388,8 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** Join BitRunners
       if (!p?.faction.factions.includes('BitRunners')) {
         const host = ns.getServer('run4theh111z');
-        if (p?.level < host.requiredHackingSkill) {
+        const sLevel = host.requiredHackingSkill || 9999;
+        if (p?.level < sLevel) {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,
@@ -507,7 +511,8 @@ export function osLogic(ns: NS, stage: number): any {
       // ******** w0r1d_d43m0n
       if (ServerInfo.list(ns).includes('w0r1d_d43m0n')) {
         const host = ns.getServer('w0r1d_d43m0n');
-        if (p?.level < host.requiredHackingSkill) {
+        const sLevel = host.requiredHackingSkill || 9999;
+        if (p?.level < sLevel) {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,

@@ -199,32 +199,32 @@ export async function main(ns: NS) {
       updateOffices(ns, agricoName, agricoCities, agricoActions);
 
       // ******** EACH START
-      while (ns.corporation.getCorporation().state === 'START') {
+      while (ns.corporation.getCorporation().nextState === 'START') {
         // updateOffices(ns, agricoName, agricoCities);
         agricoActions.Aevum = 'RECHECK';
         // await ns.asleep(100);
         await ns.corporation.nextUpdate();
       }
 
-      while (ns.corporation.getCorporation().state === 'PURCHASE') {
+      while (ns.corporation.getCorporation().nextState === 'PURCHASE') {
         // updateOffices(ns, agricoName, agricoCities);
         // await ns.asleep(100);
         await ns.corporation.nextUpdate();
       }
 
-      while (ns.corporation.getCorporation().state === 'PRODUCTION') {
+      while (ns.corporation.getCorporation().nextState === 'PRODUCTION') {
         // updateOffices(ns, agricoName, agricoCities);
         // await ns.asleep(100);
         await ns.corporation.nextUpdate();
       }
 
-      while (ns.corporation.getCorporation().state === 'EXPORT') {
+      while (ns.corporation.getCorporation().nextState === 'EXPORT') {
         // updateOffices(ns, agricoName, agricoCities);
         // await ns.asleep(100);
         await ns.corporation.nextUpdate();
       }
 
-      while (ns.corporation.getCorporation().state === 'SALE') {
+      while (ns.corporation.getCorporation().nextState === 'SALE') {
         // updateOffices(ns, agricoName, agricoCities);
         // await ns.asleep(100);
         await ns.corporation.nextUpdate();

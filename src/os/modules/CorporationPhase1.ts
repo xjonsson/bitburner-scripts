@@ -7,6 +7,18 @@ import { CITIES } from '/os/data/constants';
 const { corpName, farmName } = CORP;
 
 // ******** Shared functions
+function checkEnergyMorale(ns: NS): boolean {
+  let pass = true;
+  CITIES.forEach((city: any) => {
+    const o = ns.corporation.getOffice(farmName, city);
+    if (o.avgEnergy < 0.95 * o.maxEnergy || o.avgMorale < 0.95 * o.maxMorale) {
+      pass = false;
+    }
+  });
+  if (pass) return true;
+  return false;
+}
+
 // const d = [
 //   1, // d[0] Operations
 //   1, // d[1] Engineer
@@ -52,6 +64,15 @@ function actionOfficeAssignments(ns: NS, e: number, d: number[]): boolean {
     if (o.numEmployees !== e) {
       pass = false;
     } else if (o.numEmployees === e) {
+      if (o.employeeJobs.Unassigned === 0) {
+        // Clear assignments
+        n.setAutoJobAssignment(farmName, city, 'Intern', 0);
+        n.setAutoJobAssignment(farmName, city, 'Research & Development', 0);
+        n.setAutoJobAssignment(farmName, city, 'Management', 0);
+        n.setAutoJobAssignment(farmName, city, 'Business', d[2]);
+        n.setAutoJobAssignment(farmName, city, 'Engineer', d[1]);
+        n.setAutoJobAssignment(farmName, city, 'Operations', d[0]);
+      }
       n.setAutoJobAssignment(farmName, city, 'Operations', d[0]);
       n.setAutoJobAssignment(farmName, city, 'Engineer', d[1]);
       n.setAutoJobAssignment(farmName, city, 'Business', d[2]);
@@ -88,7 +109,7 @@ const phase1 = [
     },
     action(ns: NS) {
       ns.corporation.expandIndustry('Agriculture', farmName);
-      return 0;
+      return 1;
     },
   },
   {
@@ -107,7 +128,7 @@ const phase1 = [
           }
         }
       });
-      return 0;
+      return 2;
     },
   },
   {
@@ -138,7 +159,7 @@ const phase1 = [
           }
         }
       );
-      return 0;
+      return 3;
     },
   },
   {
@@ -156,7 +177,7 @@ const phase1 = [
       // Office  O, E, B, M, R, I, U
       const d = [1, 1, 1, 0, 0, 0, 0];
       actionOfficeAssignments(ns, e, d);
-      return 0;
+      return 4;
     },
   },
   {
@@ -171,7 +192,7 @@ const phase1 = [
       if (c.getCorporation().funds > c.getHireAdVertCost(farmName)) {
         c.hireAdVert(farmName);
       }
-      return 0;
+      return 5;
     },
   },
   {
@@ -200,7 +221,16 @@ const phase1 = [
         c.sellMaterial(farmName, city, 'Plants', 'MAX', 'MP');
         c.sellMaterial(farmName, city, 'Food', 'MAX', 'MP');
       });
-      return 0;
+      return 6;
+    },
+  },
+  {
+    // [1][7] Staff EnergyMorale > 95%
+    check(ns: NS) {
+      return checkEnergyMorale(ns);
+    },
+    action(ns: NS) {
+      return 7;
     },
   },
 ];
@@ -210,6 +240,7 @@ export function corpLogicPhase1(ns: NS): any {
   let phase = 1;
   let stage = 0;
 
+  // This will be a simple loop once we are done
   // [1][0] Buy Smart Supply
   stage = !phase1[0].check(ns) ? phase1[0].action(ns) : (stage += 1);
   // [1][1] Expand to Agriculture
@@ -224,6 +255,9 @@ export function corpLogicPhase1(ns: NS): any {
   stage = !phase1[5].check(ns) ? phase1[5].action(ns) : (stage += 1);
   // [1][6] Set produced materials to be sold
   stage = !phase1[6].check(ns) ? phase1[6].action(ns) : (stage += 1);
+  // [1][7] Staff EnergyMorale > 95%
+  stage = !phase1[7].check(ns) ? phase1[7].action(ns) : (stage += 1);
+  // [1][8] Upgrade each city's warehouse twice
 
   // Completed phase
   if (stage >= 30) {
@@ -233,20 +267,7 @@ export function corpLogicPhase1(ns: NS): any {
   return { phase, stage };
 }
 
-// // [1][7] Staff EnergyMorale > 95%
-// CITIES.forEach((city: any) => {
-//   const o = c.getOffice(farmName, city);
-//   if (
-//     o.avgEnergy < 0.95 * o.maxEnergy ||
-//     o.avgMorale < 0.95 * o.maxMorale
-//   ) {
-//     loopReturn = { phase: 1, stage: 7 };
-//     pass = false;
-//   }
-// });
-// if (!pass) return loopReturn;
-
-// // [1][8] Upgrade each city's warehouse twice
+// [1][8] Upgrade each city's warehouse twice
 // CITIES.forEach((city: any) => {
 //   const w = c.getWarehouse(farmName, city);
 //   if (w.size < 300) {

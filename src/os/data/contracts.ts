@@ -842,7 +842,7 @@ solvers['Shortest Path in a Grid'] = (data: any) => {
       ['R', a, b + 1],
       ['L', a, b - 1],
     ]) {
-      // @ts-expect-error: Functioning shortest path code
+      // @ts-ignore: Functioning shortest path code
       if (i < 0 || i >= height || j < 0 || j >= length) continue; // Index over edge
       if (data[i][j] === 1) continue; // We've hit a wall;
       // @ts-expect-error: Functioning shortest path code

@@ -13,9 +13,11 @@ const handler = Object?.keys(terminalInput)[1];
 
 function connect(ns: NS, route: string) {
   terminalInput.value = route;
+  // @ts-expect-error: This works, but see if we can remove the error properly
   terminalInput[handler].onChange({
     target: terminalInput,
   });
+  // @ts-expect-error: This works, but see if we can remove the error properly
   terminalInput[handler].onKeyDown({
     key: 'Enter',
     preventDefault: () => null,

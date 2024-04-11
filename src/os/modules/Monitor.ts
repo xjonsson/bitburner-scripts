@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { ServersCache, ControlCache } from '/os/modules/Cache';
-import ServerHack from '/os/modules/ServerHack';
+import { ControlCache } from '/os/modules/Cache';
 import { formatTime } from '/os/utils/formatTime';
+import ServerTarget from '/os/modules/ServerTarget';
 /* eslint-enable */
 
 export async function main(ns: NS) {
@@ -46,22 +46,22 @@ export async function main(ns: NS) {
       if (focus) {
         focus.forEach((h: string) => {
           // const base = ServersCache.read(ns, h);
-          const s = new ServerHack(ns, h);
-          const b = s.batch(1);
+          const s = new ServerTarget(ns, h);
+          const b = s.getBatch(true, 1);
           ns.printf(
             serverRow,
-            s.action.msg,
+            s.sanity.action, // Was s.action.msg
             s.level,
             s.hostname,
             ns.formatNumber(s.money.max, 1),
             ns.formatPercent(s.money.now / s.money.max, 1),
             `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}`,
-            ns.formatPercent(s.hackChance(), 1),
+            ns.formatPercent(s.hackChance, 1),
             ns.formatNumber(s.hackThreads, 0),
             ns.formatNumber(s.weakThreads, 0),
-            ns.formatNumber(s.growThreads(1, false), 0),
-            ns.formatNumber(s.weakThreadsAfterGrow(1, false), 0),
-            ns.formatNumber(s.value.total, 1),
+            ns.formatNumber(s.growThreads(false, 1), 0),
+            ns.formatNumber(s.weakThreadsAfterGrow(false, 1), 0),
+            ns.formatNumber(s.sanity.value, 1),
             formatTime(ns, b.deployTime)
           );
         });

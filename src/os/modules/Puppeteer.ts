@@ -53,7 +53,7 @@ export async function main(ns: NS) {
         return st;
       })
       .sort(
-        (a: ServerTarget, b: ServerTarget) => b.batch.dValue - a.batch.dValue
+        (a: ServerTarget, b: ServerTarget) => b.sanity.value - a.sanity.value
       );
 
     // ns.print(
@@ -101,10 +101,10 @@ export async function main(ns: NS) {
       }
 
       ns.print(
-        `${s.hostname} | ${ns.formatRam(s.batch.dRam, 2)} | ${ns.formatNumber(
-          s.batch.dValue,
+        `${s.hostname} | ${ns.formatRam(s.sanity.tRam, 2)} | ${ns.formatNumber(
+          s.sanity.value,
           2
-        )} | ${s.aAttack} | ${s.aAction} | ARam: ${ns.formatRam(
+        )} | ${s.aAttack} | ${s.sanity.action} | ARam: ${ns.formatRam(
           ramAvailable,
           2
         )}`
