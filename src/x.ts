@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { Corp } from '/os/modules/Corporation';
+import { Corporation } from '/os/modules/Corporation';
 import { CORP } from '/os/configs';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
@@ -18,7 +18,7 @@ export async function main(ns: NS) {
   let cycles = 0;
 
   // ******** Single run code
-  const corp = new Corp(ns);
+  const corp = new Corporation(ns);
   let phase = 1; // FIXME: should be 0 if not debugging
   let stage = 0; // FIXME: should be 0 if not debugging
 
@@ -42,7 +42,7 @@ export async function main(ns: NS) {
   while (true) {
     ns.clearLog();
     // const now = performance.now(); // DEBUG
-    ns.print(`[Cycles] ${cycles}`);
+    ns.print(`[Cycles] ${cycles} | [Wait] ${corp.wait}`);
 
     // ******** Each tick
     // ns.print(`[Time] ${formatTime(ns, now - start)}`);

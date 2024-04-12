@@ -7,13 +7,14 @@ import { corpLogicPhase1 } from '/os/modules/CorporationPhase1';
 
 const { cName, fName, sName } = CORP;
 
-export class Corp {
+export class Corporation {
   // ******** Base
   ns: NS;
   name: string;
   exists: boolean;
   phase: number;
   stage: number;
+  waitCycles: number;
 
   constructor(ns: NS) {
     this.ns = ns;
@@ -21,6 +22,7 @@ export class Corp {
     this.name = this.exists ? ns.corporation.getCorporation().name : cName;
     this.phase = -1;
     this.stage = -1;
+    this.waitCycles = 0;
 
     // const check = this.checkProgress(ns);
     // this.phase = check.phase;
@@ -29,6 +31,14 @@ export class Corp {
 
   get corpData(): any {
     return this.ns.corporation.getCorporation();
+  }
+
+  get wait(): number {
+    return this.waitCycles;
+  }
+
+  set wait(cycles: number) {
+    this.waitCycles = cycles;
   }
 
   state(cPhase = 0, cStage = 0): { phase: number; stage: number } {
@@ -44,7 +54,7 @@ export class Corp {
     }
 
     if (phase === 1) {
-      ({ phase, stage } = corpLogicPhase1(ns, stage));
+      ({ phase, stage } = corpLogicPhase1(ns, stage, this));
       ns.print(`[DEBUG] P:${phase} S:${stage}`);
       // ns.tprint(`[P1] End P:${phase} S:${stage}`);
     }

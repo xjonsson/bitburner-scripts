@@ -218,6 +218,7 @@ export const CORP: any = {
   cName: 'cosyco', // Corporations name (Corp Name)
   fName: 'Agrico', // Agriculture division name (Farm Name)
   tName: 'Tobaco', // Tobacco division name (Tobacco Name)
+  iRounds: [140e9, 5e12], // 150b, 5t
   farm: {
     hires: [3, 9],
     roles: [
@@ -233,7 +234,7 @@ export const CORP: any = {
       Hardware: [125, 2800, 9300],
       Robots: [0, 96, 726],
       'AI Cores': [75, 2520, 6270],
-      'Real Estate': [2700, 146400, 230400],
+      'Real Estate': [27000, 146400, 230400],
     },
   },
 };
