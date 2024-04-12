@@ -62,3 +62,36 @@ export const BOOST = [
   'AI Cores', // 2
   'Real Estate', // 3
 ];
+
+export const MATERIALS = {
+  Water: 'Water',
+  Ore: 'Ore',
+  Minerals: 'Minerals',
+  Food: 'Food',
+  Plants: 'Plants',
+  Metal: 'Metal',
+  Hardware: 'Hardware',
+  Chemicals: 'Chemicals',
+  Drugs: 'Drugs',
+  Robots: 'Robots',
+  AiCores: 'AI Cores',
+  RealEstate: 'Real Estate',
+};
+
+// export const INDUSTRY = {
+//   Water: 'Water Utilities',
+//   Spring: 'Spring Water',
+//   Agriculture: 'Agriculture',
+//   Fishing: 'Fishing',
+//   Mining: 'Mining',
+//   Refinery: 'Refinery',
+//   Restaurant: 'Restaurant',
+//   Tobacco: 'Tobacco',
+//   Chemical: 'Chemical',
+//   Pharmaceutical: 'Pharmaceutical',
+//   Computers: 'Computer Hardware',
+//   Robotics: 'Robotics',
+//   Software: 'Software',
+//   Healthcare: 'Healthcare',
+//   RealEstate: 'Real Estate',
+// };

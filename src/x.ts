@@ -19,8 +19,8 @@ export async function main(ns: NS) {
 
   // ******** Single run code
   const corp = new Corporation(ns);
-  let phase = 1; // FIXME: should be 0 if not debugging
-  let stage = 0; // FIXME: should be 0 if not debugging
+  let phase = 2; // FIXME: should be 0 if not debugging
+  let stage = 10; // FIXME: should be 0 if not debugging
 
   // const sample = ns.corporation.getCorporation();
   // const sCities = ns.corporation.getDivision(farmName).cities;

@@ -217,10 +217,10 @@ export const DEPLOY: any = {
 export const CORP: any = {
   cName: 'cosyco', // Corporations name (Corp Name)
   fName: 'Agrico', // Agriculture division name (Farm Name)
-  tName: 'Tobaco', // Tobacco division name (Tobacco Name)
-  iRounds: [140e9, 5e12], // 150b, 5t
+  sName: 'Smokeco', // Tobacco division name (Smoke Name)
+  iRounds: [140e9, 2.1e12], // 150b, 2.5t (Tweak these later)
   farm: {
-    hires: [3, 9],
+    hires: [3, 9, 9],
     roles: [
       // 0, 1, 2, 3, 4, 5, 6
       // O, E, B, M, R, I, U
@@ -236,5 +236,19 @@ export const CORP: any = {
       'AI Cores': [75, 2520, 6270],
       'Real Estate': [27000, 146400, 230400],
     },
+  },
+  smoke: {
+    dCity: 'Aevum', // Must match ENUM
+    pPrefix: 'Snus', // will make Snus vX
+    pVerson: 'v',
+    pInvestment: 1e9, // 1billion
+    hires: [30, 9],
+    roles: [
+      // O, E, B, M, R, I, U
+      // [x, x, x/2, x, 0, 0] Dev city Ratio
+      [8, 9, 5, 8, 0, 0, 0], // (30) In Dev city
+      // [1, 1, 1, 1, x, 0]
+      [1, 1, 1, 1, 5, 0, 0], // (9) all others
+    ],
   },
 };
