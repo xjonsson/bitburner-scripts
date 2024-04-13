@@ -2,7 +2,7 @@
 import { NS } from '@ns';
 import { CORP } from '/os/configs';
 import { Corporation } from '/os/modules/Corporation';
-import { CITIES, BOOST } from '/os/data/constants';
+import { CITIES, BOOST, RESEARCH } from '/os/data/constants';
 /* eslint-enable */
 
 const { iRounds, farm } = CORP;
@@ -255,4 +255,114 @@ export function dBoostMaterial(ns: NS, division: string, s: number): boolean {
   });
 
   return pass;
+}
+
+// ******** PRODUCT DIVISION FUNCTIONS
+export function dCheckProductsSelling(
+  ns: NS,
+  division: string,
+  city: any
+): boolean {
+  const c = ns.corporation;
+  const { products } = c.getDivision(division);
+  let pass = true;
+  products.forEach((n) => {
+    const p = c.getProduct(division, city, n);
+    const pDP = p.developmentProgress;
+    const pSP = p.desiredSellPrice;
+    const pSA = p.desiredSellAmount;
+
+    // ns.print(`${n} is complete`);
+    // Sanity check products
+    if (pDP === 100 && (pSP === '' || pSP === 0 || pSA === '' || pSA === 0)) {
+      ns.print(`[Product] ${n} was not selling, set to MAX | MP`);
+      c.sellProduct(division, city, n, 'MAX', 'MP', true);
+      pass = false;
+    }
+    // ns.tprint(p); // DEBUG
+  });
+  return pass;
+}
+
+export function dCheckNoActiveDevelopment(
+  ns: NS,
+  division: string,
+  city: any
+): boolean {
+  const c = ns.corporation;
+  const { products } = c.getDivision(division);
+  return products.every(
+    (n) => c.getProduct(division, city, n).developmentProgress === 100
+  );
+}
+
+export function dCheckMarketResearch(
+  ns: NS,
+  division: string,
+  rp: number
+): boolean {
+  const c = ns.corporation;
+  if (!c.hasResearched(division, RESEARCH.Lab)) {
+    const rPrice = c.getResearchCost(division, RESEARCH.Lab);
+    if (rp > rPrice) {
+      ns.print(`:::: Unlocking ${RESEARCH.Lab}`);
+      c.research(division, RESEARCH.Lab);
+    }
+    ns.print(`:::: Lab (${ns.formatNumber(rPrice - rp, 2)})`);
+  } else if (
+    !c.hasResearched(division, RESEARCH.MarketTa1) &&
+    !c.hasResearched(division, RESEARCH.MarketTa2)
+  ) {
+    const rPrice =
+      c.getResearchCost(division, RESEARCH.MarketTa1) +
+      c.getResearchCost(division, RESEARCH.MarketTa2);
+    if (rp > rPrice) {
+      ns.print(`:::: Unlocking ${RESEARCH.MarketTa1}`);
+      c.research(division, RESEARCH.MarketTa1);
+      ns.print(`:::: Unlocking ${RESEARCH.MarketTa2}`);
+      c.research(division, RESEARCH.MarketTa2);
+    }
+    ns.print(`:::: TA II (${ns.formatNumber(rPrice - rp, 2)})`);
+  }
+
+  if (
+    c.hasResearched(division, RESEARCH.Lab) &&
+    c.hasResearched(division, RESEARCH.MarketTa1) &&
+    c.hasResearched(division, RESEARCH.MarketTa2)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function pCalculatePrice(
+  ns: NS,
+  division: string,
+  city: any,
+  product: string
+): number {
+  const c = ns.corporation;
+  // const o = c.getOffice(division, city);
+  const ostats = c.getOffice(division, city).employeeProductionByJob;
+  const p = c.getProduct(division, city, product);
+
+  // Destructuring
+  const totalProd = ostats.total;
+  // const engrRatio = ostats.Engineer / totalProd;
+  const mgmtRatio = ostats.Management / totalProd;
+  // const rndRatio = ostats['Research & Development'] / totalProd;
+  // const opsRatio = ostats.Operations / totalProd;
+  const busRatio = ostats.Business / totalProd;
+
+  // const advMult = 1 + Math.pow(p.advertisingInvestment, 0.1) / 100;
+  const advMult = 1 + p.advertisingInvestment ** 0.1 / 100;
+  const busmgtgRatio = Math.max(busRatio + mgmtRatio, 1 / totalProd);
+  // const markup =
+  //   100 / (advMult * Math.pow((p.stats.quality + 0.001), 0.65) * busmgtgRatio);
+  const markup =
+    100 / (advMult * (p.stats.quality + 0.001) ** 0.65 * busmgtgRatio);
+
+  const markupLimit = Math.max(p.effectiveRating, 0.001) / markup;
+  const optimalPrice = p.productionCost + markupLimit;
+  return optimalPrice;
 }

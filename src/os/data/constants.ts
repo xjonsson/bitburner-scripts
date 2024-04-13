@@ -78,6 +78,25 @@ export const MATERIALS = {
   RealEstate: 'Real Estate',
 };
 
+export const RESEARCH = {
+  Lab: 'Hi-Tech R&D Laboratory',
+  AutoBrew: 'AutoBrew',
+  AutoParty: 'AutoPartyManager',
+  AutoDrug: 'Automatic Drug Administration',
+  CPH4Inject: 'CPH4 Injections',
+  Drones: 'Drones',
+  DronesAssembly: 'Drones - Assembly',
+  DronesTransport: 'Drones - Transport',
+  GoJuice: 'Go-Juice',
+  RecruitHR: 'HRBuddy-Recruitment',
+  TrainingHR: 'HRBuddy-Training',
+  MarketTa1: 'Market-TA.I',
+  MarketTa2: 'Market-TA.II',
+  Overclock: 'Overclock',
+  SelfCorrectAssemblers: 'Self-Correcting Assemblers',
+  Stimu: 'Sti.mu',
+};
+
 // export const INDUSTRY = {
 //   Water: 'Water Utilities',
 //   Spring: 'Spring Water',
