@@ -279,6 +279,9 @@ export function dCheckProductsSelling(
       c.sellProduct(division, city, n, 'MAX', 'MP', true);
       pass = false;
     }
+
+    // Enable TA II
+    c.setProductMarketTA2(division, n, true);
     // ns.tprint(p); // DEBUG
   });
   return pass;
@@ -304,7 +307,7 @@ export function dCheckMarketResearch(
   const c = ns.corporation;
   if (!c.hasResearched(division, RESEARCH.Lab)) {
     const rPrice = c.getResearchCost(division, RESEARCH.Lab);
-    if (rp > rPrice) {
+    if (rp > rPrice && 10e3) {
       ns.print(`:::: Unlocking ${RESEARCH.Lab}`);
       c.research(division, RESEARCH.Lab);
     }
@@ -316,7 +319,7 @@ export function dCheckMarketResearch(
     const rPrice =
       c.getResearchCost(division, RESEARCH.MarketTa1) +
       c.getResearchCost(division, RESEARCH.MarketTa2);
-    if (rp > rPrice) {
+    if (rp > rPrice && rp > 140e3) {
       ns.print(`:::: Unlocking ${RESEARCH.MarketTa1}`);
       c.research(division, RESEARCH.MarketTa1);
       ns.print(`:::: Unlocking ${RESEARCH.MarketTa2}`);

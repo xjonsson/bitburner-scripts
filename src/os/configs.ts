@@ -241,7 +241,7 @@ export const CORP: any = {
     dCity: 'Aevum', // Must match ENUM
     pPrefix: 'Snus', // will make Snus vX
     pVerson: 'v',
-    pInvestment: 1e9, // 1billion
+    pInvestment: 2e9, // 2billion
     hires: [30, 9],
     roles: [
       // O, E, B, M, R, I, U
@@ -252,3 +252,8 @@ export const CORP: any = {
     ],
   },
 };
+
+// Math.floor(c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
+// Math.floor(c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
+// Math.floor(0.5 * c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
+// Math.ceil(c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
