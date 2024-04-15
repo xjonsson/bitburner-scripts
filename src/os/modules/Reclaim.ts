@@ -4,26 +4,52 @@ import { ServerInfo, Server } from '/os/modules/Server';
 /* eslint-enable */
 
 export function nukeServer(ns: NS, hostname: string, challenge: number) {
-  if (challenge >= 5) {
+  // if (challenge >= 5) {
+  //   ns.sqlinject(hostname);
+  // }
+  // if (challenge >= 4) {
+  //   ns.httpworm(hostname);
+  // }
+  // if (challenge >= 3) {
+  //   ns.relaysmtp(hostname);
+  // }
+  // if (challenge >= 2) {
+  //   ns.ftpcrack(hostname);
+  // }
+  // if (challenge >= 1) {
+  //   ns.brutessh(hostname);
+  // }
+
+  try {
     ns.sqlinject(hostname);
+  } catch (error) {
+    // ns.print(error);
   }
-  if (challenge >= 4) {
+  try {
     ns.httpworm(hostname);
+  } catch (error) {
+    // ns.print(error);
   }
-  if (challenge >= 3) {
+  try {
     ns.relaysmtp(hostname);
+  } catch (error) {
+    // ns.print(error);
   }
-  if (challenge >= 2) {
+  try {
     ns.ftpcrack(hostname);
+  } catch (error) {
+    // ns.print(error);
   }
-  if (challenge >= 1) {
+  try {
     ns.brutessh(hostname);
+  } catch (error) {
+    // ns.print(error);
   }
 
   try {
     ns.nuke(hostname);
   } catch (error) {
-    ns.print(error);
+    // ns.print(error);
   }
 
   return ns.hasRootAccess(hostname);

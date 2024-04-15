@@ -441,12 +441,17 @@ function prepHWGW(ns: NS, s: ServerTarget): number {
 
 // ******** Main function
 export async function main(ns: NS) {
+  const xWidth = 1040;
+  const xHeight = 430;
+  const window = ns.ui.windowSize();
+  const wWidth = window[0];
+  const wHeight = window[1];
   ns.disableLog('ALL');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Puppeteer');
-  ns.resizeTail(1040, 440);
-  ns.moveTail(680, 0);
+  ns.resizeTail(xWidth, xHeight);
+  ns.moveTail(wWidth - 200 - xWidth, 0);
   const start = performance.now();
 
   // NOTE: ONETIME CODE

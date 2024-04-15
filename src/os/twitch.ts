@@ -66,14 +66,19 @@ const updateCorporations = async (ns: NS) => {
 };
 
 export async function main(ns: NS) {
+  const xWidth = 200;
+  const xHeight = 190;
+  const window = ns.ui.windowSize();
+  const wWidth = window[0];
+  const wHeight = window[1];
   ns.disableLog('disableLog');
   ns.disableLog('asleep');
   ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
   ns.setTitle('OS Control');
-  ns.resizeTail(200, 190);
-  ns.moveTail(1720, 440);
+  ns.resizeTail(xWidth, xHeight);
+  ns.moveTail(wWidth - xWidth, wHeight - xHeight - 52);
 
   // ******** Initialize
 
