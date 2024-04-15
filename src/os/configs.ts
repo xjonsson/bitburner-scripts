@@ -217,8 +217,13 @@ export const DEPLOY: any = {
 export const CORP: any = {
   cName: 'cosyco', // Corporations name (Corp Name)
   fName: 'Agrico', // Agriculture division name (Farm Name)
+  zName: 'Chemco', // Chemical division (Chem Name)
   sName: 'Smokeco', // Tobacco division name (Smoke Name)
   iRounds: [140e9, 2.1e12], // 150b, 2.5t (Tweak these later)
+  warehouse: {
+    boost: 0.5, // If under 50% boost
+    grow: 0.9, // If over 90% grow
+  },
   farm: {
     hires: [3, 9, 9],
     roles: [
@@ -237,11 +242,13 @@ export const CORP: any = {
       'Real Estate': [27000, 146400, 230400],
     },
   },
+  chem: {
+    temp: '',
+  },
   smoke: {
     dCity: 'Aevum', // Must match ENUM
     pPrefix: 'Snus', // will make Snus vX
     pVerson: 'v',
-    pInvestment: 2e9, // 2billion
     hires: [30, 9],
     roles: [
       // O, E, B, M, R, I, U
@@ -250,6 +257,16 @@ export const CORP: any = {
       // [1, 1, 1, 1, x, 0]
       [1, 1, 1, 1, 5, 0, 0], // (9) all others
     ],
+    investmentRatio: {
+      dProductBase: 2e9, // 2billion
+      dProductRatio: 0.02, // 2% of funds on Product (1% on Design 1% on Marketing)
+      // uResearchRatio: 0.01, // 1% of funds on general research
+      uUpgradesRatio: 0.02, // 2% of funds on Random upgrades
+      uOfficeRatio: 0.2, // 20% of funds on Office
+      uWarehouseRatio: 0.1, // 10% of funds on Warehouse
+      uWilsonRatio: 0.8, // 20% of funds on Wilson Analytics
+      uAdvertRatio: 0.2, // 20% of funds on Adverts
+    },
   },
 };
 
@@ -257,3 +274,13 @@ export const CORP: any = {
 // Math.floor(c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
 // Math.floor(0.5 * c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
 // Math.ceil(c.getOffice(tobaccoName, cities[0]).employees.length / 3.5);
+
+// const wChemBoost10p = {
+//   size: 2940,
+//   resultCity: 8.216,
+//   resultTotal: 49.294,
+//   'Hardware (x)': 10350, // 0.06
+//   'Robots (y)': 1177, // 0.5
+//   'AI Cores (z)': 6010, // 0.1
+//   'Real Estate (w)': 167150, // 0.005
+// };
