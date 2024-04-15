@@ -33,10 +33,10 @@
 export const MODULES: any = {};
 (function () {
   // System
-  MODULES.HACKNET = true; // true will buy hacknets (~6 GB)
-  MODULES.HOSTING = true; // true will buy servers (~8 GB)
+  MODULES.HACKNET = false; // true will buy hacknets (~6 GB)
+  MODULES.HOSTING = false; // true will buy servers (~8 GB)
   MODULES.CONTRACTS = true; // true will solve contracts (~27 GB)
-  MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
+  MODULES.PUPPETEER = false; // true will HWGW on servers (~18 GB)
   MODULES.CORPORATIONS = true; // true will run a corporation (~100 GB)
   MODULES.GANGS = false; // true will run a gang (~TBD)
 })();

@@ -587,34 +587,18 @@ solvers['Array Jumping Game II'] = (_data: any) => {
   return jumps;
 };
 
-// name: 'Merge Overlapping Intervals',
-//     solver: (_data: unknown, ans: string): boolean => {
-//       const data = _data as number[][];
-//       const intervals: number[][] = data.slice();
-//       intervals.sort((a: number[], b: number[]) => a[0] - b[0]);
-
-//       const result: number[][] = [];
-//       let start: number = intervals[0][0];
-//       let end: number = intervals[0][1];
-//       for (const interval of intervals) {
-//         if (interval[0] <= end) {
-//           end = Math.max(end, interval[1]);
-//         } else {
-//           result.push([start, end]);
-//           start = interval[0];
-//           end = interval[1];
-//         }
-//       }
-//       result.push([start, end]);
-
-//       const sanitizedResult: string = convert2DArrayToString(result);
-//       const sanitizedAns: string = ans.replace(/\s/g, '');
-
-//       return (
-//         sanitizedResult === sanitizedAns ||
-//         sanitizedResult === removeBracketsFromArrayString(sanitizedAns)
-//       );
-//     }
+// ******** Merge Overlapping Intervals
+solvers['Merge Overlapping Intervals'] = (data: any) => {
+  data.sort((a: any, b: any) => a[0] - b[0]);
+  const intervals = [data[0].slice()];
+  for (const interval of data) {
+    const [x1, y1] = interval;
+    const [, y2] = intervals[intervals.length - 1];
+    if (y2 >= x1) intervals[intervals.length - 1][1] = Math.max(y1, y2);
+    else intervals.push(interval.slice());
+  }
+  return intervals;
+};
 
 // ******** Generate IP Addresses
 solvers['Generate IP Addresses'] = (data: any) => {
