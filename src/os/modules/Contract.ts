@@ -66,24 +66,26 @@ export function attemptAllContracts(ns: NS) {
 
 // ******** Main function
 export async function main(ns: NS) {
+  // ******** Setup
   const xWidth = 200;
-  const xHeight = 90; // OS is 190 + 52 buffer
-  const window = ns.ui.windowSize();
-  const wWidth = window[0];
-  const wHeight = window[1];
-  ns.disableLog('scan');
-  ns.disableLog('asleep');
+  const xHeight = 90; // OS is 190
+  const xBufferY = 52; // Bottom terminal
+  const wWidth = ns.ui.windowSize()[0];
+  const wHeight = ns.ui.windowSize()[1];
+  ns.disableLog('disableLog');
   ns.disableLog('clearLog');
+  ns.disableLog('asleep');
+  ns.disableLog('scan');
+  ns.clearLog();
   ns.tail();
   ns.setTitle('Contracts');
   ns.resizeTail(xWidth, xHeight);
-  ns.moveTail(wWidth - xWidth, wHeight - xHeight - 52 - 190);
-  ns.clearLog();
+  ns.moveTail(wWidth - xWidth, wHeight - xHeight - xBufferY - 190);
 
-  // const start = performance.now();
+  // ******** Initialize (One Time Code)
   let count = 0;
 
-  // **** Main loop
+  // ******** Primary (Loop Time Code)
   while (true) {
     count += 1;
     ns.clearLog();
