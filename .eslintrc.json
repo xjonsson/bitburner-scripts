@@ -19,7 +19,7 @@
     "tsconfig.json"
   ],
   "rules": {
-    "no-console": "warn",
+    "no-console": "off",
     "no-debugger": "warn",
     "no-constant-condition": 0,
     "@typescript-eslint/no-explicit-any": 0,

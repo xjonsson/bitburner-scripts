@@ -2,6 +2,60 @@
 
 Collection of scripts while trying out Bitburner
 
+**Run filesync:**
+How to run the sync
+
+```
+npm install
+npm run watch
+```
+
+Then go to Bitburner and connect in the remote API options
+
+**Alias:**
+Launch the scripts
+
+```
+alias start="run /os/launcher.js"
+```
+
+Buy software
+
+```
+alias exes="home;connect darkweb;buy BruteSSH.exe;buy FTPCrack.exe;buy relaySMTP.exe;buy HTTPWorm.exe;buy SQLInject.exe;buy ServerProfiler.exe;buy AutoLink.exe;buy DeepscanV1.exe;buy DeepscanV2.exe;home";
+```
+
+Nuke server
+
+```
+alias nuke="run BruteSSH.exe;run FTPCrack.exe;run relaySMTP.exe;run HTTPWorm.exe;run SQLInject.exe;run NUKE.exe"
+```
+
+Route and door (host: string, door: boolean)
+
+```
+alias route="run os/modules/Route.js"
+```
+
+Backdoor all possible servers
+
+```
+alias doors="run /os/utils/backdoor.js"
+```
+
+Generate Milestone alias (m1-m4)
+
+```
+alias milestones="run os/utils/milestoneRoutes.js"
+```
+
+Automatically Complete all Infiltrations
+
+```
+alias infilStart="run /os/modules/Infiltration.js --start"
+alias infilStop="run /os/modules/Infiltration.js --stop"
+```
+
 ## Logic
 
 Add image of logic flow here
@@ -57,3 +111,4 @@ Add image of logic flow here
 - Minimal.js borrows from [Official Getting Started Guide](https://bitburner-official.readthedocs.io/en/latest/guidesandtips/gettingstartedguideforbeginnerprogrammers.html)
 - Hacknet payback time borrows from [@grimley517](https://gist.github.com/grimley517/c2d531976db057cede4ac8e367418971)
 - HWGW Algorithm borrows from [@trhr](https://github.com/trhr/lets-play-bitburner/blob/ep7/hwgw.js)
+- Contracts solver is straight from [@jjclark1982](https://github.com/jjclark1982/bitburner-scripts/tree/main/contracts)
