@@ -48,7 +48,6 @@ export const CONFIGS: any = {
   moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: {
     // 50% 30% 20% (50% Essential, 30% life, 20% savings)
-    hacknetMoneyRatio: 0.2, // 50% of money will be used on hacknet
     hostingMoneyRatio: 0.8, // 30% of money will be used on servers
     savingsMoneyRatio: 0.2, // 20% of money will be used for savings
   },
@@ -80,11 +79,12 @@ export const CONFIGS: any = {
     shareRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
   },
   hacknet: {
-    hacknetBreakevenTime: 2 * 60 * 60, // 2 hours in seconds
-    hacknetTargetCount: 16, // 20 Soft Max (Real Max Infinity)
-    hacknetTargetLevel: 200, // 200, // 200 (Real Max)
-    hacknetTargetRam: 64, // 64, // 64 (Real Max)
-    hacknetTargetCores: 16, // 16, // 16 (Real Max)
+    hnMoneyRatio: 0.2, // 50% of money will be used on hacknet
+    hnBreakEvenTime: 2 * 60 * 60, // 2 hours in seconds
+    hnTCount: 16, // 20 Soft Max (Real Max Infinity)
+    hnTLevel: 200, // 200, // 200 (Real Max)
+    hnTRam: 64, // 64, // 64 (Real Max)
+    hnTCores: 16, // 16, // 16 (Real Max)
   },
   hosting: {
     hostingTargetCount: 25, // 25 (Real Max)
@@ -172,10 +172,10 @@ export const PORTS: any = {};
 (function () {
   PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
   PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
+  PORTS[(PORTS.HACKNET = 3)] = 'HACKNET'; // TODO: Add hacknet
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
-  // PORTS[(PORTS.HACKNET = 7)] = 'HACKNET'; // TODO: Add hacknet
   // PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
   // PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
   // PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations

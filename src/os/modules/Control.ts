@@ -14,7 +14,7 @@ export class Control {
   level: number;
   challenge: number;
   isPlayerCheck: boolean;
-  isShopHacknet: boolean;
+  isShopHN: boolean;
   isShopHosting: boolean;
   isReserve: number;
   hackTargets: [];
@@ -32,7 +32,7 @@ export class Control {
     this.hackTargets = past ? past.hackTargets : [];
 
     // ******** Update shopping based on logic
-    this.isShopHacknet = this.phase.hacknet;
+    this.isShopHN = this.phase.hn;
     this.isShopHosting = this.phase.hosting;
     this.isReserve = this.phase.reserve;
 

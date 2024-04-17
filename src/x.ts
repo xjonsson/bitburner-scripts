@@ -11,6 +11,9 @@ const { cName, fName, sName } = CORP;
 
 // ******** Main function
 export async function main(ns: NS) {
+  // NOTE: Exploit - Bypass the ungodly 1TB RAM cost
+  // eval('ns.bypass(document)');
+  // NOTE: Exploit - Bypass the ungodly 1TB RAM cost
   ns.disableLog('ALL');
   ns.tail();
   ns.clearLog();

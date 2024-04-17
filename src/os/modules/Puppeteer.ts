@@ -22,7 +22,7 @@ export async function main(ns: NS) {
   ns.disableLog('scan');
   ns.clearLog();
   ns.tail();
-  ns.setTitle('Puppeteer');
+  ns.setTitle('Puppeteer X2');
   ns.resizeTail(xWidth, xHeight);
   ns.moveTail(wWidth - 200 - xWidth, 0);
   const start = performance.now();

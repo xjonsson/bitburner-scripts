@@ -7,17 +7,24 @@ import deployScripts from '/os/utils/deploy';
 /* eslint-enable */
 
 export async function main(ns: NS) {
+  // ******** Setup
+  const xWidth = 220;
+  const xHeight = 440;
+  const xBufferx = 200; // Other panels
+  const xBufferY = 52; // Bottom terminal
+  const wWidth = ns.ui.windowSize()[0];
+  const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('disableLog');
   ns.disableLog('getServerMoneyAvailable');
   ns.disableLog('getServerMaxRam');
   ns.disableLog('purchaseServer');
-  ns.disableLog('scp');
   ns.disableLog('asleep');
+  ns.disableLog('scp');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Hosting');
-  ns.resizeTail(220, 680);
-  ns.moveTail(1248, 440);
+  ns.resizeTail(xWidth, xHeight);
+  ns.moveTail(wWidth - xWidth - xBufferx, wHeight - xHeight - xBufferY);
 
   // ******** Initialize
   const { moneyReserve } = CONFIGS;

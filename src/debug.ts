@@ -443,9 +443,8 @@ function prepHWGW(ns: NS, s: ServerTarget): number {
 export async function main(ns: NS) {
   const xWidth = 1040;
   const xHeight = 430;
-  const window = ns.ui.windowSize();
-  const wWidth = window[0];
-  const wHeight = window[1];
+  const wWidth = ns.ui.windowSize()[0];
+  const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('ALL');
   ns.clearLog();
   ns.tail();

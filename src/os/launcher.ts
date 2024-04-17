@@ -10,7 +10,6 @@ export async function main(ns: NS) {
   ns.tail();
   ns.clearLog();
   ns.disableLog('disableLog');
-  ns.disableLog('asleep');
 
   // TODO: Kill all processes
 

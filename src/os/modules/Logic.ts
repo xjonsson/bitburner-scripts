@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CONFIGS } from '/os/configs';
+import { CONFIGS, PORTS } from '/os/configs';
 import { PlayerCache } from '/os/modules/Cache';
 import { ServerInfo } from '/os/modules/Server';
 /* eslint-enable */
@@ -20,17 +20,18 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'STAGE_0_JOB',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: 0,
         };
       }
       // ******** Setup Hacknet
-      if (ns.hacknet.numNodes() < 8) {
+      const hnNodes = ns.peek(PORTS.HACKNET)?.nodesCount || 0;
+      if (hnNodes < 8) {
         return {
           done: false,
           msg: 'HNET_NODES_8',
-          hacknet: true,
+          hn: true,
           hosting: false,
           reserve: 0,
         };
@@ -40,7 +41,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'HOSTING_NODES_8',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: 0,
         };
@@ -48,7 +49,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_0_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -60,25 +61,27 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'LVL_80',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
         }
 
-        const hnCount = ns.hacknet.numNodes();
-        let hnLevel = 0; // 100
+        // const hnCount = ns.hacknet.numNodes();
+        // const hnNodes = ns.peek(PORTS.HACKNET)?.nodes || 0;
+        const hnNodesLevel = ns.peek(PORTS.HACKNET)?.nodesLevel || 0;
+        // let hnLevel = 0; // 100
 
-        for (let i = 0; i < hnCount; i += 1) {
-          const node = ns.hacknet.getNodeStats(i);
-          hnLevel += node.level;
-        }
+        // for (let i = 0; i < hnCount; i += 1) {
+        //   const node = ns.hn.getNodeStats(i);
+        //   hnLevel += node.level;
+        // }
 
-        if (hnLevel < 100) {
+        if (hnNodesLevel < 100) {
           return {
             done: false,
             msg: 'HNET_LVL_100',
-            hacknet: true,
+            hn: true,
             hosting: false,
             reserve: 0,
           };
@@ -86,7 +89,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_NetBurners',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: 0,
         };
@@ -98,7 +101,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_TOR 200K',
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.tor,
           };
@@ -106,7 +109,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_TOR 200K',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.tor,
         };
@@ -114,7 +117,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_1_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -126,7 +129,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_SSH 500K',
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.ssh,
           };
@@ -134,7 +137,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_SSH 500K',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.ssh,
         };
@@ -142,7 +145,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_2_COMPLETE',
-        hacknet: false,
+        hn: false,
         hosting: true,
         reserve: 0,
       };
@@ -156,7 +159,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_${sLevel}`,
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: 0,
           };
@@ -166,7 +169,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'ROOT_CSEC',
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: 0,
           };
@@ -176,7 +179,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'DOOR_CSEC (m1)',
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: 0,
           };
@@ -185,7 +188,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_CyberSec',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: 0,
         };
@@ -193,7 +196,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_3_COMPLETE',
-        hacknet: false,
+        hn: false,
         hosting: true,
         reserve: 0,
       };
@@ -205,7 +208,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_FTP 1.5M',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.ftp,
           };
@@ -213,7 +216,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_FTP 1.5M',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.ftp,
         };
@@ -221,7 +224,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_4_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -235,7 +238,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_${sLevel}`,
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -245,7 +248,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'ROOT_avmnite-02h',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -255,7 +258,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'DOOR_avmnite-02h (m2)',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -264,7 +267,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_NiteSec',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: 0,
         };
@@ -272,7 +275,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_5_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -284,7 +287,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_SMTP 5M',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.smtp,
           };
@@ -292,7 +295,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_SMTP 5M',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.smtp,
         };
@@ -300,7 +303,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_6_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -314,7 +317,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -324,7 +327,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'ROOT_I.I.I.I',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -334,7 +337,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'DOOR_I.I.I.I (m3)',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -343,7 +346,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_TheBlackHand',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: 0,
         };
@@ -351,7 +354,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_7_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -363,7 +366,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_HTTP 30M',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.http,
           };
@@ -371,7 +374,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_HTTP 30M',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.http,
         };
@@ -379,7 +382,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_8_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -393,7 +396,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -403,7 +406,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'ROOT_run4theh111z',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -413,7 +416,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'DOOR_run4theh111z (m4)',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -422,7 +425,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_BitRunners',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: 0,
         };
@@ -430,7 +433,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_9_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -442,7 +445,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: 'SAVE_SQL 250M',
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: CONFIGS.shoppingPrices.sql,
           };
@@ -450,7 +453,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'BUY_SQL 250M',
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: CONFIGS.shoppingPrices.sql,
         };
@@ -458,7 +461,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_10_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -471,7 +474,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_2500`,
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -481,7 +484,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `100 Billion`,
-            hacknet: false,
+            hn: false,
             hosting: true,
             reserve: 1e11,
           };
@@ -490,7 +493,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: 'JOIN_Daedalus',
-          hacknet: false,
+          hn: false,
           hosting: true,
           reserve: 1e11,
         };
@@ -501,7 +504,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: true,
         msg: 'STAGE_11_COMPLETE',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -516,7 +519,7 @@ export function osLogic(ns: NS, stage: number): any {
           return {
             done: false,
             msg: `LVL_${host.requiredHackingSkill}`,
-            hacknet: true,
+            hn: true,
             hosting: true,
             reserve: 0,
           };
@@ -524,7 +527,7 @@ export function osLogic(ns: NS, stage: number): any {
         return {
           done: false,
           msg: `BACKDOOR_w0r1d_d43m0n (m5)`,
-          hacknet: true,
+          hn: true,
           hosting: true,
           reserve: 0,
         };
@@ -532,7 +535,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: false,
         msg: 'INSTALL_REDPILL',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
@@ -541,7 +544,7 @@ export function osLogic(ns: NS, stage: number): any {
       return {
         done: false,
         msg: 'ERROR',
-        hacknet: true,
+        hn: true,
         hosting: true,
         reserve: 0,
       };
