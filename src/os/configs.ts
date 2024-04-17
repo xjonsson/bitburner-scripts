@@ -33,7 +33,7 @@
 export const MODULES: any = {};
 (function () {
   // System
-  MODULES.HACKNET = true; // true will buy hacknets (~6 GB)
+  MODULES.HACKNET = true; // true will buy hacknets (~7.2 GB)
   MODULES.HOSTING = true; // true will buy servers (~8 GB)
   MODULES.CONTRACTS = true; // true will solve contracts (~27 GB)
   MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
@@ -172,7 +172,7 @@ export const PORTS: any = {};
 (function () {
   PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
   PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
-  PORTS[(PORTS.HACKNET = 3)] = 'HACKNET'; // TODO: Add hacknet
+  PORTS[(PORTS.HACKNET = 3)] = 'HACKNET';
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves

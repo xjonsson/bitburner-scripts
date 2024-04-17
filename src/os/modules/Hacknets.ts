@@ -12,11 +12,21 @@ const { hnMoneyRatio, hnTCount, hnTLevel, hnTRam, hnTCores } = CONFIGS.hacknet; 
 
 // ******** HACKNET UTILITY FUNCTIONS
 function calcPayBack(c: number, o: number, n: number): number {
-  return c / (n - o); // Cost / (new production - old production)
+  return c / (n - o);
 }
 
 function hnMoney(ns: NS, r: number): number {
   return (ns.getServerMoneyAvailable('home') - mReserve - r) * hnMoneyRatio;
+}
+
+function hnShopItem(i: number, t: string, m: string, c: number, v: number) {
+  return {
+    id: i,
+    type: t,
+    msg: m,
+    cost: c,
+    value: v,
+  };
 }
 
 // ******** HACKNET CLASS
@@ -36,13 +46,13 @@ export default class Hacknets {
 
   // ******** CONSTRUCTOR
   constructor(ns: NS, lvl = 1) {
+    const cBN = ns.getResetInfo().currentNode;
     this.ns = ns;
     this.done = false;
     this.pMult = ns.getPlayer().mults.hacknet_node_money || 1;
-    this.pMultBN =
-      getBitNodeMults(ns.getResetInfo().currentNode, lvl).HacknetNodeMoney || 1;
+    this.pMultBN = getBitNodeMults(cBN, lvl).HacknetNodeMoney || 1;
     this.nodesLevel = 0;
-    this.nodesMaxed = 0; // maxNumNodes()
+    this.nodesMaxed = 0;
     this.shoppinglist = [];
   }
 
@@ -60,73 +70,53 @@ export default class Hacknets {
     let nLevel = 0;
     let nMaxed = 0;
 
+    // ******** NODE NEW
     if (this.nodesCount < hnTCount) {
       const cNew = this.ns.hacknet.getPurchaseNodeCost();
-      s.push({
-        id: this.nodesCount,
-        type: 'NEW',
-        msg: '💰 New',
-        cost: cNew,
-        value: calcPayBack(cNew, 0, this.calcProduction(1, 1, 1)),
-      });
+      const vNew = calcPayBack(cNew, 0, this.calcProduction(1, 1, 1));
+      const mNew = '💰 New';
+      const sNew = hnShopItem(this.nodesCount, 'NEW', mNew, cNew, vNew);
+      s.push(sNew);
     }
 
     // Go through all existing ones
     for (let i = 0; i < this.nodesCount; i += 1) {
       const n = this.ns.hacknet.getNodeStats(i);
 
-      // Node is maxed
+      // ******** NODE MAXED
       if (n.level >= hnTLevel && n.ram >= hnTRam && n.cores >= hnTCores) {
         nMaxed += 1;
       }
       nLevel += n.level;
 
-      // Node can level
+      // ******** NODE LEVEL
       if (n.level < hnTLevel) {
         const cLevel = this.ns.hacknet.getLevelUpgradeCost(i, 1);
-        s.push({
-          id: i,
-          type: 'LVL',
-          msg: `🌿 ${n.level + 1}`,
-          cost: cLevel,
-          value: calcPayBack(
-            cLevel,
-            n.production,
-            this.calcProduction(n.level + 1, n.ram, n.cores)
-          ),
-        });
+        const uLevel = this.calcProduction(n.level + 1, n.ram, n.cores);
+        const vLevel = calcPayBack(cLevel, n.production, uLevel);
+        const mLevel = `🌿 ${n.level + 1}`;
+        const sLevel = hnShopItem(i, 'LVL', mLevel, cLevel, vLevel);
+        s.push(sLevel);
       }
 
-      // Node can ram
+      // ******** NODE RAM
       if (n.ram < hnTRam) {
         const cRam = this.ns.hacknet.getRamUpgradeCost(i, 1);
-        s.push({
-          id: i,
-          type: 'RAM',
-          msg: `🔋 ${n.ram * 2}`,
-          cost: cRam,
-          value: calcPayBack(
-            cRam,
-            n.production,
-            this.calcProduction(n.level, n.ram + 1, n.cores)
-          ),
-        });
+        const uRam = this.calcProduction(n.level, n.ram + 1, n.cores);
+        const vRam = calcPayBack(cRam, n.production, uRam);
+        const mRam = `🔋 ${n.ram * 2}`;
+        const sRam = hnShopItem(i, 'RAM', mRam, cRam, vRam);
+        s.push(sRam);
       }
 
-      // Node can core
+      // ******** NODE CORES
       if (n.cores < hnTCores) {
         const cCores = this.ns.hacknet.getCoreUpgradeCost(i, 1);
-        s.push({
-          id: i,
-          type: 'CORES',
-          msg: `🖲️ ${n.cores + 1}`,
-          cost: cCores,
-          value: calcPayBack(
-            cCores,
-            n.production,
-            this.calcProduction(n.level, n.ram, n.cores + 1)
-          ),
-        });
+        const uCores = this.calcProduction(n.level, n.ram, n.cores + 1);
+        const vCores = calcPayBack(cCores, n.production, uCores);
+        const mCores = `🖲️ ${n.cores + 1}`;
+        const sCores = hnShopItem(i, 'CORES', mCores, cCores, vCores);
+        s.push(sCores);
       }
     }
 
@@ -143,7 +133,7 @@ export default class Hacknets {
       nodesCount: this.nodesCount,
       nodesLevel: this.nodesLevel,
       nodesMaxed: this.nodesMaxed,
-      // list: this.shoppinglist, // Add back for debug
+      // list: this.shoppinglist, // NOTE: Add back for full shopping list
     };
     this.ns.clearPort(PORTS.HACKNET);
     await this.ns.tryWritePort(PORTS.HACKNET, portdata);
@@ -190,11 +180,13 @@ export async function main(ns: NS) {
     const reserve = control?.isReserve || 0;
 
     // ******** Display
-    ns.print(
-      `${isShopHN ? '🟢' : '🟥'}👾${hacknet.nodesMaxed} ${
-        hacknet.nodesCount
-      }/${hnTCount} 💸${ns.formatNumber(reserve, 1)}`
-    );
+    const dStatus = isShopHN ? '🟢' : '🟥';
+    const dNodesMax = `👾${hacknet.nodesMaxed}`;
+    const dNodesCount = hacknet.nodesCount;
+    const dReserve = `💸${ns.formatNumber(reserve, 1)}`;
+    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hnTCount} ${dReserve}}`);
+
+    // ******** Shopping Loop
     if (isShopHN) {
       const list = hacknet.updateNodes;
       await hacknet.updatePorts();
@@ -203,17 +195,15 @@ export async function main(ns: NS) {
       const { id, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
         // Styling
-        ns.printf(
-          '%2s %-16s',
-          id,
-          `${msg} (${ns.formatNumber(cost - hnMoney(ns, reserve), 1)})`
-        );
+        const price = ns.formatNumber(cost - hnMoney(ns, reserve), 1);
+        ns.print(`${id} ${msg} (${price})`);
 
         // Wait if we cant afford it
         while (hnMoney(ns, reserve) < cost) {
           await ns.sleep(TIME.HACKNET);
         }
 
+        // Buy it if we can
         switch (type) {
           case 'NEW':
             ns.hacknet.purchaseNode();
@@ -236,3 +226,35 @@ export async function main(ns: NS) {
     await ns.sleep(TIME.HACKNET);
   }
 }
+
+/* ******** SAMPLE HACKNET
+ *  This can be read on port data. List needs to be uncommented for full
+ * sampleHacknet = {
+ *    done: false,         // [false, true] if hacknets maxed to config
+ *    nodesCount: 15,      // current amount of nodes purchased
+ *    nodesLevel: 2811,    // sum of all node levels (Netburners requirement)
+ *    nodesMaxed: 10,      // sum of all maxed nodes (lvl, ram, cores)
+ *                         // Sorted shoping list of next best purchase
+ *    list: [
+ *      {
+ *        id: 14,          // ID of the node purchase relates to
+ *        type: 'LVL',     // [LVL, RAM, CORES, NEW] type of purcahse
+ *        msg: '🌿 12',    // Display msg. (current + 1)
+ *        cost: 601.34,    // Cost of the upgrade
+ *        value: 1252.81,  // Seconds until cost is paid back (lower is better)
+ *      },
+ *      {
+ *        type: 'RAM',
+ *        msg: '🔋 2',
+ *      },
+ *      {
+ *        type: 'CORES',
+ *        msg: '🖲️ 2',
+ *      },
+ *      {
+ *        type: 'NEW',
+ *        msg: '💰 New',
+ *      },
+ *    ],
+ *  };
+ */

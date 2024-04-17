@@ -17,11 +17,9 @@ export async function main(ns: NS) {
   // Keep the game loop going
   function updateDisplay() {
     const control = ControlCache.read(ns, 'control');
-    const focus = control?.serverFocus;
+    const focus = control?.hackTargets;
     ns.clearLog();
     if (control) {
-      ns.print(`[Action] ${control.actions[0]}`);
-
       const headerRow = ` %6s |%4s| %-18s | %5s | %6s | %4s |%6s |%5s|%5s|%5s |%5s|%10s|%10s`;
       const serverRow = ` %6s |%4s| %-18s | %5s | %6s | %4s |%6s|%5s|%5s|%5s|%5s|%10s|%10s`;
       ns.printf(
@@ -62,7 +60,7 @@ export async function main(ns: NS) {
             ns.formatNumber(s.growThreads(false, 1), 0),
             ns.formatNumber(s.weakThreadsAfterGrow(false, 1), 0),
             ns.formatNumber(s.sanity.value, 1),
-            formatTime(ns, b.deployTime)
+            formatTime(ns, b.dTime)
           );
         });
       }

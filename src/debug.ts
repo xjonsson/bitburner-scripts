@@ -520,6 +520,6 @@ export async function main(ns: NS) {
       }
     });
 
-    await ns.asleep(1000);
+    await ns.sleep(1000);
   }
 }
