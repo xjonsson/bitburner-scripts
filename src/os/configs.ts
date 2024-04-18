@@ -160,7 +160,7 @@ export const TIME: any = {};
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
   // TIME.CRIMES = 2 * 1000; // 2 second updates
   // TIME.STOCKS = 1 * 1000; // 1 second updates
-  TIME.TIMECONTRACTS = 60 * 1000; // 1.5 min updates
+  TIME.TIMECONTRACTS = 2 * 60 * 1000; // 2 min updates
 })();
 
 // export const MINISAVE: any = {

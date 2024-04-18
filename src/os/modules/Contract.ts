@@ -8,59 +8,71 @@ import { solvers } from '/os/data/contracts';
 // ******** Globals
 const { TIMECONTRACTS } = TIME;
 
-// ******** GET CONTRACTS
-export function getContracts(ns: NS) {
-  const contracts = [];
-  for (const host of ServerInfo.list(ns)) {
-    for (const file of ns.ls(host)) {
-      if (file.match(/\.cct$/)) {
-        const contract = {
-          host,
-          file,
-          type: ns.codingcontract.getContractType(file, host),
-          triesRemaining: ns.codingcontract.getNumTriesRemaining(file, host),
-        };
-        contracts.push(contract);
+// ******** CONTRACTS CLASS
+export default class Contracts {
+  ns: NS;
+  servers: Array<string>;
+  found: number;
+  attempted: number;
+  solved: number;
+  failed: number;
+  missing: Array<any>;
+
+  constructor(ns: NS) {
+    this.ns = ns;
+    this.servers = ServerInfo.list(ns);
+    this.found = 0;
+    this.attempted = 0;
+    this.solved = 0;
+    this.failed = 0;
+    this.missing = [];
+  }
+
+  // ******** UPDATE & GET CONTRACTS
+  update() {
+    const contracts = [];
+    for (const s of this.servers) {
+      for (const f of this.ns.ls(s)) {
+        if (f.endsWith('.cct')) {
+          const contract = {
+            server: s,
+            file: f,
+            type: this.ns.codingcontract.getContractType(f, s),
+            tries: this.ns.codingcontract.getNumTriesRemaining(f, s),
+          };
+          contracts.push(contract);
+        }
       }
     }
-  }
-  return contracts;
-}
 
-// ******** ATTEMPT CONTRACT
-export function attemptContract(ns: NS, contract: any) {
-  const solver = solvers[contract.type];
-  if (solver) {
-    ns.print(`Attempting ${JSON.stringify(contract, null, 2)}`);
-    const solution = solver(
-      ns.codingcontract.getData(contract.file, contract.host)
-    );
+    this.found = contracts.length;
 
-    const reward = ns.codingcontract.attempt(
-      solution,
-      contract.file,
-      contract.host
-    );
-
-    if (reward) {
-      ns.tprint(`${reward} for solving "${contract.type}" on ${contract.host}`);
-    } else {
-      ns.tprint(
-        `ERROR: Failed to solve "${contract.type}" on ${contract.host}`
-      );
-      ns.exit();
+    for (const contract of contracts) {
+      this.solve(contract);
     }
-  } else {
-    ns.tprint(`WARNING: No solver for "${contract.type}" on ${contract.host}`);
   }
-}
 
-// ******** ATTEMP ALL CONTRACTS
-export function attemptAllContracts(ns: NS) {
-  const contracts = getContracts(ns);
-  ns.print(`Found ${contracts.length} contracts.`);
-  for (const contract of contracts) {
-    attemptContract(ns, contract);
+  // ******** ATTEMPT CONTRACT
+  solve(c: { server: string; file: string; type: string; tries: number }) {
+    const solver = solvers[c.type];
+    if (solver) {
+      this.attempted += 1;
+      // this.ns.print(`Attempting ${JSON.stringify(c, null, 2)}`);
+      const solution = solver(this.ns.codingcontract.getData(c.file, c.server));
+      const reward = this.ns.codingcontract.attempt(solution, c.file, c.server);
+
+      if (reward) {
+        this.solved += 1;
+        this.ns.tprint(`${reward} for solving "${c.type}" on ${c.server}`);
+      } else {
+        this.failed += 1;
+        this.ns.tprint(`ERROR: Failed to solve "${c.type}" on ${c.server}`);
+        this.ns.exit();
+      }
+    } else {
+      this.missing.push(c.type);
+      this.ns.tprint(`WARNING: No solver for "${c.type}" on ${c.server}`);
+    }
   }
 }
 
@@ -72,10 +84,11 @@ export async function main(ns: NS) {
   const xBufferY = 52; // Bottom terminal
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
-  ns.disableLog('disableLog');
-  ns.disableLog('clearLog');
-  ns.disableLog('asleep');
-  ns.disableLog('scan');
+  ns.disableLog('ALL');
+  // ns.disableLog('disableLog');
+  // ns.disableLog('clearLog');
+  // ns.disableLog('asleep');
+  // ns.disableLog('scan');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Contracts');
@@ -83,16 +96,21 @@ export async function main(ns: NS) {
   ns.moveTail(wWidth - xWidth, wHeight - xHeight - xBufferY - 190);
 
   // ******** Initialize (One Time Code)
-  let count = 0;
+  let searches = 0;
+  const contracts = new Contracts(ns);
 
   // ******** Primary (Loop Time Code)
   while (true) {
-    count += 1;
+    // Display & styling
     ns.clearLog();
-    // ******** Time and Ram
-    ns.print(`[Count] ${count}`);
-    attemptAllContracts(ns);
+    ns.print(`⏱️${searches}`);
+    const { found, attempted, solved, failed } = contracts;
+    ns.print(`📝${attempted} ✅${solved} ❌${failed} 🔎${found}`);
 
-    await ns.asleep(TIMECONTRACTS);
+    // ******** Find and solve
+    contracts.update();
+
+    searches += 1;
+    await ns.asleep(TIMECONTRACTS); // PUTBACK
   }
 }
