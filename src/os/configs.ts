@@ -3,27 +3,6 @@
 // Best Gym 10x Multiplier [Sector 12] - Powerhouse Gym
 // Best Infiltrate [Aevum] - ECorp
 
-/* Augments path could go
- * [x] Netburners - Hacknet
- * [x] Sector-12
- * [x] CyberSec (CSEC) - Milestone m1
- * [x] Tian Di Hui
- * [x] NiteSec (avmnite-02h) - Milestone [112.500k rep] m2
- * [x] Aevum (40m)
- * [x] The Black Hand (I.I.I.I) - Milestone [175.000k rep] m3
- * [ ] Chongqing
- * [ ] New Tokyo (Uneeded, but can do with Chongqing)
- * [ ] Ishima (Uneeded, but can do with Chongqing)
- * [ ] Clarke Inc (Aevum) 400k [H 225 Software Engineering] ? (ZB best rates)
- * [ ] Bachman & Associates (Aevum) 400k [H 225 Software Engineering] ?
- * [ ] NWO (Volhaven) 400k [H 250 IT Intern]
- * [x] Bitrunners (run4theh111z) - Milestone m4
- * [ ] OmniTek Incorporated (Volhaven) 400k [H 225 IT Intern]
- * [ ] Fulcrum Technologies (Aevum) Backdoor 1585 400k [H 225 IT Intern]
- * [ ] Daedalus [Augmentations: a / 30] | Money: m / $100.000b | Hacking: 2500]
- * [ ] w0rld_d43m0n [H 3000]
- */
-
 /*
  * Use this section to disable certain modules.
  * This can be useful for certain Bitnodes
@@ -45,12 +24,8 @@ export const MODULES: any = {};
 // These have been set for steady rampup, changes can cause errors
 export const CONFIGS: any = {
   ramReserve: 32, // 8GB reserved ram
-  moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
-  moneyRatio: {
-    // 50% 30% 20% (50% Essential, 30% life, 20% savings)
-    hostingMoneyRatio: 0.8, // 30% of money will be used on servers
-    savingsMoneyRatio: 0.2, // 20% of money will be used for savings
-  },
+  moneyReserve: 1e6, // 100000 * 1000000, // 1000000 1 Million,
+  moneyRatio: 0.2, // 20% of money will be used for savings
   shoppingPrices: {
     tor: 200e3, // 200 K
     ssh: 500e3, // 500 K
@@ -79,7 +54,7 @@ export const CONFIGS: any = {
     shareRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
   },
   hacknet: {
-    hnMoneyRatio: 0.2, // 50% of money will be used on hacknet
+    hnMoneyRatio: 0.2, // 20% of money will be used on hacknet
     hnBreakEvenTime: 2 * 60 * 60, // 2 hours in seconds
     hnTCount: 16, // 20 Soft Max (Real Max Infinity)
     hnTLevel: 200, // 200, // 200 (Real Max)
@@ -87,9 +62,10 @@ export const CONFIGS: any = {
     hnTCores: 16, // 16, // 16 (Real Max)
   },
   hosting: {
-    hostingTargetCount: 25, // 25 (Real Max)
-    hostingStartRam: 8,
-    hostingTargetRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
+    hMoneyRatio: 0.8, // 80% of money will be used on servers
+    hTCount: 25, // 25 (Real Max)
+    hSRam: 8, // Iniital ram purchase
+    hTRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
     hackSkim: 0.1, // 10%
@@ -115,6 +91,36 @@ export const CONFIGS: any = {
      */
     // hackDistance: 15, // How much above 50% of player level we will target
   },
+};
+
+// ******** Module Layout
+export const LAYOUT: any = {
+  // Width, Heigh, offset X, offsetY
+  bufferY: 52,
+  OS: {
+    xW: 200,
+    xH: 190,
+  },
+  CONTRACT: {
+    xW: 200,
+    xH: 90,
+    xOX: 0,
+    xOY: 190,
+  },
+  HACKNET: {
+    xW: 200,
+    xH: 90,
+    xOX: 0,
+    xOY: 190 + 90,
+  },
+  HOSTING: {
+    xW: 200,
+    xH: 120,
+    xOX: 0,
+    xOY: 190 + 90 + 90,
+  },
+  // MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
+  // MODULES.CORPORATIONS = false; // true will run a corporation (~100 GB) //FIXME:
 };
 
 // ******** OS PATHS
@@ -160,12 +166,8 @@ export const TIME: any = {};
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
   // TIME.CRIMES = 2 * 1000; // 2 second updates
   // TIME.STOCKS = 1 * 1000; // 1 second updates
-  TIME.TIMECONTRACTS = 2 * 60 * 1000; // 2 min updates
+  TIME.CONTRACTS = 2 * 60 * 1000; // 2 min updates
 })();
-
-// export const MINISAVE: any = {
-//   FILE: `${PATHS.TMP}/Active.txt`,
-// };
 
 // ******** PORTS CONFIGURATIONS
 export const PORTS: any = {};
@@ -173,6 +175,7 @@ export const PORTS: any = {};
   PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
   PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
   PORTS[(PORTS.HACKNET = 3)] = 'HACKNET';
+  PORTS[(PORTS.HOSTING = 4)] = 'HOSTING';
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves

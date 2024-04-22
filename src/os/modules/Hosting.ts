@@ -1,217 +1,216 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { ControlCache, PlayerCache } from '/os/modules/Cache';
-import { ControlInfo } from '/os/modules/Control';
-import { CONFIGS, TIME } from '/os/configs';
+import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
+import { ControlCache } from '/os/modules/Cache';
 import deployScripts from '/os/utils/deploy';
 /* eslint-enable */
 
+// ******** Globals
+const mReserve = CONFIGS.moneyReserve;
+const { hMoneyRatio, hTCount, hSRam, hTRam } = CONFIGS.hosting;
+
+// ******** HOSTING UTILITY FUNCTIONS
+function hMoney(ns: NS, r: number): number {
+  return (ns.getServerMoneyAvailable('home') - mReserve - r) * hMoneyRatio;
+}
+
+// ******** HOSTING CLASS
+export default class Hosting {
+  ns: NS;
+  done: boolean;
+  nodesMaxed: number;
+  ramTotal: number;
+  ramHighest: number;
+  shoppingList: Array<{
+    id: number;
+    name: string;
+    ram: number;
+    type: string;
+    msg: string;
+    cost: number;
+  }>;
+
+  // ******** CONSTRUCTOR
+  constructor(ns: NS) {
+    this.ns = ns;
+    this.done = false;
+    this.nodesMaxed = 0;
+    this.ramTotal = 0;
+    this.ramHighest = 0;
+    this.shoppingList = this.updateNodes;
+  }
+
+  // ******** METHODS
+  get nodesCount() {
+    return this.ns.getPurchasedServers().length;
+  }
+
+  get updateNodes() {
+    const nCount = this.nodesCount;
+    const s: any = [];
+    let nMaxed = 0;
+    let rTotal = 0;
+    let rHighest = 0;
+
+    // ******** NODE NEW
+    if (nCount < hTCount) {
+      s.push({
+        id: nCount,
+        name: `ps-${nCount}`,
+        ram: hSRam,
+        type: 'NEW',
+        msg: '💰 New',
+        cost: this.ns.getPurchasedServerCost(hSRam),
+      });
+    }
+
+    // ******** NODE EXISTING
+    this.ns.getPurchasedServers().forEach((h: string, i: number) => {
+      const node = {
+        id: i,
+        name: h,
+        ram: this.ns.getServerMaxRam(h),
+        type: 'MAX',
+        msg: `🔋 ${this.ns.formatRam(hTRam, 0)}`,
+        cost: 0,
+      };
+
+      if (node.ram >= hTRam) nMaxed += 1;
+      if (node.ram > rHighest) rHighest = node.ram;
+
+      if (node.ram < hTRam) {
+        node.type = 'RAM';
+        node.msg = `🌿 ${this.ns.formatRam(node.ram * 2, 0)}`;
+        node.cost = this.ns.getPurchasedServerUpgradeCost(h, node.ram * 2);
+        s.push(node);
+      }
+
+      rTotal += node.ram;
+    });
+
+    if (nMaxed >= hTCount) this.done = true;
+    this.nodesMaxed = nMaxed;
+    this.ramTotal = rTotal;
+    this.ramHighest = rHighest;
+    this.shoppingList = s.sort((a: any, b: any) => a.cost - b.cost);
+    return s;
+  }
+
+  async updatePorts() {
+    const portData = {
+      done: this.done,
+      nodesCount: this.nodesCount,
+      nodesMaxed: this.nodesMaxed,
+      ramTotal: this.ramTotal,
+      ramHighest: this.ramHighest,
+      // list: this.shoppingList, // NOTE: Add back for full shopping list
+    };
+    this.ns.clearPort(PORTS.HOSTING);
+    await this.ns.tryWritePort(PORTS.HOSTING, portData);
+  }
+
+  // ******** FUNCTIONS
+}
+
+// ******** Main function
 export async function main(ns: NS) {
   // ******** Setup
-  const xWidth = 220;
-  const xHeight = 440;
-  const xBufferx = 200; // Other panels
-  const xBufferY = 52; // Bottom terminal
+  const { bufferY } = LAYOUT;
+  const { xW, xH, xOX, xOY } = LAYOUT.HOSTING;
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
+  // ns.disableLog('ALL');
   ns.disableLog('disableLog');
   ns.disableLog('getServerMoneyAvailable');
   ns.disableLog('getServerMaxRam');
   ns.disableLog('purchaseServer');
-  ns.disableLog('asleep');
+  ns.disableLog('sleep');
   ns.disableLog('scp');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Hosting');
-  ns.resizeTail(xWidth, xHeight);
-  ns.moveTail(wWidth - xWidth - xBufferx, wHeight - xHeight - xBufferY);
+  ns.resizeTail(xW, xH);
+  ns.moveTail(wWidth - xW - xOX, wHeight - xH - bufferY - xOY);
 
-  // ******** Initialize
-  const { moneyReserve } = CONFIGS;
-  const { hostingMoneyRatio } = CONFIGS.moneyRatio;
-  const hostingSleepTime = TIME.HOSTING;
-  const { hostingTargetCount, hostingStartRam, hostingTargetRam } =
-    CONFIGS.hosting;
+  // ******** Initialize (One Time Code)
+  const hosting = new Hosting(ns);
 
-  let serverRam = hostingStartRam;
-
-  // function getReserve() {
-  //   const stage = ControlCache.read(ns, 'control')?.stage;
-  //   const sCount = ns.getPurchasedServers().length;
-
-  //   switch (stage) {
-  //     case 1: {
-  //       return CONFIGS.shoppingPrices.tor; // tor: 200e3, // 200 K
-  //     }
-  //     case 2: {
-  //       if (sCount < 4) {
-  //         return 0;
-  //       }
-  //       return CONFIGS.shoppingPrices.ssh; // ssh: 500e3, // 500 K
-  //     }
-  //     case 4: {
-  //       if (sCount < 8) {
-  //         return 0;
-  //       }
-  //       return CONFIGS.shoppingPrices.ftp; // ftp: 1.5e6, // 1.5 Million
-  //     }
-  //     case 6: {
-  //       return CONFIGS.shoppingPrices.smtp; // smtp: 5e6, // 5 Million
-  //     }
-  //     case 8: {
-  //       return CONFIGS.shoppingPrices.http; // http: 30e6, // 30 Million
-  //     }
-  //     case 10: {
-  //       return CONFIGS.shoppingPrices.sql; // sql: 250e6, // 250 Million
-  //     }
-  //     default: {
-  //       return 0;
-  //     }
-  //   }
-  // }
-
-  function getMoney(reserve: number) {
-    return (
-      (ns.getServerMoneyAvailable('home') - (moneyReserve + reserve)) *
-      hostingMoneyRatio
-    );
-  }
-
-  function updateShop(reserve: number) {
-    const shop = [];
-    const servers = ns.getPurchasedServers();
-    const serverCount = servers.length;
-
-    if (serverCount < hostingTargetCount) {
-      shop.push({
-        id: null,
-        cost: ns.getPurchasedServerCost(serverRam),
-        type: 'SERVER_NEW',
-        text: `server (${serverRam})`,
-      });
-    }
-
-    ns.print(`💸 ${ns.formatNumber(reserve, 1)}`);
-    ns.printf(' %2s %-5s %4s %5s ', 'ID', 'HOST', 'RAM', 'Cost');
-    servers
-      .map((hostname, index) => ({
-        id: index,
-        name: hostname,
-        ram: ns.getServerMaxRam(hostname),
-      }))
-      .filter((server) => server.ram < hostingTargetRam)
-      .forEach((existing) => {
-        shop.push({
-          id: existing.id,
-          name: existing.name,
-          cost: ns.getPurchasedServerUpgradeCost(
-            existing.name,
-            existing.ram * 2
-          ),
-          ram: existing.ram,
-          type: 'SERVER_RAM',
-          text: `server RAM (${existing.ram * 2})`,
-        });
-        ns.printf(
-          ' %2s %-5s %4s %5s ',
-          existing.id,
-          existing.name,
-          ns.formatRam(existing.ram, 0),
-          ns.formatNumber(
-            ns.getPurchasedServerUpgradeCost(existing.name, existing.ram * 2),
-            1
-          )
-        );
-      });
-
-    return shop.sort((a, b) => a.cost - b.cost);
-  }
-
-  // function buyServer(sCount: number, sRam: number) {
-  //   const serverID = sCount || 0;
-  //   const name = `ps-${serverID}`;
-  //   const ref = ns.purchaseServer(name, sRam);
-  //   return ref;
-  // }
-
-  // function buyServerRAM(server: any, sRam: number) {
-  //   const upgrade = server.ram * 2;
-  //   ns.upgradePurchasedServer(server.name, upgrade);
-  //   if (upgrade > sRam) {
-  //     serverRam = upgrade;
-  //   }
-  // }
-
-  // const nodes = ns.getPurchasedServers();
-  // const price = ns.getPurchasedServerCost(16);
-  // ns.print(nodes);
-  // ns.print(price);
-
-  const repeat = true;
-  while (repeat) {
+  // ******** Primary (Loop Time Code)
+  while (!hosting.done) {
     ns.clearLog();
+    // ******** Consts
     const control = ControlCache.read(ns, 'control');
-    const isShopHosting = control?.isShopHosting;
-    const isReserve = control?.isReserve;
-    const purchase = updateShop(isReserve);
+    const isShopHosting = control?.isShopHN || true;
+    const reserve = control?.isReserve || 0;
 
-    if (
-      purchase.length === 0 &&
-      ns.getPurchasedServers().length >= hostingTargetCount
-    ) {
-      // const past = ControlCache.read(ns, 'control');
-      // const control = ControlInfo.details(ns, past);
-      // control.isShopHosting = false;
-      // await ControlCache.update(ns, control);
-      return;
-    }
+    // ******** Display
+    const dStatus = isShopHosting ? '🟢' : '🟥';
+    const dNodesMax = `🖥️${hosting.nodesMaxed}`;
+    const dNodesCount = hosting.nodesCount;
+    const dReserve = `💸${ns.formatNumber(reserve, 1)}`;
+    const dRamTotal = `🔋${ns.formatRam(hosting.ramTotal, 1)}`;
+    const dRamHighest = `💎${ns.formatRam(hosting.ramHighest, 1)}`;
+    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hTCount} ${dReserve}`);
+    ns.print(`${dRamTotal} | ${dRamHighest}`);
 
+    // ******** Shopping Loop
     if (isShopHosting) {
-      if (purchase.length > 0 && getMoney(isReserve) > purchase[0].cost) {
-        purchase.forEach((next: any) => {
-          if (getMoney(isReserve) > next.cost) {
-            // ns.print(
-            //   ` Buying [${next.id ? next.id : 'New'}] ${
-            //     next.text
-            //   } | ${ns.formatNumber(next.cost, 2)}`
-            // );
+      const list = hosting.updateNodes;
+      await hosting.updatePorts();
+      if (hosting.done) ns.exit();
 
-            switch (next.type) {
-              case 'SERVER_NEW': {
-                const serverID = ns.getPurchasedServers().length || 0;
-                const name = `ps-${serverID}`;
-                const ref = ns.purchaseServer(name, serverRam);
-                deployScripts(ns, name);
-                break;
-              }
-              case 'SERVER_RAM': {
-                // buyServerRAM();
-                const upgrade = next.ram * 2;
-                ns.upgradePurchasedServer(next.name, upgrade);
-                if (upgrade > serverRam) {
-                  serverRam = upgrade;
-                }
-                break;
-              }
-              default: {
-                ns.print('Could not detect type of purchase');
-              }
-            }
-          } else if (purchase.length > 0) {
-            const next = purchase[0];
-            // ns.print(
-            //   ` Saving [${next.id ? next.id : 'New'}] ${
-            //     next.text
-            //   } | ${ns.formatNumber(next.cost, 2)}`
-            // );
-          }
-        });
+      // Process
+      const { name, ram, type, msg, cost } = list[0];
+      if (Number.isFinite(cost) && cost) {
+        // Styling
+        const price = ns.formatNumber(cost - hMoney(ns, reserve), 1);
+        ns.print(`${name} ${msg} (${price})`);
+
+        // Wait if we cant affort it
+        while (hMoney(ns, reserve) < cost) {
+          await ns.sleep(TIME.HOSTING);
+        }
+
+        // Buy it if we can
+        switch (type) {
+          case 'NEW':
+            ns.purchaseServer(name, ram);
+            deployScripts(ns, name);
+            break;
+          case 'RAM':
+            ns.upgradePurchasedServer(name, ram * 2);
+            break;
+          default:
+            break;
+        }
       }
     }
-    // const servers = ns.getPurchasedServers();
-    // servers.forEach((s) => {
-    //   ns.print(s);
-    // });
-    await ns.asleep(hostingSleepTime);
+
+    await ns.sleep(TIME.HOSTING);
   }
 }
+
+/* ******** SAMPLE HOSTING
+ *  This can be read on port data. List needs to be uncommented for full
+ * sampleHosting = {
+ *    done: false,         // [false, true] if hosting maxed to config
+ *    nodesMaxed: 10,      // sum of all maxed nodes (ram)
+ *    ramTotal: 45472,     // sum of all purchased ram
+ *    ramHighest: 4096,    // highets server ram available (hwgw batching)
+ *                         // Sorted shoping list of next best purchase
+ *    list: [
+ *      {
+ *        id: 14,          // ID of the node purchase relates to
+ *        name: "ps-12",   // Name of the server
+ *        ram: 32,         // Current level or ram
+ *        type: 'RAM',     // [NEW, RAM] type of purcahse
+ *        msg: '🌿 64GB',  // Display msg. (current * 2)
+ *        cost: 601.34,    // Cost of the upgrade
+ *      },
+ *      {
+ *        type: 'NEW',
+ *        msg: '💰 New',
+ *      },
+ *    ],
+ *  };
+ */

@@ -1,12 +1,9 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { TIME } from '/os/configs';
+import { TIME, LAYOUT } from '/os/configs';
 import { ServerInfo } from '/os/modules/Server';
 import { solvers } from '/os/data/contracts';
 /* eslint-enable */
-
-// ******** Globals
-const { TIMECONTRACTS } = TIME;
 
 // ******** CONTRACTS CLASS
 export default class Contracts {
@@ -78,10 +75,9 @@ export default class Contracts {
 
 // ******** Main function
 export async function main(ns: NS) {
+  const { bufferY } = LAYOUT;
+  const { xW, xH, xOX, xOY } = LAYOUT.CONTRACT;
   // ******** Setup
-  const xWidth = 200;
-  const xHeight = 90; // OS is 190
-  const xBufferY = 52; // Bottom terminal
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('ALL');
@@ -92,8 +88,8 @@ export async function main(ns: NS) {
   ns.clearLog();
   ns.tail();
   ns.setTitle('Contracts');
-  ns.resizeTail(xWidth, xHeight);
-  ns.moveTail(wWidth - xWidth, wHeight - xHeight - xBufferY - 190);
+  ns.resizeTail(xW, xH);
+  ns.moveTail(wWidth - xW - xOX, wHeight - xH - bufferY - xOY);
 
   // ******** Initialize (One Time Code)
   let searches = 0;
@@ -101,16 +97,15 @@ export async function main(ns: NS) {
 
   // ******** Primary (Loop Time Code)
   while (true) {
-    // Display & styling
+    // ******** Find and solve
+    const { found, attempted, solved, failed } = contracts;
+    contracts.update();
+    // ******** Display & stats
     ns.clearLog();
     ns.print(`⏱️${searches}`);
-    const { found, attempted, solved, failed } = contracts;
     ns.print(`📝${attempted} ✅${solved} ❌${failed} 🔎${found}`);
 
-    // ******** Find and solve
-    contracts.update();
-
     searches += 1;
-    await ns.asleep(TIMECONTRACTS); // PUTBACK
+    await ns.asleep(TIME.CONTRACTS);
   }
 }
