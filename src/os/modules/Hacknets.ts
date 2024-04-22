@@ -1,8 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { PORTS } from '/os/configs';
+import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
 import { ControlCache } from '/os/modules/Cache';
-import { CONFIGS, TIME } from '/os/configs';
 import { getBitNodeMults } from '/os/modules/BitNodes';
 /* eslint-enable */
 
@@ -37,7 +36,7 @@ export default class Hacknets {
   pMultBN: number;
   nodesLevel: number;
   nodesMaxed: number;
-  shoppinglist: Array<{
+  shoppingList: Array<{
     id: number;
     type: string;
     cost: number;
@@ -53,7 +52,7 @@ export default class Hacknets {
     this.pMultBN = getBitNodeMults(cBN, lvl).HacknetNodeMoney || 1;
     this.nodesLevel = 0;
     this.nodesMaxed = 0;
-    this.shoppinglist = [];
+    this.shoppingList = [];
   }
 
   // ******** METHODS
@@ -62,7 +61,7 @@ export default class Hacknets {
   }
 
   get list() {
-    return this.shoppinglist;
+    return this.shoppingList;
   }
 
   get updateNodes() {
@@ -123,7 +122,7 @@ export default class Hacknets {
     if (nMaxed >= hnTCount) this.done = true;
     this.nodesLevel = nLevel;
     this.nodesMaxed = nMaxed;
-    this.shoppinglist = s.sort((a: any, b: any) => a.cost - b.cost);
+    this.shoppingList = s.sort((a: any, b: any) => a.cost - b.cost);
     return s;
   }
 
@@ -133,7 +132,7 @@ export default class Hacknets {
       nodesCount: this.nodesCount,
       nodesLevel: this.nodesLevel,
       nodesMaxed: this.nodesMaxed,
-      // list: this.shoppinglist, // NOTE: Add back for full shopping list
+      // list: this.shoppingList, // NOTE: Add back for full shopping list
     };
     this.ns.clearPort(PORTS.HACKNET);
     await this.ns.tryWritePort(PORTS.HACKNET, portdata);
@@ -151,9 +150,8 @@ export default class Hacknets {
 // ******** Main function
 export async function main(ns: NS) {
   // ******** Setup
-  const xWidth = 200;
-  const xHeight = 90;
-  const xBufferY = 52; // Bottom terminal
+  const { bufferY } = LAYOUT;
+  const { xW, xH, xOX, xOY } = LAYOUT.HACKNET;
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('disableLog');
@@ -162,8 +160,8 @@ export async function main(ns: NS) {
   ns.clearLog();
   ns.tail();
   ns.setTitle('Hacknet');
-  ns.resizeTail(xWidth, xHeight);
-  ns.moveTail(wWidth - xWidth, wHeight - xHeight - xBufferY - 190 - 90);
+  ns.resizeTail(xW, xH);
+  ns.moveTail(wWidth - xW - xOX, wHeight - xH - bufferY - xOY);
 
   // ******** Initialize (One Time Code)
   if (ns.hacknet.numNodes() === 0) {
@@ -184,7 +182,7 @@ export async function main(ns: NS) {
     const dNodesMax = `👾${hacknet.nodesMaxed}`;
     const dNodesCount = hacknet.nodesCount;
     const dReserve = `💸${ns.formatNumber(reserve, 1)}`;
-    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hnTCount} ${dReserve}}`);
+    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hnTCount} ${dReserve}`);
 
     // ******** Shopping Loop
     if (isShopHN) {

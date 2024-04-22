@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { TIME, CORE, MODULES, CACHE } from '/os/configs';
+import { TIME, CORE, MODULES, CACHE, LAYOUT } from '/os/configs';
 import { launch } from '/os/utils/launch';
 import { ControlCache, PlayerCache } from '/os/modules/Cache';
 import { formatTime } from '/os/utils/formatTime';
@@ -66,8 +66,8 @@ const updateCorporations = async (ns: NS) => {
 };
 
 export async function main(ns: NS) {
-  const xWidth = 200;
-  const xHeight = 190;
+  const { bufferY } = LAYOUT;
+  const { xW, xH } = LAYOUT.OS;
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('disableLog');
@@ -75,9 +75,9 @@ export async function main(ns: NS) {
   ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
-  ns.setTitle('OS Control');
-  ns.resizeTail(xWidth, xHeight);
-  ns.moveTail(wWidth - xWidth, wHeight - xHeight - 52);
+  ns.setTitle('OS');
+  ns.resizeTail(xW, xH);
+  ns.moveTail(wWidth - xW, wHeight - xH - bufferY);
 
   // ******** Initialize
 
