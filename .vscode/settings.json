@@ -37,5 +37,6 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "prettier.printWidth": 80
+  // "prettier.printWidth": 80,
+  "eslint.execArgv": null
 }

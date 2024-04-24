@@ -68,16 +68,17 @@ export const CONFIGS: any = {
     hTRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
-    hackSkim: 0.1, // 10%
-    hackBuffer: 1000, // Time in ms between scripts
-    hackDelay: 3000, // Delay in ms between batches
+    xSkim: 0.1, // 10%
+    xBuffer: 250, // Time in ms between scripts
+    xDelay: 1000, // Delay in ms between batches
     /* Max batches is calculated based on 1 minute intervals with short hack times
      * this ensures we do not lockup ram on long standing processess
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
-    hackBatches: 128, // 128, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 10, // Only work on 25 servers
+    xBatches: 128, // Batch 128 hack, weak, grow, weak
+    xTargets: 10, // Only work on 10 servers
+    xPrep: 8, // Have at least 8 targets prepared before swapping
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
     hackMinBatches: 5, // Min number of batches before switching
     hackSwap: 3, // How many targets to swap at once (make less than min batches)
@@ -96,28 +97,37 @@ export const CONFIGS: any = {
 // ******** Module Layout
 export const LAYOUT: any = {
   // Width, Heigh, offset X, offsetY
+  topBar: 38,
+  textHeight: 24,
+  bufferX: 58,
   bufferY: 52,
   OS: {
     xW: 200,
-    xH: 190,
+    xH: 158,
   },
   CONTRACT: {
     xW: 200,
-    xH: 90,
+    xH: 86,
     xOX: 0,
-    xOY: 190,
+    xOY: 158,
   },
   HACKNET: {
     xW: 200,
-    xH: 90,
+    xH: 86,
     xOX: 0,
-    xOY: 190 + 90,
+    xOY: 158 + 86,
   },
   HOSTING: {
     xW: 200,
-    xH: 120,
+    xH: 110,
     xOX: 0,
-    xOY: 190 + 90 + 90,
+    xOY: 158 + 86 + 86,
+  },
+  PUPPETEER: {
+    xW: 1040,
+    xH: 326,
+    xOX: 220,
+    xOY: 0,
   },
   // MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
   // MODULES.CORPORATIONS = false; // true will run a corporation (~100 GB) //FIXME:
@@ -162,6 +172,7 @@ export const TIME: any = {};
   TIME.HACKNET = 3 * 1000; // 3 second updates
   TIME.HOSTING = 10 * 1000; // 10 second updates
   TIME.SERVERS = 10 * 1000; // 10 second updates
+  TIME.PUPPETEER = 1 * 1000; // 1 second updates
   // TIME.FACTIONS = 30 * 1000; // 30 second updates
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
   // TIME.CRIMES = 2 * 1000; // 2 second updates
@@ -176,10 +187,10 @@ export const PORTS: any = {};
   PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
   PORTS[(PORTS.HACKNET = 3)] = 'HACKNET';
   PORTS[(PORTS.HOSTING = 4)] = 'HOSTING';
+  PORTS[(PORTS.PUPPETEER = 5)] = 'PUPPETEER'; // TODO: Add servers
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
-  // PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
   // PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
   // PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
   // PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
