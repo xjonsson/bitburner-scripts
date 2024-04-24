@@ -25,9 +25,9 @@ const rowStyle =
   '%4s ' + // Meak Threads (Weak after Grow)
   '%7s ' + // Action Time
   '%5s ' + // Batch Ram
-  '%4s '; // VPRS (Value Per Ram Second)
-// '%4s ' + // HWGW (Batches)
-// '%5s '; // Action
+  '%4s ' + // VPRS (Value Per Ram Second)
+  // '%4s ' + // HWGW (Batches)
+  '%5s '; // Action
 
 function updateHeaders(ns: NS) {
   ns.printf(
@@ -46,9 +46,9 @@ function updateHeaders(ns: NS) {
     'Meak', // Meak Threads (Weak after Grow)
     'Time', // Action Time
     'Batch', // Batch Ram
-    'VPRS' // VPRS (Value Per Ram Second)
+    'VPRS', // VPRS (Value Per Ram Second)
     // 'HWGW', // HWGW (Batches)
-    // 'Step' // Action
+    'Step' // Action
   );
 }
 
@@ -96,18 +96,18 @@ export async function main(ns: NS) {
         }
 
         let mPrepped = '✅';
-        let mHack = ns.formatNumber(st.hThreads, 0);
-        let mWeak = ns.formatNumber(st.wThreads, 0);
-        let mGrow = ns.formatNumber(st.gThreads, 0);
-        let mWeakAG = ns.formatNumber(st.wagThreads, 0);
-        let mRam = ns.formatRam(st.bRam, 0);
+        let mHack = ns.formatNumber(st.x.hThreads, 0);
+        let mWeak = ns.formatNumber(st.x.wThreads, 0);
+        let mGrow = ns.formatNumber(st.x.gThreads, 0);
+        let mWeakAG = ns.formatNumber(st.x.wagThreads, 0);
+        let mRam = ns.formatRam(st.x.bRam, 0);
 
         if (st.status.action !== X.HACK.A) {
           mPrepped = '❌';
           mHack = '';
-          mWeak = st.pwThreads > 0 ? ns.formatNumber(st.pwThreads, 0) : '';
-          mGrow = st.pgThreads > 0 ? ns.formatNumber(st.pgThreads, 0) : '';
-          mWeakAG = ns.formatNumber(st.wagThreads, 0);
+          mWeak = st.x.pwThreads > 0 ? ns.formatNumber(st.x.pwThreads, 0) : '';
+          mGrow = st.x.pgThreads > 0 ? ns.formatNumber(st.x.pgThreads, 0) : '';
+          mWeakAG = ns.formatNumber(st.x.wagThreads, 0);
           mRam = '';
         }
 
@@ -119,17 +119,17 @@ export async function main(ns: NS) {
           ns.formatNumber(st.money.max, 0), // Cash
           mMoney, // Cash %
           mSec, // Sec
-          st.hackChance < 1 ? ns.formatNumber(st.hackChance, 1) : '', // Chance
+          st.x.hackChance < 1 ? ns.formatNumber(st.x.hackChance, 1) : '', // Chance
           mPrepped, // Prep
           mHack, // Hack Threads
           mWeak, // Weak Threads
           mGrow, // Grow Threads
           mWeakAG, // Meak Threads (Weak after Grow)
-          formatTime(ns, st.wTime), // Action Time
+          formatTime(ns, st.x.wTime), // Action Time
           mRam, // Batch Ram
-          ns.formatNumber(st.bValue, 0) // VPRS (Value Per Ram Second)
-          // 'HWGW', // HWGW (Batches)
-          // st.status.action // Action
+          ns.formatNumber(st.x.bValue, 0), // VPRS (Value Per Ram Second)
+          // st.batches, // 'HWGW', // HWGW (Batches)
+          st.status.action // Action
         );
       });
     }

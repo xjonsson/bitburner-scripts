@@ -125,7 +125,7 @@ export const LAYOUT: any = {
   },
   PUPPETEER: {
     xW: 1040,
-    xH: 326,
+    xH: 566, // 326,
     xOX: 220,
     xOY: 0,
   },
