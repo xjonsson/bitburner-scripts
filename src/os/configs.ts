@@ -78,7 +78,7 @@ export const CONFIGS: any = {
      */
     xBatches: 128, // Batch 128 hack, weak, grow, weak
     xTargets: 10, // Only work on 10 servers
-    xPrep: 8, // Have at least 8 targets prepared before swapping
+    xPrimed: 8, // Have at least 8 targets prepared before swapping
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
     hackMinBatches: 5, // Min number of batches before switching
     hackSwap: 3, // How many targets to swap at once (make less than min batches)
