@@ -18,6 +18,7 @@ export const X = {
   GROW: { A: 'GROW', I: '🌿' },
   WAIT: { A: 'WAIT', I: '⏱️' },
   RISK: { A: 'RISK', I: '🎲' },
+  ERROR: { A: 'ERROR', I: '❌' },
 };
 
 // ******** SERVER TARGET UTILITY FUNCTIONS
@@ -139,15 +140,11 @@ export class ServerTarget extends Server {
   }
 
   setUpdate(delay: number) {
-    if (delay < 10 * 1000) {
-      this.updateAt = performance.now() + 10 * 1000;
-    } else {
-      this.updateAt = performance.now() + delay;
-    }
+    this.updateAt = performance.now() + delay;
   }
 
   // ******** Functions
-  async update() {
+  update() {
     // Consts & Calculations
     const { hostname, pMult, pMultBN } = this;
     const { now: sNow, min: sMin } = this.sec;
@@ -182,8 +179,11 @@ export class ServerTarget extends Server {
     else if (hChance < 1) this.status = { action: X.RISK.A, icon: X.RISK.I };
     else if (sNow <= sMin && mNow >= mMax && hChance >= 1) {
       this.status = { action: X.HACK.A, icon: X.HACK.I };
+    } else if (Number.isNaN(this.updateAt)) {
+      this.status = { action: X.ERROR.A, icon: X.ERROR.I };
     } else this.status = { action: X.WAIT.A, icon: X.WAIT.I };
 
-    this.updateAt = performance.now();
+    // this.updateAt = performance.now();
+    return this;
   }
 }

@@ -69,8 +69,8 @@ export const CONFIGS: any = {
   },
   hacking: {
     xSkim: 0.1, // 10%
-    xBuffer: 250, // Time in ms between scripts
-    xDelay: 1000, // Delay in ms between batches
+    xBuffer: 1000, // Time in ms between scripts
+    xDelay: 3000, // Delay in ms between batches
     /* Max batches is calculated based on 1 minute intervals with short hack times
      * this ensures we do not lockup ram on long standing processess
      * while still allowing for long value hacks and generate smaller value quick cash
