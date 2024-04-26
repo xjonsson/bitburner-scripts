@@ -76,7 +76,7 @@ export const CONFIGS: any = {
      * while still allowing for long value hacks and generate smaller value quick cash
      * this prevents situations where you need to wait 30m for a large windfall
      */
-    xBatches: 128, // Batch 128 hack, weak, grow, weak
+    xBatches: 2, // 128, // Batch 128 hack, weak, grow, weak
     xTargets: 10, // Only work on 10 servers
     xPrimed: 8, // Have at least 8 targets prepared before swapping
     hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)

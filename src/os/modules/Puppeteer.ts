@@ -69,9 +69,13 @@ function updateRow(ns: NS, st: ServerTarget, now: number) {
   let mGrow = ns.formatNumber(st.x.gThreads, 0);
   let mWeakAG = ns.formatNumber(st.x.wagThreads, 0);
   let mRam = ns.formatRam(st.x.bRam, 0);
+  let mTime = formatTime(ns, st.x.wTime);
 
   if (mA === X.WEAK.A) mSec = `+${ns.formatNumber(sNow - sMin, 1)}`;
-  if (mA === X.GROW.A) mMoney = ns.formatPercent(mNow / mMax, 0);
+  if (mA === X.GROW.A) {
+    mMoney = ns.formatPercent(mNow / mMax, 0);
+    mTime = formatTime(ns, st.x.gTime);
+  }
   if (mA !== X.HACK.A) {
     mPrepped = '❌';
     mHack = '';
@@ -95,7 +99,7 @@ function updateRow(ns: NS, st: ServerTarget, now: number) {
     mWeak, // Weak Threads
     mGrow, // Grow Threads
     mWeakAG, // Meak Threads (Weak after Grow)
-    formatTime(ns, st.x.wTime), // Action Time
+    mTime, // Action Time
     mRam, // Batch Ram
     ns.formatNumber(st.x.bValue, 0), // VPRS (Value Per Ram Second)
     st.batches, // > 0 ? st.batches : '', // HWGW (Batches)
@@ -323,19 +327,25 @@ export default class Puppeteer {
               const nhTime = hTime + dBuff * xDelay;
               nhT = rhThreads > nhT ? nhT : rhThreads;
               if (nhT > 0) {
-                this.ns.exec(
-                  xHack,
-                  n.hostname,
-                  nhT,
-                  st.hostname,
-                  false,
-                  nhTime
-                );
+                // this.ns.exec(
+                //   xHack,
+                //   n.hostname,
+                //   nhT,
+                //   st.hostname,
+                //   false,
+                //   nhTime
+                // );
                 rhThreads -= nhT;
                 fBatch = true;
-                // this.ns.tprint(
-                //   `Batch: [${dBuff}]${n.hostname} fired ${nhT} Hack threads (${rhThreads}) Remain`
-                // );
+                this.ns.tprint(
+                  `Batch: [${dBuff}]${
+                    n.hostname
+                  } fired ${nhT} HACK (${rhThreads}) left on ${
+                    st.hostname
+                  } [${formatTime(this.ns, st.x.hTime)}|${dBuff}|${
+                    (dBuff * xDelay) / 1000
+                  }s] ${formatTime(this.ns, nhTime - sTime)}`
+                );
               }
             }
 
@@ -345,19 +355,25 @@ export default class Puppeteer {
               const nwTime = wTime + dBuff * xDelay;
               nwT = rwThreads > nwT ? nwT : rwThreads;
               if (nwT > 0) {
-                this.ns.exec(
-                  xWeak,
-                  n.hostname,
-                  nwT,
-                  st.hostname,
-                  false,
-                  nwTime
-                );
+                // this.ns.exec(
+                //   xWeak,
+                //   n.hostname,
+                //   nwT,
+                //   st.hostname,
+                //   false,
+                //   nwTime
+                // );
                 rwThreads -= nwT;
                 fBatch = true;
-                // this.ns.tprint(
-                //   `Batch: [${dBuff}]${n.hostname} fired ${nwT} Weak threads (${rwThreads}) Remain`
-                // );
+                this.ns.tprint(
+                  `Batch: [${dBuff}]${
+                    n.hostname
+                  } fired ${nwT} WEAK (${rwThreads}) left on ${
+                    st.hostname
+                  } [${formatTime(this.ns, st.x.wTime)}|${dBuff}|${
+                    (dBuff * xDelay) / 1000
+                  }s] ${formatTime(this.ns, nwTime - sTime)}`
+                );
               }
             }
 
@@ -367,19 +383,25 @@ export default class Puppeteer {
               const ngTime = gTime + dBuff * xDelay;
               ngT = rwThreads > ngT ? ngT : rgThreads;
               if (ngT > 0) {
-                this.ns.exec(
-                  xGrow,
-                  n.hostname,
-                  ngT,
-                  st.hostname,
-                  false,
-                  ngTime
-                );
+                // this.ns.exec(
+                //   xGrow,
+                //   n.hostname,
+                //   ngT,
+                //   st.hostname,
+                //   false,
+                //   ngTime
+                // );
                 rgThreads -= ngT;
                 fBatch = true;
-                // this.ns.tprint(
-                //   `Batch: [${dBuff}]${n.hostname} fired ${ngT} Grow threads (${rgThreads}) Remain`
-                // );
+                this.ns.tprint(
+                  `Batch: [${dBuff}]${
+                    n.hostname
+                  } fired ${ngT} GROW (${rgThreads}) left on ${
+                    st.hostname
+                  } [${formatTime(this.ns, st.x.gTime)}|${dBuff}|${
+                    (dBuff * xDelay) / 1000
+                  }s] ${formatTime(this.ns, ngTime - sTime)}`
+                );
               }
             }
 
@@ -389,19 +411,25 @@ export default class Puppeteer {
               const nwagTime = wagTime + dBuff * xDelay;
               nwagT = rwagThreads > nwagT ? nwagT : rwagThreads;
               if (nwagT > 0) {
-                this.ns.exec(
-                  xWeak,
-                  n.hostname,
-                  nwagT,
-                  st.hostname,
-                  false,
-                  nwagTime
-                );
+                // this.ns.exec(
+                //   xWeak,
+                //   n.hostname,
+                //   nwagT,
+                //   st.hostname,
+                //   false,
+                //   nwagTime
+                // );
                 rwagThreads -= nwagT;
                 fBatch = true;
-                // this.ns.tprint(
-                //   `Batch: [${dBuff}]${n.hostname} fired ${nwagT} Weak after threads (${rwagThreads}) Remain`
-                // );
+                this.ns.tprint(
+                  `Batch: [${dBuff}]${
+                    n.hostname
+                  } fired ${nwagT} WEAKag (${rwagThreads}) left on ${
+                    st.hostname
+                  } [${formatTime(this.ns, st.x.wTime)}|${dBuff}|${
+                    (dBuff * xDelay) / 1000
+                  }s] ${formatTime(this.ns, nwagTime - sTime)}`
+                );
               }
             }
 
@@ -417,6 +445,15 @@ export default class Puppeteer {
               rwagThreads = wagThreads;
               pBatches -= 1;
               st.setBatches = dBuff;
+              this.ns.tprint(
+                `Batch: [${dBuff}] on ${st.hostname} [${formatTime(
+                  this.ns,
+                  st.x.wTime
+                )}|1s|${(dBuff * xDelay) / 1000}s|1s|3s] ${formatTime(
+                  this.ns,
+                  st.x.wTime + xDelay + dBuff * xDelay + 3000
+                )}`
+              );
               dBuff += 1;
               fBatch = true;
             }
@@ -449,8 +486,15 @@ export default class Puppeteer {
           let nwThreads = Math.floor(n.ramNow / xWeakRam);
           nwThreads = rwThreads > nwThreads ? nwThreads : rwThreads;
           if (nwThreads > 0) {
-            this.ns.exec(xWeak, n.id, nwThreads, st.hostname, false, dTime); // FIXME:
+            // this.ns.exec(xWeak, n.id, nwThreads, st.hostname, false, dTime);
             rwThreads -= nwThreads;
+            this.ns.tprint(
+              `${n.id} fired ${nwThreads} pWEAK (${rwThreads}) left on ${
+                st.hostname
+              } [${formatTime(this.ns, st.x.wTime)}|${
+                (xDelay * 3) / 1000
+              }s] ${formatTime(this.ns, st.x.wTime + xDelay * 3)}`
+            );
             fWeak = true;
           }
           if (rwThreads <= 0) break;
@@ -478,8 +522,15 @@ export default class Puppeteer {
           let ngThreads = Math.floor(n.ramNow / xGrowRam);
           ngThreads = rgThreads > ngThreads ? ngThreads : rgThreads;
           if (ngThreads > 0) {
-            this.ns.exec(xGrow, n.id, ngThreads, st.hostname, false, dTime);
+            // this.ns.exec(xGrow, n.id, ngThreads, st.hostname, false, dTime);
             rgThreads -= ngThreads;
+            this.ns.tprint(
+              `${n.id} fired ${ngThreads} pGROW (${rgThreads}) left on ${
+                st.hostname
+              } [${formatTime(this.ns, st.x.gTime)}|${
+                (xDelay * 3) / 1000
+              }s] ${formatTime(this.ns, st.x.gTime + xDelay * 3)}`
+            );
             fGrow = true;
           }
           if (rgThreads <= 0) break;
@@ -515,6 +566,7 @@ export async function main(ns: NS) {
 
   // ******** Initialize (One Time Code)
   let cLevel = -1;
+  let dTimer = 0; // FIXME:
   // console.profile('Puppeteer'); // FIXME:
   const puppeteer = new Puppeteer(ns);
   // console.time('Puppeteer :: updateTargets'); // FIXME:
@@ -547,7 +599,7 @@ export async function main(ns: NS) {
     const mRamNow = ns.formatRam(nRamNow, 1);
     const mRamMax = ns.formatRam(nRamMax, 1);
     const mStats = `🔋${mRamNow}/${mRam} | 💎${mRamMax}`;
-    ns.print(`[Time] ${formatTime(ns, now - start)} | ${mStats}`);
+    ns.print(`[Time] ${formatTime(ns, now - start)} | ${mStats} *${dTimer}`); // FIXME:
     updateHeaders(ns);
 
     const { hacking: pLevel } = ns.getPlayer().skills;
@@ -555,6 +607,11 @@ export async function main(ns: NS) {
     if (pLevel > cLevel) {
       cLevel = pLevel;
       await puppeteer.updateTargets();
+    }
+
+    if (dTimer >= 24) {
+      await puppeteer.updateTargets(); // FIXME:
+      dTimer = 0;
     }
 
     // ns.print('===== DEBUG =====');
@@ -609,6 +666,8 @@ export async function main(ns: NS) {
     }
     // console.timeEnd('Puppeteer :: DisplayTargets'); // FIXME:
     // profiler += 1; // FIXME:
+
+    dTimer += 1; // FIXME:
 
     await ns.asleep(TIME.PUPPETEER);
   }
