@@ -125,7 +125,7 @@ export const LAYOUT: any = {
   },
   PUPPETEER: {
     xW: 1040,
-    xH: 566, // 326,
+    xH: (CONFIGS.hacking.xTargets + 2) * 24 + 38, // 326,
     xOX: 220,
     xOY: 0,
   },
@@ -153,7 +153,7 @@ export const CORE: any = {};
   CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
   CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
   CORE.CONTRACTS = `${PATHS.MODULES}/Contract.js`;
-  CORE.PUPPETEER = `/debug.js`;
+  CORE.PUPPETEER = `${PATHS.MODULES}/Puppeteer.js`;
   CORE.CORPORATIONS = `/dCorps.js`;
   // CORE.GANGS = `/debug.js`;
 })();

@@ -167,7 +167,7 @@ export class ServerTarget extends Server {
     this.x.bRam = bRam;
     this.x.bValue =
       (mMax * xSkim) / ((hTime * 4) / 1000) / (bRam / ((hTime * 4) / 1000));
-    this.batches = 0;
+    // this.batches = 0;
 
     if (sNow > sMin) this.status = { action: X.WEAK.A, icon: X.WEAK.I };
     else if (mNow < mMax) this.status = { action: X.GROW.A, icon: X.GROW.I };

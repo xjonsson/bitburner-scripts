@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
+import { CONFIGS, TIME, PORTS, LAYOUT, DEPLOY } from '/os/configs';
 import { Server, ServerInfo } from '/os/modules/Server';
 import { ServerTarget, X } from '/os/modules/ServerTarget';
 import { formatTime } from '/os/utils/formatTime';
@@ -8,6 +8,8 @@ import { formatTime } from '/os/utils/formatTime';
 
 // ******** Globals
 const { xBuffer, xDelay, xBatches, xTargets, xPrimed } = CONFIGS.hacking;
+const { xHack, xWeak, xGrow } = DEPLOY;
+const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
 
 // ******** Styling
 const rowStyle =
@@ -96,17 +98,28 @@ function updateRow(ns: NS, st: ServerTarget, now: number) {
     formatTime(ns, st.x.wTime), // Action Time
     mRam, // Batch Ram
     ns.formatNumber(st.x.bValue, 0), // VPRS (Value Per Ram Second)
-    st.batches > 0 ? st.batches : '', // HWGW (Batches)
+    st.batches, // > 0 ? st.batches : '', // HWGW (Batches)
     mA, // Action
     mUpdate // Update
   );
 }
 
-// ******** PUPPETEER UTILITY FUNCTIONS
+// ******** PUPPETEER INTERFACES
+interface SNode {
+  id: string;
+  ramMax: number;
+  ramNow: number;
+}
+
 interface SFocus {
   id: string;
   value: number;
   primed: boolean;
+}
+
+// ******** PUPPETEER UTILITY FUNCTIONS
+function cThreads(ram: number, script = 1.6): number {
+  return Math.floor(ram / script);
 }
 
 // ******** PUPPETEER CLASS
@@ -118,6 +131,7 @@ export default class Puppeteer {
   nodes: Array<{ hostname: string; ramMax: number; ramNow: number }>;
   nRam: number;
   nRamNow: number;
+  nRamMax: number;
   targets: Array<any>; // FIXME:
   tPrimed: Array<SFocus>;
   tNext: Array<SFocus>;
@@ -135,13 +149,13 @@ export default class Puppeteer {
     // Nodes
     this.nRam = 0;
     this.nRamNow = 0;
-    this.nodes = this.updateNodes();
+    this.nRamMax = 0;
+    this.nodes = []; // this.updateNodes();
 
     // Targets
-    // this.targets = this.updateTargets();
     this.targets = [];
     this.tPrimed = [];
-    this.tNext = [];
+    this.tNext = [{ id: 'n00dles', value: -1, primed: false }];
   }
 
   // ******** METHODS
@@ -160,16 +174,18 @@ export default class Puppeteer {
     return { targetHosts: t, nodeHosts: n };
   }
 
-  updateNodes() {
+  updateNodes(): SNode[] {
     let ram = 0;
     let ramNow = 0;
+    let ramMax = 0;
     const n = this.nHosts
       .map((h: string) => {
         const s = ServerInfo.details(this.ns, h);
         ram += s.ram.max;
         ramNow += s.ram.now;
+        if (s.ram.max > ramMax) ramMax = s.ram.max;
         return {
-          hostname: s.hostname,
+          id: s.hostname,
           ramMax: s.ram.max,
           ramNow: s.ram.now,
         };
@@ -178,55 +194,14 @@ export default class Puppeteer {
 
     this.nRam = ram;
     this.nRamNow = ramNow;
+    this.nRamMax = ramMax;
     return n;
   }
 
-  // FIXME: Make async again
-  async updateTargets(_targets = ['n00dles']) {
-    const targets = this.tHosts
-      .reduce((ts: ServerTarget[], h: string) => {
-        const st = new ServerTarget(this.ns, h);
-        if (st.isTarget) ts.push(st);
-        return ts;
-      }, [])
-      .sort((a: ServerTarget, b: ServerTarget) => b.x.bValue - a.x.bValue);
-    // .slice(0, xTargets); // FIXME:
-    this.targets = targets;
-    await this.updatePorts(); // FIXME:
-    // this.updatePorts();
-    return targets;
-  }
-
-  // FIXME: Make async again
-  async updatePorts() {
-    const targets = this.targets.map((st: ServerTarget) => {
-      const { ns, pMult, pMultBN, ...t } = st; // Strips NS but also functions
-      return t;
-    });
-    const portData = {
-      targetCount: targets.length,
-      targets,
-      primedCount: this.tPrimed.length,
-      primed: this.tPrimed,
-      nextCount: this.tNext.length,
-      next: this.tNext,
-    };
-    this.ns.clearPort(PORTS.PUPPETEER);
-    await this.ns.tryWritePort(PORTS.PUPPETEER, portData); // FIXME: await
-  }
-
-  // ******** FUNCTIONS
-  // ******** TEST FUNCTIONS
-  // _primed: SFocus[] = [],
-  //   _next: SFocus[] = [{ id: 'n00dles', value: -1, primed: false }]
-  async xTargets() {
+  async updateTargets() {
     const qHosts: string[] = [];
     const primed = [...this.tPrimed]; // Shallow copy
     const next = [...this.tNext]; // Shallow copy
-    this.ns.tprint(`Primed ========`); // FIXME: remove
-    this.ns.tprint(primed); // FIXME: remove
-    this.ns.tprint(`Next ========`); // FIXME: remove
-    this.ns.tprint(next); // FIXME: remove
 
     // Sorted list of all available targets from [0] high value to [end] low value
     const aTargets = this.tHosts
@@ -248,58 +223,41 @@ export default class Puppeteer {
 
       const pIndex = primed.findIndex((pt: SFocus) => pt.id === sf.id);
       const nIndex = next.findIndex((nt: SFocus) => nt.id === sf.id);
-      // this.ns.tprint(
-      //   `Checking [${aTargets.length}] ${sf.id} | ${sf.value.toFixed(2)} | ${
-      //     sf.primed
-      //   }`
-      // );
-      // if (pIndex > -1) this.ns.tprint(`:: In Primed at ${pIndex}`);
-      // if (nIndex > -1) this.ns.tprint(`:: In Next at ${nIndex}`);
 
       if (sf.primed) {
-        // Its primed
-        // this.ns.tprint(':: Its primed');
         if (primed.length < xPrimed && pIndex < 0) {
-          // this.ns.tprint(`:: Primed [${primed.length}/${xPrimed}] Adding`);
           primed.push(sf);
         } else if (
           primed.length >= xPrimed &&
           pIndex < 0 &&
           sf.value > primed[primed.length - 1].value
         ) {
-          // this.ns.tprint(`:: Primed [${primed.length}/${xPrimed}] and better`);
-          // const dPrime = primed[primed.length - 1];
-          // this.ns.tprint(
-          //   `:: ${dPrime.id}: ${dPrime.value.toFixed(2)} | ${
-          //     sf.id
-          //   }: ${sf.value.toFixed(2)} (${sf.value > dPrime.value})`
-          // );
           while (primed.length > xPrimed) primed.shift();
           primed.shift();
           primed.push(sf);
         }
 
         if (nIndex > -1) next.splice(nIndex, 1);
-      } else if (primed.length + next.length < xTargets && nIndex < 0) {
-        // const tTotal = primed.length + next.length;
-        // this.ns.tprint(
-        //   `:: Need [${xTargets - tTotal}] Under Target: ${tTotal} (${
-        //     primed.length
-        //   }|${next.length})`
-        // );
+      } else if (
+        primed.length + next.length < xTargets &&
+        nIndex < 0 &&
+        pIndex < 0
+      ) {
         next.push(sf);
-      } else if (primed.length + next.length >= xTargets && nIndex < 0) {
+      } else if (
+        primed.length + next.length >= xTargets &&
+        nIndex < 0 &&
+        pIndex < 0
+      ) {
         while (primed.length + next.length > xTargets) next.shift();
         if (sf.value > primed[primed.length - 1].value) {
           next.shift();
           next.push(sf);
         }
       }
-      // const debug = primed.length + next.length;
-      // this.ns.tprint(`DEBUG: ${debug} (${primed.length}|${next.length})`);
     }
 
-    // Create a list of targets to focus from easy to hard
+    // Create a list of targets to focus from easy to hard as simple strings for speed filter
     primed.forEach((sf: SFocus) => qHosts.push(sf.id));
     next.forEach((sf: SFocus) => qHosts.push(sf.id));
     const targets = qHosts.map((h: string) => new ServerTarget(this.ns, h));
@@ -308,18 +266,229 @@ export default class Puppeteer {
     this.targets = targets;
     await this.updatePorts();
     return targets;
+  }
 
-    // this.ns.tprint('Primed End ========');
-    // this.ns.tprint(primed);
-    // this.ns.tprint('Next End ========');
-    // this.ns.tprint(next);
-    // this.ns.tprint(`qTargets ========`); // FIXME: remove
-    // const debug = qTargets.map((st: ServerTarget) => ({
-    //   hostname: st.hostname,
-    //   value: st.x.bValue,
-    //   primed: st.status.action === X.HACK.A,
-    // }));
-    // this.ns.tprint(debug);
+  async updatePorts() {
+    const targets = this.targets.map((st: ServerTarget) => {
+      const { ns, pMult, pMultBN, ...t } = st; // Strips NS but also functions
+      return t;
+    });
+    const portData = {
+      targetCount: targets.length,
+      targets,
+      primedCount: this.tPrimed.length,
+      primed: this.tPrimed,
+      nextCount: this.tNext.length,
+      next: this.tNext,
+    };
+    this.ns.clearPort(PORTS.PUPPETEER);
+    await this.ns.tryWritePort(PORTS.PUPPETEER, portData);
+  }
+
+  // ******** FUNCTIONS
+  hack(st: ServerTarget) {
+    // this.ns.tprint(`We would HACK ${st.hostname}`);
+    if (st.nextUpdate < performance.now()) {
+      const nodes = this.updateNodes().filter(
+        (n: SNode) => n.ramNow > xWeakRam
+      );
+      const { nRamNow } = this;
+      const { hThreads, wThreads, gThreads, wagThreads } = st.x;
+      const sTime = performance.now() + xDelay * 2;
+      const eTime = sTime + st.x.wTime;
+      const hTime = eTime - st.x.hTime - xBuffer * 3;
+      const wTime = eTime - st.x.wTime - xBuffer * 2;
+      const gTime = eTime - st.x.gTime - xBuffer * 1;
+      const wagTime = sTime;
+      let dBuff = 1;
+      let fBatch = false;
+      st.setBatches = 0;
+      // this.ns.tprint(`Batches Pre: ${st.batches}`);
+
+      if (nRamNow > st.x.bRam) {
+        // We have the potential for partial batch nodes
+        let pBatches = Math.floor((nRamNow * 0.8) / st.x.bRam);
+        pBatches = pBatches > xBatches ? xBatches : pBatches;
+        // this.ns.tprint(`We can do ${pBatches} Batches`);
+        let rhThreads = hThreads;
+        let rwThreads = wThreads;
+        let rgThreads = gThreads;
+        let rwagThreads = wagThreads;
+        for (let i = 0; i < nodes.length; i += 1) {
+          const n = new Server(this.ns, nodes[i].id);
+          while (pBatches > 0 && n.ram.now > xWeakRam) {
+            if (rhThreads > 0 && n.ram.now > xHackRam) {
+              // Do Hack
+              let nhT = Math.floor(n.ram.now / xHackRam);
+              const nhTime = hTime + dBuff * xDelay;
+              nhT = rhThreads > nhT ? nhT : rhThreads;
+              if (nhT > 0) {
+                this.ns.exec(
+                  xHack,
+                  n.hostname,
+                  nhT,
+                  st.hostname,
+                  false,
+                  nhTime
+                );
+                rhThreads -= nhT;
+                fBatch = true;
+                // this.ns.tprint(
+                //   `Batch: [${dBuff}]${n.hostname} fired ${nhT} Hack threads (${rhThreads}) Remain`
+                // );
+              }
+            }
+
+            if (rwThreads > 0 && n.ram.now > xWeakRam) {
+              // Do Weak
+              let nwT = Math.floor(n.ram.now / xWeakRam);
+              const nwTime = wTime + dBuff * xDelay;
+              nwT = rwThreads > nwT ? nwT : rwThreads;
+              if (nwT > 0) {
+                this.ns.exec(
+                  xWeak,
+                  n.hostname,
+                  nwT,
+                  st.hostname,
+                  false,
+                  nwTime
+                );
+                rwThreads -= nwT;
+                fBatch = true;
+                // this.ns.tprint(
+                //   `Batch: [${dBuff}]${n.hostname} fired ${nwT} Weak threads (${rwThreads}) Remain`
+                // );
+              }
+            }
+
+            if (rgThreads > 0 && n.ram.now > xGrowRam) {
+              // Do Grow
+              let ngT = Math.floor(n.ram.now / xGrow);
+              const ngTime = gTime + dBuff * xDelay;
+              ngT = rwThreads > ngT ? ngT : rgThreads;
+              if (ngT > 0) {
+                this.ns.exec(
+                  xGrow,
+                  n.hostname,
+                  ngT,
+                  st.hostname,
+                  false,
+                  ngTime
+                );
+                rgThreads -= ngT;
+                fBatch = true;
+                // this.ns.tprint(
+                //   `Batch: [${dBuff}]${n.hostname} fired ${ngT} Grow threads (${rgThreads}) Remain`
+                // );
+              }
+            }
+
+            if (rwagThreads > 0 && n.ram.now > xWeakRam) {
+              // Do Weak after grow
+              let nwagT = Math.floor(n.ram.now / xWeakRam);
+              const nwagTime = wagTime + dBuff * xDelay;
+              nwagT = rwagThreads > nwagT ? nwagT : rwagThreads;
+              if (nwagT > 0) {
+                this.ns.exec(
+                  xWeak,
+                  n.hostname,
+                  nwagT,
+                  st.hostname,
+                  false,
+                  nwagTime
+                );
+                rwagThreads -= nwagT;
+                fBatch = true;
+                // this.ns.tprint(
+                //   `Batch: [${dBuff}]${n.hostname} fired ${nwagT} Weak after threads (${rwagThreads}) Remain`
+                // );
+              }
+            }
+
+            if (
+              rhThreads <= 0 &&
+              rwThreads <= 0 &&
+              rgThreads <= 0 &&
+              rwagThreads <= 0
+            ) {
+              rhThreads = hThreads;
+              rwThreads = wThreads;
+              rgThreads = gThreads;
+              rwagThreads = wagThreads;
+              pBatches -= 1;
+              st.setBatches = dBuff;
+              dBuff += 1;
+              fBatch = true;
+            }
+          }
+        }
+      }
+      // else if (nRamNow > xHackRam) {
+      //   this.ns.tprint('Partial hack:');
+      //   this.ns.tprint(nodes);
+      // }
+
+      // this.ns.tprint(`Batches Post: ${st.batches}`);
+      if (fBatch) st.update(st.x.wTime + xDelay + dBuff * xDelay + 3000);
+      // st.update(TIME.SERVERS);
+    } else st.update(TIME.SERVERS);
+  }
+
+  weak(st: ServerTarget) {
+    // this.ns.tprint(`We would WEAK ${st.hostname}`);
+    if (st.nextUpdate < performance.now()) {
+      const nodes = this.updateNodes().filter(
+        (n: SNode) => n.ramNow > xWeakRam
+      );
+      const dTime = performance.now() + xDelay;
+      let { pwThreads: rwThreads } = st.x;
+      let fWeak = false;
+      if (rwThreads > 0) {
+        for (let i = 0; i < nodes.length; i += 1) {
+          const n = nodes[i];
+          let nwThreads = Math.floor(n.ramNow / xWeakRam);
+          nwThreads = rwThreads > nwThreads ? nwThreads : rwThreads;
+          if (nwThreads > 0) {
+            this.ns.exec(xWeak, n.id, nwThreads, st.hostname, false, dTime); // FIXME:
+            rwThreads -= nwThreads;
+            fWeak = true;
+          }
+          if (rwThreads <= 0) break;
+        }
+        // this.ns.tprint(`Still need: ${rwThreads}`);
+      }
+      if (fWeak) st.update(st.x.wTime + xDelay * 3);
+      // else st.update(TIME.SERVERS);
+    } else st.update(TIME.SERVERS);
+  }
+
+  // async grow(st: ServerTarget) {
+  grow(st: ServerTarget) {
+    // this.ns.tprint(`We would GROW ${st.hostname}`);
+    if (st.nextUpdate < performance.now()) {
+      const nodes = this.updateNodes().filter(
+        (n: SNode) => n.ramNow > xWeakRam
+      );
+      const dTime = performance.now() + xDelay;
+      let { pgThreads: rgThreads } = st.x;
+      let fGrow = false;
+      if (rgThreads > 0) {
+        for (let i = 0; i < nodes.length; i += 1) {
+          const n = nodes[i];
+          let ngThreads = Math.floor(n.ramNow / xGrowRam);
+          ngThreads = rgThreads > ngThreads ? ngThreads : rgThreads;
+          if (ngThreads > 0) {
+            this.ns.exec(xGrow, n.id, ngThreads, st.hostname, false, dTime);
+            rgThreads -= ngThreads;
+            fGrow = true;
+          }
+          if (rgThreads <= 0) break;
+        }
+        // this.ns.tprint(`Still need: ${rwThreads}`);
+      }
+      if (fGrow) st.update(st.x.gTime + xDelay * 3);
+      // else st.update(TIME.SERVERS);
+    } else st.update(TIME.SERVERS);
   }
 }
 
@@ -336,6 +505,7 @@ export async function main(ns: NS) {
   ns.disableLog('getHackingLevel');
   ns.disableLog('asleep');
   ns.disableLog('scan');
+  ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Puppeteer X3');
@@ -344,11 +514,11 @@ export async function main(ns: NS) {
   const start = performance.now();
 
   // ******** Initialize (One Time Code)
+  let cLevel = -1;
   // console.profile('Puppeteer'); // FIXME:
   const puppeteer = new Puppeteer(ns);
   // console.time('Puppeteer :: updateTargets'); // FIXME:
-  // await puppeteer.updateTargets(); // FIXME: await
-  await puppeteer.xTargets(); // TODO: DEBUG
+  // await puppeteer.updateTargets();
   // console.timeEnd('Puppeteer :: updateTargets'); // FIXME:
 
   // ******** DEBUG ONETIME ********
@@ -370,12 +540,22 @@ export async function main(ns: NS) {
     // ******** Consts
     const now = performance.now();
     // puppeteer.updateNodes(); // FIXME: remove this, should not be every tick
-    const { nRam, nRamNow } = puppeteer;
+    const { nRam, nRamNow, nRamMax } = puppeteer;
 
     // ******** Display
-    const dRamNow = ns.formatRam(nRamNow, 1);
-    const dRam = ns.formatRam(nRam, 1);
-    ns.print(`[Time] ${formatTime(ns, now - start)} | 🔋${dRamNow}/${dRam}`);
+    const mRam = ns.formatRam(nRam, 1);
+    const mRamNow = ns.formatRam(nRamNow, 1);
+    const mRamMax = ns.formatRam(nRamMax, 1);
+    const mStats = `🔋${mRamNow}/${mRam} | 💎${mRamMax}`;
+    ns.print(`[Time] ${formatTime(ns, now - start)} | ${mStats}`);
+    updateHeaders(ns);
+
+    const { hacking: pLevel } = ns.getPlayer().skills;
+    // ******** Update Nodes & Servers on change
+    if (pLevel > cLevel) {
+      cLevel = pLevel;
+      await puppeteer.updateTargets();
+    }
 
     // ns.print('===== DEBUG =====');
     // const sample = puppeteer.targets[0];
@@ -384,35 +564,48 @@ export async function main(ns: NS) {
     // ns.print(sample.status);
     // ns.print(sample.getStatus());
 
-    // ns.print(formatTime(ns, now - start));
     // ns.print('===== DEBUG =====');
-    // const rowHeader = '%6s %1s %8s %8s %-18s';
-    // ns.printf(rowHeader, 'Mine', '🎲', 'Note', 'Update', 'Server');
+
+    // Using for of so we can await
+    // ******** Puppeteer (loop time code)
     // console.time('Puppeteer :: DisplayTargets'); // FIXME:
-    updateHeaders(ns);
-    // puppeteer.targets.forEach((st: ServerTarget) => {
-    //   // Display
-    //   updateRow(ns, st, now);
-
-    //   if (st.nextUpdate < now) {
-    //     st.update(TIME.SERVERS);
-    //   }
-    // });
-
-    // NOTE: Using for of so we can await
     for (const st of puppeteer.targets as ServerTarget[]) {
       // Display
-      updateRow(ns, st, now);
-
       if (st.nextUpdate < now) {
-        // Do this switch thing here
-        if (st.status.action === X.HACK.A) st.update(st.x.wTime + xDelay);
-        else if (st.status.action === X.WEAK.A) st.update(st.x.wTime + xDelay);
-        else if (st.status.action === X.GROW.A) st.update(st.x.gTime + xDelay);
-        else if (st.status.action === X.WAIT.A) st.update(TIME.SERVERS);
-        else if (st.status.action === X.RISK.A) st.update(TIME.SERVERS);
-        else st.update(TIME.SERVERS);
+        const { action } = st.status;
+        switch (action) {
+          case X.HACK.A: {
+            // await puppeteer.hack(st);
+            puppeteer.hack(st);
+            // st.update(st.x.wTime + xDelay);
+            break;
+          }
+          case X.WEAK.A: {
+            // await puppeteer.weak(st);
+            puppeteer.weak(st);
+            // if (res) st.update(st.x.wTime + xDelay);
+            break;
+          }
+          case X.GROW.A: {
+            // await puppeteer.grow(st);
+            puppeteer.grow(st);
+            // st.update(st.x.gTime + xDelay);
+            break;
+          }
+          case X.WAIT.A: {
+            st.update(TIME.SERVERS);
+            break;
+          }
+          case X.RISK.A: {
+            st.update(TIME.SERVERS);
+            break;
+          }
+          default:
+            st.update(TIME.SERVERS);
+            break;
+        }
       }
+      updateRow(ns, st, now);
     }
     // console.timeEnd('Puppeteer :: DisplayTargets'); // FIXME:
     // profiler += 1; // FIXME:
@@ -423,16 +616,3 @@ export async function main(ns: NS) {
   // console.profileEnd();
   // console.timeEnd('Puppeteer'); // FIXME:
 }
-
-const samplePrimed = [
-  { id: 'nectar-net', value: 232.86534455603163, primed: true },
-  { id: 'neo-net', value: 416.75349031048137, primed: true },
-  { id: 'harakiri-sushi', value: 488.8899753110562, primed: true },
-  { id: 'max-hardware', value: 955.7214263186567, primed: true },
-];
-
-const sampleNext = [
-  { id: 'neo-net', value: 416.75349031048137, primed: true },
-  { id: 'nectar-net', value: 232.86534455603163, primed: true },
-  { id: 'harakiri-sushi', value: 488.8899753110562, primed: true },
-];
