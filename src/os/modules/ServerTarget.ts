@@ -101,7 +101,7 @@ export class ServerTarget extends Server {
   updateAt: number; // Next update
 
   // ******** CONSTRUCTOR
-  constructor(ns: NS, hostname: string) {
+  constructor(ns: NS, hostname: string, update = 0) {
     super(ns, hostname);
     this.ns = ns;
     this.pMult = ns.getPlayer().mults.hacking_grow;
@@ -123,10 +123,10 @@ export class ServerTarget extends Server {
     };
     this.batches = 0;
     this.status = { action: '', icon: '' };
-    this.updateAt = 0;
+    this.updateAt = update;
 
     // Initiatlize the batch
-    this.update(0);
+    if (update < performance.now()) this.update();
   }
 
   // ******** METHODS
@@ -138,8 +138,16 @@ export class ServerTarget extends Server {
     this.batches = count;
   }
 
+  setUpdate(delay: number) {
+    if (delay < 10 * 1000) {
+      this.updateAt = performance.now() + 10 * 1000;
+    } else {
+      this.updateAt = performance.now() + delay;
+    }
+  }
+
   // ******** Functions
-  async update(delay: number) {
+  async update() {
     // Consts & Calculations
     const { hostname, pMult, pMultBN } = this;
     const { now: sNow, min: sMin } = this.sec;
@@ -167,7 +175,7 @@ export class ServerTarget extends Server {
     this.x.bRam = bRam;
     this.x.bValue =
       (mMax * xSkim) / ((hTime * 4) / 1000) / (bRam / ((hTime * 4) / 1000));
-    // this.batches = 0;
+    this.batches = 0;
 
     if (sNow > sMin) this.status = { action: X.WEAK.A, icon: X.WEAK.I };
     else if (mNow < mMax) this.status = { action: X.GROW.A, icon: X.GROW.I };
@@ -176,6 +184,6 @@ export class ServerTarget extends Server {
       this.status = { action: X.HACK.A, icon: X.HACK.I };
     } else this.status = { action: X.WAIT.A, icon: X.WAIT.I };
 
-    this.updateAt = performance.now() + delay;
+    this.updateAt = performance.now();
   }
 }
