@@ -257,7 +257,10 @@ export default class Puppeteer {
     let ctPrimed = ct.filter(
       (st: ServerTarget) => st.status.action === X.HACK.A
     ).length;
-    if (ct.length < xTargets || ctPrimed >= xPrimed) {
+    const ctRisk = ct.filter(
+      (st: ServerTarget) => st.status.action === X.RISK.A
+    );
+    if (ct.length < xTargets || ctPrimed >= xPrimed || ctRisk.length > 0) {
       const aTargets = this.tHosts
         .reduce((ast: ServerTarget[], h: string) => {
           const st = new ServerTarget(ns, h);
@@ -275,7 +278,7 @@ export default class Puppeteer {
         let cIndex = ct.findIndex((pt: ServerTarget) => pt.hostname === id);
         // ns.tprint(`${id} [${cIndex}|${primed}|${value.toFixed(0)}]`);
 
-        if (ct.length < xTargets && cIndex < 0 && !risk) {
+        if (ct.length < xTargets && cIndex < 0 && !risk && ctPrimed > 0) {
           // ns.tprint(`:: Added ${qt.hostname} Need [${xTargets - ct.length}]`);
           ct.push(qt);
           if (primed) ctPrimed += 1;
@@ -513,29 +516,40 @@ export default class Puppeteer {
   }
 
   grow(st: ServerTarget) {
-    if (st.updateAt < performance.now()) {
-      // st.update();
-      const nodes = this.updateNodes().filter(
-        (n: SNode) => n.ramNow > xWeakRam
-      );
-      const dTime = performance.now() + xDelay;
-      let { pgThreads: rgThreads } = st.x;
-      let fGrow = false;
-      if (rgThreads > 0) {
-        for (let i = 0; i < nodes.length; i += 1) {
-          const n = nodes[i];
-          let ngThreads = Math.floor(n.ramNow / xGrowRam);
-          ngThreads = rgThreads > ngThreads ? ngThreads : rgThreads;
-          if (ngThreads > 0) {
-            this.ns.exec(xGrow, n.id, ngThreads, st.hostname, false, dTime);
-            rgThreads -= ngThreads;
-            fGrow = true;
-          }
-          if (rgThreads <= 0) break;
+    const nodes = this.updateNodes().filter((n: SNode) => n.ramNow > xWeakRam);
+    // const dTime = performance.now() + xDelay;
+    const { hostname: tID } = st;
+    const sTime = performance.now() + xDelay;
+    const eTime = sTime + st.x.wTime + xBuffer;
+    const gTime = eTime - xBuffer * 1 - (st.x.gTime + xBuffer);
+    const wagTime = eTime - (st.x.wTime + xBuffer);
+    let { pgThreads: rgTh } = st.x;
+    let rwagTh = Math.ceil(rgTh / 12.5);
+    let fGrow = false;
+    let fWeak = false;
+    if (rgTh > 0) {
+      for (let i = 0; i < nodes.length; i += 1) {
+        const n = new Server(this.ns, nodes[i].id);
+        const { hostname: nID } = n;
+        if (rgTh > 0 && n.ram.now > xGrowRam) {
+          let ngTh = Math.floor(n.ram.now / xGrowRam);
+          ngTh = rgTh > ngTh ? ngTh : rgTh;
+          this.ns.exec(xGrow, nID, ngTh, tID, false, gTime);
+          rgTh -= ngTh;
+          fGrow = true;
         }
+        if (rwagTh > 0 && n.ram.now > xWeakRam) {
+          let nwagTh = Math.floor(n.ram.now / xWeakRam);
+          nwagTh = rwagTh > nwagTh ? nwagTh : rwagTh;
+          this.ns.exec(xWeak, nID, nwagTh, tID, false, wagTime);
+          rwagTh -= nwagTh;
+          fWeak = true;
+        }
+        if (rgTh <= 0 && rwagTh <= 0) break;
       }
-      if (fGrow) return st.x.gTime + xDelay * 3;
     }
+    if (fWeak || fGrow) return eTime - sTime + xDelay;
+    // if (fGrow) return st.x.gTime + xDelay * 3;
     return TIME.SERVERS;
   }
 }
@@ -597,7 +611,7 @@ export async function main(ns: NS) {
     const mRamMax = ns.formatRam(nRamMax, 1);
     const mStats = `🔋${mRamNow}/${mRam} | 💎${mRamMax}`;
     ns.print(
-      `[Time] ${formatTime(ns, now - start)} | ${mStats} *${puppeteer.dBatch}`
+      `[Time] ${formatTime(ns, now - start)} | ${mStats} ⚔️${puppeteer.dBatch}`
     ); // FIXME:
     updateHeaders(ns);
 
