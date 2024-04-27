@@ -50,8 +50,8 @@ export const CONFIGS: any = {
      * 0.2 ~ 1.42 (42% bonus) ~ 38,640 threads
      * 0.1 ~ 1.39 (39% bonus) ~ 19,630 threads
      */
-    workRamRatio: 0.7, // 0.7 (70%) of ram will be used for work
-    shareRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
+    wRamRatio: 0.7, // 0.7 (70%) of ram will be used for work
+    sRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
   },
   hacknet: {
     hnMoneyRatio: 0.2, // 20% of money will be used on hacknet
@@ -68,56 +68,62 @@ export const CONFIGS: any = {
     hTRam: 1048576, // L10 (1024) L15 (32768) L18 (262144) L20 (1048576) (Pow2 2, 4, 8)
   },
   hacking: {
-    hackSkim: 0.1, // 10%
-    hackBuffer: 1000, // Time in ms between scripts
-    hackDelay: 3000, // Delay in ms between batches
-    /* Max batches is calculated based on 1 minute intervals with short hack times
-     * this ensures we do not lockup ram on long standing processess
-     * while still allowing for long value hacks and generate smaller value quick cash
-     * this prevents situations where you need to wait 30m for a large windfall
-     */
-    hackBatches: 128, // 128, // Batch 128 hack, weak, grow, weak
-    hackTargetsMax: 10, // Only work on 25 servers
-    hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
-    hackMinBatches: 5, // Min number of batches before switching
-    hackSwap: 3, // How many targets to swap at once (make less than min batches)
+    xSkim: 0.1, // 10%
+    xBuffer: 1000, // Time in ms between scripts (Lower than this and HWGW stops working)
+    xDelay: 3000, // Delay in ms between batches
+    xBatches: 16, // Batch minimum 16 hack, weak, grow, weak cycles
+    xBatchesMax: 256, // Batch maximum. These are dynamically calculated
+    xTargets: 10, // Only work on 10 servers
+    xPrimed: 7, // Have at least 8 targets prepared before swapping (must be less than targets)
     /* hack Batches is the number of perfect HWGW being fired
+     * Buffer is time between each script H/W/G/W
+     * Delay is the time in between each batch of attaches, eg 128, delay, 128
+     * Reducing timings below 1s buffer can desync HWGW 1s is (0.25s each for H/W/G/W)
+     * Delay of 3s is pretty reasonable in between each set of attacks.
      * we only target servers where our largest server can perfect batch to prevent locks
-     * Target max is the amount of targets to focus on at the same time
-     * TargetsPrep is the number of simultanious batches we need before switching targets
+     * Targets is the total amount of targets we will work on
+     * Primed is how many are HWGW ready and can perfect batch
      * Retargeting happens on player level change
-     * Early game 20 targets + 5 steps with low hack bathes works well
-     * Lategame with high ram 16 batches is too low, swap to 128
+     * Batches scale dynamically based on how much available ram you have
+     * Lategame increasing to higher max batches could be helpful.
      */
-    // hackDistance: 15, // How much above 50% of player level we will target
   },
 };
 
 // ******** Module Layout
 export const LAYOUT: any = {
   // Width, Heigh, offset X, offsetY
+  topBar: 38,
+  textHeight: 24,
+  bufferX: 58,
   bufferY: 52,
   OS: {
     xW: 200,
-    xH: 190,
+    xH: 158,
   },
   CONTRACT: {
     xW: 200,
-    xH: 90,
+    xH: 86,
     xOX: 0,
-    xOY: 190,
+    xOY: 158,
   },
   HACKNET: {
     xW: 200,
-    xH: 90,
+    xH: 86,
     xOX: 0,
-    xOY: 190 + 90,
+    xOY: 158 + 86,
   },
   HOSTING: {
     xW: 200,
-    xH: 120,
+    xH: 110,
     xOX: 0,
-    xOY: 190 + 90 + 90,
+    xOY: 158 + 86 + 86,
+  },
+  PUPPETEER: {
+    xW: 990,
+    xH: (CONFIGS.hacking.xTargets + 2) * 24 + 38, // 326,
+    xOX: 220,
+    xOY: 0,
   },
   // MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
   // MODULES.CORPORATIONS = false; // true will run a corporation (~100 GB) //FIXME:
@@ -143,7 +149,7 @@ export const CORE: any = {};
   CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
   CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
   CORE.CONTRACTS = `${PATHS.MODULES}/Contract.js`;
-  CORE.PUPPETEER = `/debug.js`;
+  CORE.PUPPETEER = `${PATHS.MODULES}/Puppeteer.js`;
   CORE.CORPORATIONS = `/dCorps.js`;
   // CORE.GANGS = `/debug.js`;
 })();
@@ -162,6 +168,7 @@ export const TIME: any = {};
   TIME.HACKNET = 3 * 1000; // 3 second updates
   TIME.HOSTING = 10 * 1000; // 10 second updates
   TIME.SERVERS = 10 * 1000; // 10 second updates
+  TIME.PUPPETEER = 1 * 1000; // 1 second updates
   // TIME.FACTIONS = 30 * 1000; // 30 second updates
   // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
   // TIME.CRIMES = 2 * 1000; // 2 second updates
@@ -176,10 +183,10 @@ export const PORTS: any = {};
   PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
   PORTS[(PORTS.HACKNET = 3)] = 'HACKNET';
   PORTS[(PORTS.HOSTING = 4)] = 'HOSTING';
+  PORTS[(PORTS.PUPPETEER = 5)] = 'PUPPETEER'; // TODO: Add servers
   // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
   // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
   // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
-  // PORTS[(PORTS.SERVERS = 8)] = 'SERVERS'; // TODO: Add servers
   // PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
   // PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
   // PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
