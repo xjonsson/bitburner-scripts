@@ -50,8 +50,8 @@ export const CONFIGS: any = {
      * 0.2 ~ 1.42 (42% bonus) ~ 38,640 threads
      * 0.1 ~ 1.39 (39% bonus) ~ 19,630 threads
      */
-    workRamRatio: 0.7, // 0.7 (70%) of ram will be used for work
-    shareRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
+    wRamRatio: 0.7, // 0.7 (70%) of ram will be used for work
+    sRamRatio: 0.3, // 0.3 (30%) of ram will be used for shares
   },
   hacknet: {
     hnMoneyRatio: 0.2, // 20% of money will be used on hacknet
@@ -69,28 +69,24 @@ export const CONFIGS: any = {
   },
   hacking: {
     xSkim: 0.1, // 10%
-    xBuffer: 1000, // Time in ms between scripts
+    xBuffer: 1000, // Time in ms between scripts (Lower than this and HWGW stops working)
     xDelay: 3000, // Delay in ms between batches
-    /* Max batches is calculated based on 1 minute intervals with short hack times
-     * this ensures we do not lockup ram on long standing processess
-     * while still allowing for long value hacks and generate smaller value quick cash
-     * this prevents situations where you need to wait 30m for a large windfall
-     */
-    xBatches: 24, // 128, // Batch 128 hack, weak, grow, weak
+    xBatches: 16, // Batch minimum 16 hack, weak, grow, weak cycles
+    xBatchesMax: 256, // Batch maximum. These are dynamically calculated
     xTargets: 10, // Only work on 10 servers
-    xPrimed: 8, // Have at least 8 targets prepared before swapping (must be less than targets)
-    hackTargetsPrepMax: 5, // Prepare the next n (must be less than targets max)
-    hackMinBatches: 5, // Min number of batches before switching
-    hackSwap: 3, // How many targets to swap at once (make less than min batches)
+    xPrimed: 7, // Have at least 8 targets prepared before swapping (must be less than targets)
     /* hack Batches is the number of perfect HWGW being fired
+     * Buffer is time between each script H/W/G/W
+     * Delay is the time in between each batch of attaches, eg 128, delay, 128
+     * Reducing timings below 1s buffer can desync HWGW 1s is (0.25s each for H/W/G/W)
+     * Delay of 3s is pretty reasonable in between each set of attacks.
      * we only target servers where our largest server can perfect batch to prevent locks
-     * Target max is the amount of targets to focus on at the same time
-     * TargetsPrep is the number of simultanious batches we need before switching targets
+     * Targets is the total amount of targets we will work on
+     * Primed is how many are HWGW ready and can perfect batch
      * Retargeting happens on player level change
-     * Early game 20 targets + 5 steps with low hack bathes works well
-     * Lategame with high ram 16 batches is too low, swap to 128
+     * Batches scale dynamically based on how much available ram you have
+     * Lategame increasing to higher max batches could be helpful.
      */
-    // hackDistance: 15, // How much above 50% of player level we will target
   },
 };
 
@@ -124,7 +120,7 @@ export const LAYOUT: any = {
     xOY: 158 + 86 + 86,
   },
   PUPPETEER: {
-    xW: 1040,
+    xW: 1050,
     xH: (CONFIGS.hacking.xTargets + 2) * 24 + 38, // 326,
     xOX: 220,
     xOY: 0,

@@ -7,7 +7,9 @@ import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
 // ******** Globals
-const { xBuffer, xDelay, xBatches, xTargets, xPrimed } = CONFIGS.hacking;
+const { xBuffer, xDelay, xBatches, xBatchesMax, xTargets, xPrimed } =
+  CONFIGS.hacking;
+const { wRamRatio, sRamRatio } = CONFIGS.ramRatio;
 const { xHack, xWeak, xGrow } = DEPLOY;
 const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
 
@@ -19,7 +21,7 @@ const rowStyle =
   '%4s ' + // Cash
   '%4s ' + // Cash %
   '%5s ' + // Sec
-  '%3s ' + // Chance
+  '%4s ' + // Chance
   '%1s ' + // Prep
   '%4s ' + // Hack Threads
   '%4s ' + // Weak Threads
@@ -64,6 +66,8 @@ function updateRow(ns: NS, st: ServerTarget, now: number) {
     ? formatTime(ns, st.updateAt - now)
     : 'ERROR';
   let mMoney = '';
+  // let mChance = st.x.hackChance > 0 ? st.x.hackChance : 0;
+  // mChance = st.x.hackChance < 1 ? ns.formatNumber(st.x.hackChance, 1) : '';
   let mSec = '';
   let mPrepped = '✅';
   let mHack = ns.formatNumber(st.x.hThreads, 0);
@@ -138,6 +142,8 @@ export default class Puppeteer {
   nRam: number;
   nRamNow: number;
   nRamMax: number;
+  dBatchRam: Array<number>;
+  dBatch: number;
   targets: Array<any>; // FIXME:
   tPrimed: Array<SFocus>;
   tNext: Array<SFocus>;
@@ -156,6 +162,8 @@ export default class Puppeteer {
     this.nRam = 0;
     this.nRamNow = 0;
     this.nRamMax = 0;
+    this.dBatchRam = [];
+    this.dBatch = xBatches;
     this.nodes = []; // this.updateNodes();
 
     // Targets
@@ -165,6 +173,22 @@ export default class Puppeteer {
   }
 
   // ******** METHODS
+  updateDynBatch(): number {
+    const { dBatchRam: dBRA } = this;
+    if (dBRA.length === 0) this.dBatch = xBatches;
+    while (dBRA.length > 10) dBRA.shift();
+    const avg = dBRA.reduce((sum, curr) => sum + curr, 0) / dBRA.length;
+    // this.ns.tprint(`DBR Average: ${avg}`);
+    let { dBatch } = this;
+    if (avg >= wRamRatio) dBatch += 8;
+    if (avg < sRamRatio) dBatch -= 8;
+    if (dBatch > xBatchesMax) dBatch = xBatchesMax;
+    if (dBatch < xBatches) dBatch = xBatches;
+    // this.ns.tprint(`DBR dBatch ${dBatch} | cdBR ${this.dBR}`);
+    this.dBatch = dBatch;
+    return this.dBatch;
+  }
+
   updateHosts() {
     const t: string[] = [];
     const n: string[] = [];
@@ -201,80 +225,125 @@ export default class Puppeteer {
     this.nRam = ram;
     this.nRamNow = ramNow;
     this.nRamMax = ramMax;
+    this.dBatchRam.push(ramNow / ram);
+    this.updateDynBatch(); // FIXME:
     return n;
   }
 
-  async updateTargets() {
-    const cTargets = this.targets;
-    const qHosts: string[] = [];
-    const primed = [...this.tPrimed]; // Shallow copy
-    const next = [...this.tNext]; // Shallow copy
+  updateTargets() {
+    const { ns, targets: ct } = this;
 
-    // Sorted list of all available targets from [0] high value to [end] low value
-    const aTargets = this.tHosts
-      .reduce((ast: ServerTarget[], h: string) => {
-        const st = new ServerTarget(this.ns, h);
-        if (st.isTarget) ast.push(st);
-        return ast;
-      }, [])
-      .sort((a: ServerTarget, b: ServerTarget) => b.x.bValue - a.x.bValue);
-
-    // Create a set of ready primed [hwgw ready] and next [w/g] targets
-    while (aTargets.length > 0) {
-      const qt = aTargets.pop() as ServerTarget;
-      const sf: SFocus = {
-        id: qt.hostname,
-        value: qt.x.bValue,
-        primed: qt.status.action === X.HACK.A,
-      };
-
-      const pIndex = primed.findIndex((pt: SFocus) => pt.id === sf.id);
-      const nIndex = next.findIndex((nt: SFocus) => nt.id === sf.id);
-
-      if (sf.primed) {
-        if (primed.length < xPrimed && pIndex < 0) {
-          primed.push(sf);
-        } else if (
-          primed.length >= xPrimed &&
-          pIndex < 0 &&
-          sf.value > primed[primed.length - 1].value
-        ) {
-          while (primed.length > xPrimed) primed.shift();
-          primed.shift();
-          primed.push(sf);
-        }
-
-        if (nIndex > -1) next.splice(nIndex, 1);
-      } else if (
-        primed.length + next.length < xTargets &&
-        nIndex < 0 &&
-        pIndex < 0
-      ) {
-        next.push(sf);
-      } else if (
-        primed.length + next.length >= xTargets &&
-        nIndex < 0 &&
-        pIndex < 0
-      ) {
-        while (primed.length + next.length > xTargets) next.shift();
-        if (sf.value > primed[primed.length - 1].value) {
-          next.shift();
-          next.push(sf);
+    // Check for targets and reconnect
+    if (ct.length === 0) {
+      ns.tprint('No Puppeteer Targets');
+      const pTargets = this.checkPorts().targets;
+      if (pTargets.length === 0) {
+        ns.tprint(':: No Port Targets - Adding n00dles');
+        ct.push(new ServerTarget(ns, 'n00dles'));
+      } else {
+        ns.tprint(':: Port Targets');
+        for (let pti = 0; pti < pTargets.length; pti += 1) {
+          const pt = pTargets[pti];
+          const ot = new ServerTarget(ns, pt.hostname, pt.updateAt);
+          if (ot.status.action !== X.RISK.A) {
+            ns.tprint(`:::: Adding ${pt.hostname}`);
+            ct.push(ot);
+          }
         }
       }
     }
 
-    // Create a list of targets to focus from easy to hard as simple strings for speed filter
-    primed.forEach((sf: SFocus) => qHosts.push(sf.id));
-    next.forEach((sf: SFocus) => qHosts.push(sf.id));
-    const targets = qHosts.map((h: string) => new ServerTarget(this.ns, h));
-    this.tPrimed = primed;
-    this.tNext = next;
-    // this.targets = targets; // FIXME:
-    if (cTargets.length === 0) this.targets = targets;
-    else this.targets = cTargets;
-    await this.updatePorts();
-    return targets;
+    // Past initial check, do processing
+    let ctPrimed = ct.filter(
+      (st: ServerTarget) => st.status.action === X.HACK.A
+    ).length;
+    if (ct.length < xTargets || ctPrimed >= xPrimed) {
+      const aTargets = this.tHosts
+        .reduce((ast: ServerTarget[], h: string) => {
+          const st = new ServerTarget(ns, h);
+          if (st.isTarget) ast.push(st);
+          return ast;
+        }, [])
+        .sort((a: ServerTarget, b: ServerTarget) => b.x.bValue - a.x.bValue);
+
+      while (aTargets.length > 0) {
+        const qt = aTargets.pop() as ServerTarget;
+        const { hostname: id } = qt;
+        const { bValue: value } = qt.x;
+        const primed = qt.status.action === X.HACK.A;
+        const risk = qt.status.action === X.RISK.A;
+        let cIndex = ct.findIndex((pt: ServerTarget) => pt.hostname === id);
+        // ns.tprint(`${id} [${cIndex}|${primed}|${value.toFixed(0)}]`);
+
+        if (ct.length < xTargets && cIndex < 0 && !risk) {
+          // ns.tprint(`:: Added ${qt.hostname} Need [${xTargets - ct.length}]`);
+          ct.push(qt);
+          if (primed) ctPrimed += 1;
+        } else if (primed && cIndex < 0) {
+          if (ctPrimed < xPrimed) {
+            // Under, just add it
+            ct.push(qt);
+            ctPrimed += 1;
+          } else if (ctPrimed >= xPrimed) {
+            // Primed and can replace a lower primed in list
+            const dIndex = ct.reduce(
+              (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
+                if (curr.status.action === X.HACK.A) {
+                  if (curr.x.bValue < st[pI].x.bValue) return i;
+                }
+                return pI;
+              },
+              0
+            );
+            const dPrime = ct[dIndex];
+            if (value > dPrime.x.bValue && cIndex < 0) {
+              // ns.tprint(`:: PRIME ${ct[dIndex].hostname} for ${qt.hostname}`);
+              ct[dIndex] = qt;
+              cIndex = dIndex;
+            }
+          } else if (ctPrimed < xPrimed) {
+            const dIndex = ct.reduce(
+              (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
+                if (curr.status.action === X.HACK.A) {
+                  if (curr.x.bValue < st[pI].x.bValue) return i;
+                }
+                return pI;
+              },
+              0
+            );
+            if (cIndex < 0) {
+              // ns.tprint(`:: PRIME ${ct[dIndex].hostname} for ${qt.hostname}`);
+              // drop a non prime for a prime if we are under FIXME:
+              ct[dIndex] = qt;
+              cIndex = dIndex;
+            }
+          }
+        } else if (cIndex < 0) {
+          // Not primed but can replace the lowest one
+          const dIndex = ct.reduce(
+            (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
+              const { action } = curr.status;
+              if (action !== X.HACK.A && action !== X.RISK.A) {
+                if (curr.x.bValue < st[pI].x.bValue) return i;
+              }
+              return pI;
+            },
+            0
+          );
+          const dNext = ct[dIndex];
+          if (value > dNext.x.bValue && !risk) {
+            // ns.tprint(`:: DROP ${ct[dIndex].hostname} for ${qt.hostname}`);
+            ct[dIndex] = qt;
+            cIndex = dIndex;
+          }
+        } else if (cIndex > -1 && risk) {
+          // ns.tprint(`:: RISK ${qt.hostname}`);
+          ct.splice(cIndex, 1);
+        }
+      }
+    }
+    // this.updateDynBatch(); FIXME:
+    this.updatePorts();
   }
 
   updatePorts() {
@@ -283,6 +352,7 @@ export default class Puppeteer {
       return t;
     });
     const portData = {
+      dbr: this.dBatch,
       targetCount: targets.length,
       targets,
       primedCount: this.tPrimed.length,
@@ -310,328 +380,114 @@ export default class Puppeteer {
     return data;
   }
 
-  xTargets() {
-    // const cTargets = this.targets;
-    const { ns, targets: ct } = this;
+  // ******** FUNCTIONS
+  hack(st: ServerTarget) {
+    if (st.updateAt < performance.now()) {
+      st.batches = 0;
+      const { ns } = this;
+      const nodes = this.updateNodes().filter(
+        (n: SNode) => n.ramNow > st.x.bRam
+      );
+      const {
+        hThreads: hTh,
+        wThreads: wTh,
+        gThreads: gTh,
+        wagThreads: wagTh,
+        bRam,
+      } = st.x;
+      // this.ns.tprint(nodes);
+      const sTime = performance.now() + xDelay;
+      const eTime = sTime + st.x.wTime + xBuffer;
+      const hTime = eTime - xBuffer * 3 - (st.x.hTime + xBuffer);
+      const wTime = eTime - xBuffer * 2 - (st.x.wTime + xBuffer);
+      const gTime = eTime - xBuffer * 1 - (st.x.gTime + xBuffer);
+      const wagTime = eTime - (st.x.wTime + xBuffer);
+      let nBuffer = 1;
 
-    // Check for targets and reconnect
-    if (ct.length === 0) {
-      ns.tprint('No Puppeteer Targets');
-      const pTargets = this.checkPorts().targets;
-      if (pTargets.length === 0) {
-        ns.tprint(':: No Port Targets - Adding n00dles');
-        ct.push(new ServerTarget(ns, 'n00dles'));
-      } else {
-        ns.tprint(':: Port Targets');
-        for (let pti = 0; pti < pTargets.length; pti += 1) {
-          const pt = pTargets[pti];
-          ns.tprint(`:::: Adding ${pt.hostname}`);
-          // const now = performance.now();
-          // this.ns.tprint(`Now: ${now}`);
-          // this.ns.tprint(`PT: ${pt.updateAt}`);
-          // this.ns.tprint(`+/-: ${pt.updateAt - now}`);
-          ct.push(new ServerTarget(ns, pt.hostname, pt.updateAt));
-        }
+      // Complete batch
+      if (nodes.length > 0 && hTh > 0 && wTh > 0 && gTh > 0 && wagTh > 0) {
+        nodes.forEach((sn: SNode) => {
+          const n = new Server(ns, sn.id);
+          const { hostname: nID } = n;
+          const { hostname: tID } = st;
+          // const nDelay = nBuffer * xBuffer;
+          while (n.ram.now > bRam && st.batches < this.dBatch) {
+            // while (n.ram.now > bRam && st.batches < xBatches) { // FIXME:
+            ns.exec(xHack, nID, hTh, tID, false, hTime + nBuffer * xBuffer);
+            ns.exec(xWeak, nID, wTh, tID, false, wTime + nBuffer * xBuffer);
+            ns.exec(xGrow, nID, gTh, tID, false, gTime + nBuffer * xBuffer);
+            ns.exec(xWeak, nID, wagTh, tID, false, wagTime + nBuffer * xBuffer);
+            nBuffer += 1;
+            st.setBatches = st.batches + 1;
+          }
+        });
+        return eTime - sTime + nBuffer * xBuffer + xDelay;
       }
-    }
-
-    // Past initial check, do processing
-    let ctPrimed = ct.filter(
-      (st: ServerTarget) => st.status.action === X.HACK.A
-    ).length;
-    const ctn = ct.filter((st: ServerTarget) => st.status.action !== X.HACK.A);
-    ns.tprint(`[Targets] ${ct.length} P${ctPrimed}|N${ctn.length}`);
-    // 1. If we are under targets
-    if (ct.length < xTargets || ctPrimed >= xPrimed) {
-      // ns.tprint(`We are under the limit by ${xTargets - ct.length}`);
-      const aTargets = this.tHosts
-        .reduce((ast: ServerTarget[], h: string) => {
-          const st = new ServerTarget(ns, h);
-          if (st.isTarget) ast.push(st);
-          return ast;
-        }, [])
-        .sort((a: ServerTarget, b: ServerTarget) => b.x.bValue - a.x.bValue);
-
-      while (aTargets.length > 0) {
-        const qt = aTargets.pop() as ServerTarget;
-        const { hostname: id } = qt;
-        const { bValue: value } = qt.x;
-        const primed = qt.status.action === X.HACK.A;
-        let cIndex = ct.findIndex((pt: ServerTarget) => pt.hostname === id);
-        ns.tprint(`${id} [${cIndex}|${primed}|${value.toFixed(0)}]`);
-
-        if (ct.length < xTargets && cIndex < 0) {
-          ns.tprint(`:: Added ${qt.hostname} Need [${xTargets - ct.length}]`);
-          ct.push(qt);
-          if (primed) ctPrimed += 1;
-        } else if (primed && cIndex < 0) {
-          if (ctPrimed < xPrimed) {
-            // Under, just add it
-            ns.tprint(
-              `:: Add ${qt.hostname} Under prime [${xPrimed - ctPrimed}]`
-            );
-            ct.push(qt);
-            ctPrimed += 1;
-          } else if (ctPrimed >= xPrimed) {
-            // Primed and can replace a lower primed in list
-            const dIndex = ct.reduce(
-              (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
-                if (curr.status.action === X.HACK.A) {
-                  if (curr.x.bValue < st[pI].x.bValue) return i;
-                }
-                return pI;
-              },
-              0
-            );
-            const dPrime = ct[dIndex];
-            if (value > dPrime.x.bValue && cIndex < 0) {
-              ns.tprint(`:: PRIME ${ct[dIndex].hostname} for ${qt.hostname}`);
-              ct[dIndex] = qt;
-              cIndex = dIndex;
+      if (this.nRamNow > st.x.bRam) {
+        const split = this.updateNodes().filter(
+          (n: SNode) => n.ramNow > xWeakRam
+        );
+        let pBatches = Math.floor((this.nRamNow * 0.8) / st.x.bRam);
+        // ns.tprint(`Split batch ${st.hostname} (${pBatches})`);
+        // pBatches = pBatches > xBatches ? xBatches : pBatches; // FIXME:
+        pBatches = pBatches > this.dBatch ? this.dBatch : pBatches;
+        if (pBatches > 0) {
+          for (let c = 0; c < pBatches; c += 1) {
+            let rhTh = hTh;
+            let rwTh = wTh;
+            let rgTh = gTh;
+            let rwagTh = wagTh;
+            for (let i = 0; i < split.length; i += 1) {
+              const n = new Server(ns, split[i].id);
+              const { hostname: nID } = n;
+              const { hostname: tID } = st;
+              if (rhTh > 0 && n.ram.now > xHackRam) {
+                let nhTh = Math.floor(n.ram.now / xHackRam);
+                nhTh = rhTh > nhTh ? nhTh : rhTh;
+                const nhTime = hTime + nBuffer * xBuffer;
+                ns.exec(xHack, nID, nhTh, tID, false, nhTime);
+                rhTh -= nhTh;
+              }
+              if (rwTh > 0 && n.ram.now > xWeakRam) {
+                let nwTh = Math.floor(n.ram.now / xWeakRam);
+                nwTh = rwTh > nwTh ? nwTh : rwTh;
+                const nwTime = wTime + nBuffer * xBuffer;
+                ns.exec(xWeak, nID, nwTh, tID, false, nwTime);
+                rwTh -= nwTh;
+              }
+              if (rgTh > 0 && n.ram.now > xGrowRam) {
+                let ngTh = Math.floor(n.ram.now / xGrowRam);
+                ngTh = rgTh > ngTh ? ngTh : rgTh;
+                const ngTime = gTime + nBuffer * xBuffer;
+                ns.exec(xGrow, nID, ngTh, tID, false, ngTime);
+                rgTh -= ngTh;
+              }
+              if (rwagTh > 0 && n.ram.now > xWeakRam) {
+                let nwagTh = Math.floor(n.ram.now / xWeakRam);
+                nwagTh = rwagTh > nwagTh ? nwagTh : rwagTh;
+                const nwagTime = wagTime + nBuffer * xBuffer;
+                ns.exec(xWeak, nID, nwagTh, tID, false, nwagTime);
+                rwagTh -= nwagTh;
+              }
+              if (rhTh <= 0 && rwTh <= 0 && rgTh <= 0 && rwagTh <= 0) {
+                rhTh = hTh;
+                rwTh = wTh;
+                rgTh = gTh;
+                rwagTh = wagTh;
+                nBuffer += 1;
+                st.setBatches = st.batches + 1;
+              }
             }
           }
-        } else if (cIndex < 0) {
-          // Not primed but can replace the lowest one
-          const dIndex = ct.reduce(
-            (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
-              if (curr.status.action !== X.HACK.A) {
-                if (curr.x.bValue < st[pI].x.bValue) return i;
-              }
-              return pI;
-            },
-            0
-          );
-          const dNext = ct[dIndex];
-          if (value > dNext.x.bValue) {
-            ns.tprint(`:: DROP ${ct[dIndex].hostname} for ${qt.hostname}`);
-            ct[dIndex] = qt;
-            cIndex = dIndex;
-          }
+          return eTime - sTime + nBuffer * xBuffer + xDelay;
         }
-
-        // if (cIndex < 0) {
-        //   // Not primed but can replace the lowest one
-        //   const dIndex = ct.reduce(
-        //     (pI, curr: ServerTarget, i, st: ServerTarget[]) => {
-        //       if (curr.status.action !== X.HACK.A) {
-        //         if (curr.x.bValue < st[pI].x.bValue) return i;
-        //       }
-        //       return pI;
-        //     },
-        //     0
-        //   );
-        //   const dNext = ct[dIndex];
-        //   // ns.tprint(
-        //   //   `dIndex: ${dIndex} ${
-        //   //     dNext.hostname
-        //   //   } is the lowest (${dNext.x.bValue.toFixed(0)})`
-        //   // );
-        //   if (value > dNext.x.bValue) {
-        //     ns.tprint(`:: Dropping ${ct[dIndex].hostname} for ${qt.hostname}`);
-        //     ct[dIndex] = qt;
-        //     cIndex = dIndex;
-        //   }
-        // }
       }
     }
-    // 2. Are we at batch ready and can swap
-    // 2. If we are at targets and theres something better
-
-    this.updatePorts();
   }
 
-  // ******** FUNCTIONS
-  // hack(st: ServerTarget) {
-  //   // this.ns.tprint(`We would HACK ${st.hostname}`);
-  //   if (st.nextUpdate < performance.now()) {
-  //     st.update();
-  //     const nodes = this.updateNodes().filter(
-  //       (n: SNode) => n.ramNow > xWeakRam
-  //     );
-  //     const { nRamNow } = this;
-  //     const { hThreads, wThreads, gThreads, wagThreads } = st.x;
-  //     const sTime = performance.now() + xDelay;
-  //     const eTime = sTime + st.x.wTime + xBuffer;
-  //     const hTime = eTime - xBuffer * 3 - (st.x.hTime + xBuffer);
-  //     const wTime = eTime - xBuffer * 2 - (st.x.wTime + xBuffer);
-  //     const gTime = eTime - xBuffer * 1 - (st.x.gTime + xBuffer);
-  //     const wagTime = eTime - (st.x.wTime + xBuffer);
-  //     let dSpacer = 1;
-  //     let fBatch = false;
-  //     st.setBatches = 0;
-  //     // this.ns.tprint(`Batches Pre: ${st.batches}`);
-
-  //     if (nRamNow > st.x.bRam) {
-  //       // We have the potential for partial batch nodes
-  //       let pBatches = Math.floor((nRamNow * 0.8) / st.x.bRam);
-  //       pBatches = pBatches > xBatches ? xBatches : pBatches;
-  //       // this.ns.tprint(`We can do ${pBatches} Batches`);
-  //       let rhThreads = hThreads;
-  //       let rwThreads = wThreads;
-  //       let rgThreads = gThreads;
-  //       let rwagThreads = wagThreads;
-  //       for (let i = 0; i < nodes.length; i += 1) {
-  //         const n = new Server(this.ns, nodes[i].id);
-  //         while (pBatches > 0 && n.ram.now > xWeakRam) {
-  //           if (rhThreads > 0 && n.ram.now > xHackRam) {
-  //             // Do Hack
-  //             let nhT = Math.floor(n.ram.now / xHackRam);
-  //             const nhTime = hTime + dSpacer * xBuffer;
-  //             nhT = rhThreads > nhT ? nhT : rhThreads;
-  //             if (nhT > 0) {
-  //               this.ns.exec(
-  //                 xHack,
-  //                 n.hostname,
-  //                 nhT,
-  //                 st.hostname,
-  //                 false,
-  //                 nhTime
-  //               );
-  //               rhThreads -= nhT;
-  //               fBatch = true;
-  //               // FIXME:
-  //               // this.ns.tprint(
-  //               //   `Batch: [${dBuff}]${
-  //               //     n.hostname
-  //               //   } fired ${nhT} HACK (${rhThreads}) left on ${
-  //               //     st.hostname
-  //               //   } [${formatTime(this.ns, st.x.hTime)}|${dBuff}|${
-  //               //     (dBuff * xDelay) / 1000
-  //               //   }s] ${formatTime(this.ns, nhTime - sTime)}`
-  //               // );
-  //             }
-  //           }
-
-  //           if (rwThreads > 0 && n.ram.now > xWeakRam) {
-  //             // Do Weak
-  //             let nwT = Math.floor(n.ram.now / xWeakRam);
-  //             const nwTime = wTime + dSpacer * xBuffer;
-  //             nwT = rwThreads > nwT ? nwT : rwThreads;
-  //             if (nwT > 0) {
-  //               this.ns.exec(
-  //                 xWeak,
-  //                 n.hostname,
-  //                 nwT,
-  //                 st.hostname,
-  //                 false,
-  //                 nwTime
-  //               );
-  //               rwThreads -= nwT;
-  //               fBatch = true;
-  //               // FIXME:
-  //               // this.ns.tprint(
-  //               //   `Batch: [${dBuff}]${
-  //               //     n.hostname
-  //               //   } fired ${nwT} WEAK (${rwThreads}) left on ${
-  //               //     st.hostname
-  //               //   } [${formatTime(this.ns, st.x.wTime)}|${dBuff}|${
-  //               //     (dBuff * xDelay) / 1000
-  //               //   }s] ${formatTime(this.ns, nwTime - sTime)}`
-  //               // );
-  //             }
-  //           }
-
-  //           if (rgThreads > 0 && n.ram.now > xGrowRam) {
-  //             // Do Grow
-  //             let ngT = Math.floor(n.ram.now / xGrow);
-  //             const ngTime = gTime + dSpacer * xBuffer;
-  //             ngT = rwThreads > ngT ? ngT : rgThreads;
-  //             if (ngT > 0) {
-  //               this.ns.exec(
-  //                 xGrow,
-  //                 n.hostname,
-  //                 ngT,
-  //                 st.hostname,
-  //                 false,
-  //                 ngTime
-  //               );
-  //               rgThreads -= ngT;
-  //               fBatch = true;
-  //               // FIXME:
-  //               // this.ns.tprint(
-  //               //   `Batch: [${dBuff}]${
-  //               //     n.hostname
-  //               //   } fired ${ngT} GROW (${rgThreads}) left on ${
-  //               //     st.hostname
-  //               //   } [${formatTime(this.ns, st.x.gTime)}|${dBuff}|${
-  //               //     (dBuff * xDelay) / 1000
-  //               //   }s] ${formatTime(this.ns, ngTime - sTime)}`
-  //               // );
-  //             }
-  //           }
-
-  //           if (rwagThreads > 0 && n.ram.now > xWeakRam) {
-  //             // Do Weak after grow
-  //             let nwagT = Math.floor(n.ram.now / xWeakRam);
-  //             const nwagTime = wagTime + dSpacer * xBuffer;
-  //             nwagT = rwagThreads > nwagT ? nwagT : rwagThreads;
-  //             if (nwagT > 0) {
-  //               this.ns.exec(
-  //                 xWeak,
-  //                 n.hostname,
-  //                 nwagT,
-  //                 st.hostname,
-  //                 false,
-  //                 nwagTime
-  //               );
-  //               rwagThreads -= nwagT;
-  //               fBatch = true;
-  //               // FIXME:
-  //               // this.ns.tprint(
-  //               //   `Batch: [${dBuff}]${
-  //               //     n.hostname
-  //               //   } fired ${nwagT} WEAKag (${rwagThreads}) left on ${
-  //               //     st.hostname
-  //               //   } [${formatTime(this.ns, st.x.wTime)}|${dBuff}|${
-  //               //     (dBuff * xDelay) / 1000
-  //               //   }s] ${formatTime(this.ns, nwagTime - sTime)}`
-  //               // );
-  //             }
-  //           }
-
-  //           if (
-  //             rhThreads <= 0 &&
-  //             rwThreads <= 0 &&
-  //             rgThreads <= 0 &&
-  //             rwagThreads <= 0
-  //           ) {
-  //             rhThreads = hThreads;
-  //             rwThreads = wThreads;
-  //             rgThreads = gThreads;
-  //             rwagThreads = wagThreads;
-  //             pBatches -= 1;
-  //             st.setBatches = st.batches + 1;
-  //             // FIXME:
-  //             // this.ns.tprint(
-  //             //   `Batch: [${dBuff}] on ${st.hostname} [${formatTime(
-  //             //     this.ns,
-  //             //     st.x.wTime
-  //             //   )}|1s|${(dBuff * xDelay) / 1000}s|1s|3s] ${formatTime(
-  //             //     this.ns,
-  //             //     st.x.wTime + xDelay + dBuff * xDelay + 3000
-  //             //   )}`
-  //             // );
-  //             dSpacer += 1;
-  //             fBatch = true;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     // else if (nRamNow > xHackRam) {
-  //     //   this.ns.tprint('Partial hack:');
-  //     //   this.ns.tprint(nodes);
-  //     // }
-
-  //     // this.ns.tprint(`Batches Post: ${st.batches}`);
-  //     if (fBatch) st.setUpdate(st.x.wTime + dSpacer * xBuffer + xDelay + 3000);
-  //     // st.update(TIME.SERVERS);
-  //   } // else st.update(TIME.SERVERS);
-  // }
-
   weak(st: ServerTarget) {
-    // this.ns.tprint(`We would WEAK ${st.hostname}`);
     if (st.updateAt < performance.now()) {
-      st.update();
+      // st.update();
       const nodes = this.updateNodes().filter(
         (n: SNode) => n.ramNow > xWeakRam
       );
@@ -646,31 +502,19 @@ export default class Puppeteer {
           if (nwThreads > 0) {
             this.ns.exec(xWeak, n.id, nwThreads, st.hostname, false, dTime);
             rwThreads -= nwThreads;
-            // FIXME:
-            // this.ns.tprint(
-            //   `${n.id} fired ${nwThreads} pWEAK (${rwThreads}) left on ${
-            //     st.hostname
-            //   } [${formatTime(this.ns, st.x.wTime)}|${
-            //     (xDelay * 3) / 1000
-            //   }s] ${formatTime(this.ns, st.x.wTime + xDelay * 3)}`
-            // );
             fWeak = true;
           }
           if (rwThreads <= 0) break;
         }
-        // this.ns.tprint(`Still need: ${rwThreads}`);
       }
       if (fWeak) return st.x.wTime + xDelay * 3;
-      // else st.update(TIME.SERVERS);
-    } // else st.update(TIME.SERVERS);
+    }
     return TIME.SERVERS;
   }
 
-  // async grow(st: ServerTarget) {
   grow(st: ServerTarget) {
-    // this.ns.tprint(`We would GROW ${st.hostname}`);
     if (st.updateAt < performance.now()) {
-      st.update();
+      // st.update();
       const nodes = this.updateNodes().filter(
         (n: SNode) => n.ramNow > xWeakRam
       );
@@ -685,75 +529,14 @@ export default class Puppeteer {
           if (ngThreads > 0) {
             this.ns.exec(xGrow, n.id, ngThreads, st.hostname, false, dTime);
             rgThreads -= ngThreads;
-            // FIXME:
-            // this.ns.tprint(
-            //   `${n.id} fired ${ngThreads} pGROW (${rgThreads}) left on ${
-            //     st.hostname
-            //   } [${formatTime(this.ns, st.x.gTime)}|${
-            //     (xDelay * 3) / 1000
-            //   }s] ${formatTime(this.ns, st.x.gTime + xDelay * 3)}`
-            // );
             fGrow = true;
           }
           if (rgThreads <= 0) break;
         }
-        // this.ns.tprint(`Still need: ${rwThreads}`);
       }
       if (fGrow) return st.x.gTime + xDelay * 3;
-      // else st.update(TIME.SERVERS);
-    } // else st.update(TIME.SERVERS);
-    return TIME.SERVERS;
-  }
-
-  xHack(st: ServerTarget) {
-    // another try at this
-    if (st.updateAt < performance.now()) {
-      st.batches = 0;
-      const { ns } = this;
-      // st.update();
-      const nodes = this.updateNodes().filter(
-        (n: SNode) => n.ramNow > st.x.bRam
-      );
-      const {
-        hThreads: hTh,
-        wThreads: wTh,
-        gThreads: gTh,
-        wagThreads: wagTh,
-        bRam,
-      } = st.x;
-      // this.ns.tprint(nodes);
-
-      if (nodes.length > 0 && hTh > 0 && wTh > 0 && gTh > 0 && wagTh > 0) {
-        const sTime = performance.now() + xDelay;
-        const eTime = sTime + st.x.wTime + xBuffer;
-        const hTime = eTime - xBuffer * 3 - (st.x.hTime + xBuffer);
-        const wTime = eTime - xBuffer * 2 - (st.x.wTime + xBuffer);
-        const gTime = eTime - xBuffer * 1 - (st.x.gTime + xBuffer);
-        const wagTime = eTime - (st.x.wTime + xBuffer);
-        let nBuffer = 1;
-        // ns.tprint(`These nodes can batch`);
-        nodes.forEach((sn: SNode) => {
-          ns.tprint(`${sn.id} ${ns.formatRam(sn.ramNow, 0)}`);
-          const n = new Server(ns, sn.id);
-          const { hostname: nID } = n;
-          const { hostname: tID } = st;
-          // const nDelay = nBuffer * xBuffer;
-          while (n.ram.now > bRam && st.batches < xBatches) {
-            ns.exec(xHack, nID, hTh, tID, false, hTime + nBuffer * xBuffer);
-            ns.exec(xWeak, nID, wTh, tID, false, wTime + nBuffer * xBuffer);
-            ns.exec(xGrow, nID, gTh, tID, false, gTime + nBuffer * xBuffer);
-            ns.exec(xWeak, nID, wagTh, tID, false, wagTime + nBuffer * xBuffer);
-            nBuffer += 1;
-            st.setBatches = st.batches + 1;
-          }
-        });
-        // st.setUpdate(st.x.wTime + xDelay + nBuffer * xBuffer + 3000);
-        return eTime - sTime + nBuffer * xBuffer + xDelay;
-      }
-      if (this.nRamMax < st.x.bRam) {
-        ns.tprint(`We have no nodes that can batch`);
-      }
     }
+    return TIME.SERVERS;
   }
 }
 
@@ -773,7 +556,7 @@ export async function main(ns: NS) {
   ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
-  ns.setTitle('Puppeteer X3');
+  ns.setTitle('Puppeteer');
   ns.resizeTail(xW, xH);
   ns.moveTail(wWidth - xW - xOX, 0);
   const start = performance.now();
@@ -795,7 +578,7 @@ export async function main(ns: NS) {
   // ns.tprint(puppeteer.targets[0]);
 
   // let profiler = 0;
-  console.log(`==== New Profiler ====`);
+  // console.log(`==== New Profiler ====`);
   // ******** DEBUG ONETIME END ********
 
   // ******** Primary (Loop Time Code)
@@ -813,7 +596,9 @@ export async function main(ns: NS) {
     const mRamNow = ns.formatRam(nRamNow, 1);
     const mRamMax = ns.formatRam(nRamMax, 1);
     const mStats = `🔋${mRamNow}/${mRam} | 💎${mRamMax}`;
-    ns.print(`[Time] ${formatTime(ns, now - start)} | ${mStats} *`); // FIXME:
+    ns.print(
+      `[Time] ${formatTime(ns, now - start)} | ${mStats} *${puppeteer.dBatch}`
+    ); // FIXME:
     updateHeaders(ns);
 
     const { hacking: pLevel } = ns.getPlayer().skills;
@@ -823,7 +608,7 @@ export async function main(ns: NS) {
       // await puppeteer.updateTargets();
       puppeteer.updateHosts();
       // puppeteer.updateNodes();
-      puppeteer.xTargets();
+      puppeteer.updateTargets();
     }
 
     // if (dTimer >= 8) {
@@ -852,24 +637,18 @@ export async function main(ns: NS) {
         const { action } = st.status;
         switch (action) {
           case X.HACK.A: {
-            // await puppeteer.hack(st);
-            // puppeteer.hack(st); // FIXME:
-            const delay = puppeteer.xHack(st);
+            const delay = puppeteer.hack(st);
             st.setUpdate(delay);
             break;
           }
           case X.WEAK.A: {
-            // await puppeteer.weak(st);
             const delay = puppeteer.weak(st);
             st.setUpdate(delay);
-            // if (res) st.update(st.x.wTime + xDelay);
             break;
           }
           case X.GROW.A: {
-            // await puppeteer.grow(st);
             const delay = puppeteer.grow(st);
             st.setUpdate(delay);
-            // st.update(st.x.gTime + xDelay);
             break;
           }
           case X.WAIT.A: {

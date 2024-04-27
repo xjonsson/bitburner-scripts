@@ -123,7 +123,7 @@ export class ServerTarget extends Server {
       bValue: -1,
     };
     this.batches = 0;
-    this.status = { action: '', icon: '' };
+    this.status = { action: X.WAIT.A, icon: X.WAIT.I };
     this.updateAt = update;
 
     // Initiatlize the batch

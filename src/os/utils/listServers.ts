@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { ServerInfo, Server } from '/os/modules/Server';
-import ServerTarget from '/os/modules/ServerTarget';
+import { ServerTarget } from '/os/modules/ServerTarget';
 import { formatTime } from 'os/utils/formatTime';
 /* eslint-enable */
 
@@ -57,7 +57,6 @@ export async function main(ns: NS) {
     );
 
     servers.forEach((s: ServerTarget) => {
-      const batch = s.getBatch(true, 1);
       ns.printf(
         rowHeader,
         s.isServer ? '' : s.level,
@@ -66,22 +65,22 @@ export async function main(ns: NS) {
         /* eslint-enable */
         s.hostname,
         s.isBot ? ns.formatRam(s.ram.max, 0) : '',
-        /* eslint-disable */
-        s.aAttack ? '💰' : s.aWeak ? '🔓' : s.aGrow ? '🌿' : '',
-        /* eslint-enable */
+        s.status.icon,
         s.isCash ? ns.formatNumber(s.money.max, 1) : '',
         s.isCash ? ns.formatPercent(s.money.now / s.money.max, 0) : '',
-        s.aWeak ? `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}` : '',
-        s.aWeak ? s.weakThreads : '',
-        s.aGrow ? s.growThreads() : '',
-        s.aGrow ? s.weakThreadsAfterGrow() : '',
-        s.aHack ? s.hackThreads : '',
-        s.aHack ? formatTime(ns, s.hackTime) : '',
-        s.aWeak ? formatTime(ns, s.weakTime) : '',
-        s.aGrow ? formatTime(ns, s.growTime) : '',
+        s.status.action === 'WEAK'
+          ? `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}`
+          : '',
+        s.status.action === 'WEAK' ? s.x.wThreads : '',
+        s.status.action === 'GROW' ? s.x.gThreads : '',
+        s.status.action === 'GROW' ? s.x.wagThreads : '',
+        s.status.action === 'HACK' ? s.x.hThreads : '',
+        s.status.action === 'HACK' ? formatTime(ns, s.x.hTime) : '',
+        s.status.action === 'WEAK' ? formatTime(ns, s.x.wTime) : '',
+        s.status.action === 'GROW' ? formatTime(ns, s.x.gTime) : '',
         // s.aAttack ? ns.formatRam(batch.dRam, 2) : '',
-        ns.formatRam(batch.dRam, 1),
-        ns.formatNumber(batch.dValue, 2)
+        ns.formatRam(s.x.bRam, 1),
+        ns.formatNumber(s.x.bValue, 2)
       );
     });
 
