@@ -120,7 +120,7 @@ export const LAYOUT: any = {
     xOY: 158 + 86 + 86,
   },
   PUPPETEER: {
-    xW: 1050,
+    xW: 990,
     xH: (CONFIGS.hacking.xTargets + 2) * 24 + 38, // 326,
     xOX: 220,
     xOY: 0,
