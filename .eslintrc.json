@@ -19,7 +19,7 @@
     "tsconfig.json"
   ],
   "rules": {
-    "no-console": "warn",
+    "no-console": "off",
     "no-debugger": "warn",
     "no-constant-condition": 0,
     "@typescript-eslint/no-explicit-any": 0,
@@ -29,8 +29,7 @@
       {
         "trailingComma": "es5",
         "singleQuote": true,
-        "printWidth": 80,
-        "tabWidth": 2
+        "printWidth": 80
       }
     ]
   }
