@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/xjonsson/bitburner-scripts/compare/v0.2.0...v0.2.1) (2024-04-27)
+
+
+### Features
+
+* **contracts:** refactored and cleaned contracts. Easier to read and more efficient ([63fbc5a](https://github.com/xjonsson/bitburner-scripts/commit/63fbc5a2983f3c93de06ada2c9d0d3641f651fa1))
+* **hosting:** fixed [#23](https://github.com/xjonsson/bitburner-scripts/issues/23) Refactor hosting to be cleaner, compact and more efficient ([e600d89](https://github.com/xjonsson/bitburner-scripts/commit/e600d8925ef4a6b420a2677f1342e992893ae399))
+* **puppeteer:** added selection between primed and ready targets. Much cleaner faster loops ([224dfb9](https://github.com/xjonsson/bitburner-scripts/commit/224dfb9626d0c66a047fd5244b91d902b6cbd72c))
+* **puppeteer:** clean switching, target selection, risk exclusion, reconnects, dynamic batching ([edc775f](https://github.com/xjonsson/bitburner-scripts/commit/edc775f9c2a86da76c634b4bc85e466a025d8473))
+* **puppeteer:** reworked Puppeteer and ServerTarget, looks like garbage but 62% more efficient ([07c5007](https://github.com/xjonsson/bitburner-scripts/commit/07c5007f913c94676c97f1d8849744b44f5e95d6))
+* **puppeteer:** working version, still small tweaks but 20b lvl450 from fresh in 45m is decent ([8fa872f](https://github.com/xjonsson/bitburner-scripts/commit/8fa872f31e7b5ab34b77e82d048aa8dda624dcd0))
+* **servertarget:** added cleaner code, caching, and async functions. 38% faster, uses 5-6% CPU ([120ddd1](https://github.com/xjonsson/bitburner-scripts/commit/120ddd12ccc3d287078294a6173f5d86ac762222))
+
+
+### Bug Fixes
+
+* **puppeteer:** removing async keeps everything in sync and perfect HWGW batches once primed ([46b7288](https://github.com/xjonsson/bitburner-scripts/commit/46b7288a34577eaaa880ff7f171113493bebca2f))
+* **puppeteer:** seeing if async is causing the issues in timings ([4f05fd4](https://github.com/xjonsson/bitburner-scripts/commit/4f05fd41912d81c3b58eaa4e0570ba2947e2cfda))
+* **puppeteer:** wIP Issue is specifically with updateTargets during swap ([4a88102](https://github.com/xjonsson/bitburner-scripts/commit/4a88102f3ac91056e5a7a2276c2ae38f7d959f56))
+
 ## [0.2.0](https://github.com/xjonsson/bitburner-scripts/compare/v0.1.5...v0.2.0) (2024-04-17)
 
 
