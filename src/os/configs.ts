@@ -211,16 +211,15 @@ export const CACHE: any = {};
 
 // ******** Puppeteer HWGW
 export const DEPLOY: any = {
-  xMin: `${PATHS.DEPLOY}/xmin.js`, // Minimal script
-  xMinRam: 2.41, // Minimal script RAM required
-  xHack: `${PATHS.DEPLOY}/xhack.js`, // HWGW Hack script
-  xHackRam: 1.71, // HWGW Hack script RAM required
-  xWeak: `${PATHS.DEPLOY}/xweak.js`, // HWGW Weak script
-  xWeakRam: 1.76, // HWGW Weak script RAM required
-  xGrow: `${PATHS.DEPLOY}/xgrow.js`, // HWGW Grow script
-  xGrowRam: 1.76, // HWGW Grow script RAM required
-  xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
-  xShareRam: 4.0, // Rep Share RAM required
+  // Script, Action, Icon, Ram, Script
+  MIN: { A: 'MIN', I: '🐢', R: 2.41, X: `${PATHS.DEPLOY}/xmin.js` },
+  HACK: { A: 'HACK', I: '💰', R: 1.71, X: `${PATHS.DEPLOY}/xhack.js` },
+  WEAK: { A: 'WEAK', I: '🔓', R: 1.76, X: `${PATHS.DEPLOY}/xweak.js` },
+  GROW: { A: 'GROW', I: '🌿', R: 1.76, X: `${PATHS.DEPLOY}/xgrow.js` },
+  SHARE: { A: 'SHARE', I: '🫶', R: 4.0, X: `${PATHS.DEPLOY}/xshare.js` },
+  WAIT: { A: 'WAIT', I: '⏱️' },
+  RISK: { A: 'RISK', I: '🎲' },
+  ERROR: { A: 'ERROR', I: '❌' },
 };
 
 // ******** Corporations Configurations

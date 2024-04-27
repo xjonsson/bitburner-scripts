@@ -8,18 +8,10 @@ import { Server } from '/os/modules/Server';
 
 // ******** Globals
 const { xSkim } = CONFIGS.hacking;
-const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
+const { HACK, WEAK, GROW, WAIT, RISK, ERROR } = DEPLOY;
 const { ServerBaseGrowthIncr: sBaseGrowth } = ServerConstants;
 const { ServerMaxGrowthLog: sMaxGrowth } = ServerConstants;
 const { ServerWeakenAmount: sWeakAmount } = ServerConstants;
-export const X = {
-  HACK: { A: 'HACK', I: '💰' },
-  WEAK: { A: 'WEAK', I: '🔓' },
-  GROW: { A: 'GROW', I: '🌿' },
-  WAIT: { A: 'WAIT', I: '⏱️' },
-  RISK: { A: 'RISK', I: '🎲' },
-  ERROR: { A: 'ERROR', I: '❌' },
-};
 
 // ******** SERVER TARGET UTILITY FUNCTIONS
 // ******** Computed GROWTH ON SERVER
@@ -79,24 +71,22 @@ function cgThreads(
 }
 
 // ******** SERVER TARGET CLASS
-export class ServerTarget extends Server {
+export class TServer extends Server {
   ns: NS;
   pMult: number; // Player multiplier for growth
   pMultBN: number; // Bitnode multiplier for growth
-  x: {
-    hTime: number; // Hack Time
-    wTime: number; // Weak Time
-    gTime: number; // Grow Time
-    hackChance: number; // The chance to hack the target
-    pwThreads: number; // Prepare Weak Threads
-    pgThreads: number; // Prepare Grow Threads
-    hThreads: number; // Hack Threads
-    wThreads: number; // Weak Threads
-    gThreads: number; // Grow Threads
-    wagThreads: number; // Weak after Grow Threads
-    bRam: number; // RAM for a complete batch
-    bValue: number; // Value of HWGW batch
-  };
+  hTime: number; // Hack Time
+  wTime: number; // Weak Time
+  gTime: number; // Grow Time
+  hChance: number; // Hack Chance
+  pwTh: number; // Prepare Weak Threads
+  pgTh: number; // Prepare Grow Threads
+  hTh: number; // Hack Threads
+  wTh: number; // Weak Threads
+  gTh: number; // Grow Threads
+  wagTh: number; // Weak after Grow Threads
+  bRam: number; // Batch RAM: Ram for a complete batch
+  bValue: number; // Batch Value: Value of HWGW batch
   batches: number; // Number of active batches
   status: { action: string; icon: string };
   updateAt: number; // Next update
@@ -108,33 +98,26 @@ export class ServerTarget extends Server {
     this.pMult = ns.getPlayer().mults.hacking_grow;
     this.pMultBN =
       getBitNodeMults(ns.getResetInfo().currentNode, 1).ServerGrowthRate || 1;
-    this.x = {
-      hTime: -1,
-      wTime: -1,
-      gTime: -1,
-      hackChance: -1,
-      pwThreads: -1,
-      pgThreads: -1,
-      hThreads: -1,
-      wThreads: -1,
-      gThreads: -1,
-      wagThreads: -1,
-      bRam: -1,
-      bValue: -1,
-    };
+    this.hTime = -1;
+    this.wTime = -1;
+    this.gTime = -1;
+    this.hChance = -1;
+    this.pwTh = -1;
+    this.pgTh = -1;
+    this.hTh = -1;
+    this.wTh = -1;
+    this.gTh = -1;
+    this.wagTh = -1;
+    this.bRam = -1;
+    this.bValue = -1;
     this.batches = 0;
-    this.status = { action: X.WAIT.A, icon: X.WAIT.I };
+    this.status = { action: WAIT.A, icon: WAIT.I };
     this.updateAt = update;
 
-    // Initiatlize the batch
     if (update < performance.now()) this.update();
   }
 
   // ******** METHODS
-  get nextUpdate(): number {
-    return this.updateAt;
-  }
-
   set setBatches(count: number) {
     this.batches = count;
   }
@@ -156,32 +139,31 @@ export class ServerTarget extends Server {
     const wTh = Math.ceil(hTh / 25);
     const gTh = cgThreads(mBatch, mMax, mGrow, sNow, 1, pMult, pMultBN);
     const wagTh = Math.ceil(gTh / 12.5);
-    const bRam =
-      hTh * xHackRam + wTh * xWeakRam + gTh * xGrowRam + wagTh * xWeakRam;
+    const bRam = hTh * HACK.R + wTh * WEAK.R + gTh * GROW.R + wagTh * WEAK.R;
 
-    this.x.hTime = hTime;
-    this.x.wTime = hTime * 4;
-    this.x.gTime = hTime * 3.2;
-    this.x.hackChance = hChance;
-    this.x.pwThreads = Math.ceil((sNow - sMin) / sWeakAmount);
-    this.x.pgThreads = cgThreads(mNow, mMax, mGrow, sNow, 1, pMult, pMultBN);
-    this.x.hThreads = hTh;
-    this.x.wThreads = wTh;
-    this.x.gThreads = gTh;
-    this.x.wagThreads = wagTh;
-    this.x.bRam = bRam;
-    this.x.bValue =
+    this.hTime = hTime;
+    this.wTime = hTime * 4;
+    this.gTime = hTime * 3.2;
+    this.hChance = hChance;
+    this.pwTh = Math.ceil((sNow - sMin) / sWeakAmount);
+    this.pgTh = cgThreads(mNow, mMax, mGrow, sNow, 1, pMult, pMultBN);
+    this.hTh = hTh;
+    this.wTh = wTh;
+    this.gTh = gTh;
+    this.wagTh = wagTh;
+    this.bRam = bRam;
+    this.bValue =
       (mMax * xSkim) / ((hTime * 4) / 1000) / (bRam / ((hTime * 4) / 1000));
     this.batches = 0;
 
-    if (sNow > sMin) this.status = { action: X.WEAK.A, icon: X.WEAK.I };
-    else if (mNow < mMax) this.status = { action: X.GROW.A, icon: X.GROW.I };
-    else if (hChance < 1) this.status = { action: X.RISK.A, icon: X.RISK.I };
+    if (sNow > sMin) this.status = { action: WEAK.A, icon: WEAK.I };
+    else if (mNow < mMax) this.status = { action: GROW.A, icon: GROW.I };
+    else if (hChance < 1) this.status = { action: RISK.A, icon: RISK.I };
     else if (sNow <= sMin && mNow >= mMax && hChance >= 1) {
-      this.status = { action: X.HACK.A, icon: X.HACK.I };
+      this.status = { action: HACK.A, icon: HACK.I };
     } else if (Number.isNaN(this.updateAt)) {
-      this.status = { action: X.ERROR.A, icon: X.ERROR.I };
-    } else this.status = { action: X.WAIT.A, icon: X.WAIT.I };
+      this.status = { action: ERROR.A, icon: ERROR.I };
+    } else this.status = { action: WAIT.A, icon: WAIT.I };
 
     // this.updateAt = performance.now();
     return this;

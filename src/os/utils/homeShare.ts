@@ -7,7 +7,7 @@ import { formatTime } from '/os/utils/formatTime';
 
 const { ramReserve } = CONFIGS;
 const { shareRamRatio } = CONFIGS.ramRatio;
-const { xShare, xShareRam } = DEPLOY;
+const { SHARE } = DEPLOY;
 
 // ******** Utility
 function nodeThreads(ram: number, script = 1.6): number {
@@ -74,9 +74,9 @@ export async function main(ns: NS) {
       // eslint-disable-next-line no-loop-func
       nodes.forEach((n: Server) => {
         const nRam = n.ram.now * shareRamRatio;
-        const nShare = nodeThreads(nRam, xShareRam);
-        if (nShare > 0 && n.ram.now > xShareRam) {
-          ns.exec(xShare, n.hostname, nShare, false);
+        const nShare = nodeThreads(nRam, SHARE.R);
+        if (nShare > 0 && n.ram.now > SHARE.R) {
+          ns.exec(SHARE.X, n.hostname, nShare, false);
           // ns.print(`${n.hostname} (${nShare})`);
           tShare += nShare;
         }
