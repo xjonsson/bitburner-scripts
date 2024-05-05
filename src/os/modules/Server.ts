@@ -6,6 +6,33 @@ import { Scan } from '/os/utils/scan';
 
 const { ramReserve } = CONFIGS;
 
+interface SData {
+  hostname: string; // 'n00dles';
+  ip: string; // '29.2.5.3';
+  sshPortOpen: boolean; // true;
+  ftpPortOpen: boolean; // true;
+  smtpPortOpen: boolean; // true;
+  httpPortOpen: boolean; // true;
+  sqlPortOpen: boolean; // true;
+  hasAdminRights: boolean; // true;
+  cpuCores: number; // 1;
+  isConnectedTo: boolean; // false;
+  ramUsed: number; // 0;
+  maxRam: number; // 4;
+  organizationName: string; // 'Noodle Bar';
+  purchasedByPlayer: boolean; // false;
+  backdoorInstalled: boolean; // true;
+  baseDifficulty: number; // 1;
+  hackDifficulty: number; // 1.19;
+  minDifficulty: number; // 1;
+  moneyAvailable: number; // 62977.6;
+  moneyMax: number; // 70000;
+  numOpenPortsRequired: number; // 0;
+  openPortCount: number; // 5;
+  requiredHackingSkill: number; // 1;
+  serverGrowth: number; // 3000;
+}
+
 export class Server {
   // ******** Base
   hostname: string;
@@ -22,8 +49,8 @@ export class Server {
   }
 
   // ******** Refreshable details
-  get data(): any {
-    return this.ns.getServer(this.hostname);
+  get data(): SData {
+    return this.ns.getServer(this.hostname) as SData;
   }
 
   get level(): number {
@@ -42,7 +69,7 @@ export class Server {
     return this.data.openPortCount;
   }
 
-  get ram(): any {
+  get ram(): { max: number; maxReal: number; used: number; now: number } {
     return {
       max: this.data.maxRam - (this.data.hostname === 'home' ? ramReserve : 0),
       maxReal: this.data.maxRam,
@@ -51,12 +78,12 @@ export class Server {
         0,
         this.data.maxRam -
           this.data.ramUsed -
-          (this.data.hostname === 'home' ? ramReserve : 0)
+          (this.data.hostname === 'home' ? ramReserve : 0),
       ),
     };
   }
 
-  get money(): any {
+  get money(): { max: number; now: number; growth: number } {
     return {
       max: this.data.moneyMax,
       now: this.data.moneyAvailable,
@@ -64,7 +91,7 @@ export class Server {
     };
   }
 
-  get sec(): any {
+  get sec(): { min: number; now: number; base: number } {
     return {
       min: this.data.minDifficulty,
       now: this.data.hackDifficulty,
@@ -127,7 +154,6 @@ export const ServerInfo = {
   },
 };
 
-/* eslint-disable-next-line */
-export function autocomplete(data: any, args: any) {
-  return data.servers;
+export function autocomplete({ servers }: { servers: string[] }) {
+  return servers;
 }

@@ -1,12 +1,13 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CORP } from '/os/configs';
-import { CITIES, MATERIALS } from '/os/data/constants';
+import { CONSTANTS } from '/os/data/constants';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
 // ******** Configs
-const { cName, fName, sName } = CORP;
+const { CITIES } = CONSTANTS;
+const { fName, sName } = CORP;
 
 // ******** Styling
 
@@ -28,7 +29,7 @@ export async function main(ns: NS) {
   while (isRegistered && (isFarm || isSmoke)) {
     ns.clearLog();
     ns.print(
-      `${isRegistered ? '🟢' : ''}${isFarm ? '🐄' : ''}${isSmoke ? '🚬' : ''}`
+      `${isRegistered ? '🟢' : ''}${isFarm ? '🐄' : ''}${isSmoke ? '🚬' : ''}`,
     );
     ns.print(`[Cycles] ${cycles}`);
 
@@ -38,7 +39,7 @@ export async function main(ns: NS) {
     // ******** EACH START
     while (ns.corporation.getCorporation().nextState === 'START') {
       // We check the state right before start
-      CITIES.forEach((city: any) => {
+      CITIES.forEach(() => {
         // const p = c.getMaterial(fName, city, MATERIALS.Food);
         // ns.print(p);
         const p = c.getDivision(sName).products;

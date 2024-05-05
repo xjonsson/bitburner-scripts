@@ -53,7 +53,7 @@ export async function main(ns: NS) {
       'Weak',
       'Grow',
       'Batch',
-      'Value'
+      'Value',
     );
 
     servers.forEach((s: TServer) => {
@@ -80,7 +80,7 @@ export async function main(ns: NS) {
         s.status.action === 'GROW' ? formatTime(ns, s.gTime) : '',
         // s.aAttack ? ns.formatRam(batch.dRam, 2) : '',
         ns.formatRam(s.bRam, 1),
-        ns.formatNumber(s.bValue, 2)
+        ns.formatNumber(s.bValue, 2),
       );
     });
 

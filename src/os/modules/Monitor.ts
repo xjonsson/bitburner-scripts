@@ -60,6 +60,7 @@ export async function main(ns: NS) {
   ns.disableLog('getHackingLevel');
   ns.clearLog();
   ns.tail();
+  ns.setTitle('Monitor');
 
   // ******** Initialize (One Time Code)
   const start = performance.now();
@@ -80,7 +81,7 @@ export async function main(ns: NS) {
     // const focus = control?.hackTargets;
 
     // ******** Display
-    ns.print(`[Time] ${formatTime(ns, now - start)} | 🎯${pup.targetCount}`);
+    ns.print(`[Times] ${formatTime(ns, now - start)} | 🎯${pup.targetCount}`);
 
     if (pup) {
       updateHeaders(ns);

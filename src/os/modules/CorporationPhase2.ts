@@ -2,14 +2,7 @@
 import { NS } from '@ns';
 import { CORP } from '/os/configs';
 import { Corporation } from '/os/modules/Corporation';
-import {
-  CITIES,
-  UPGRADES,
-  RESEARCH,
-  BOOST,
-  INDUSTRY,
-  MATERIALS,
-} from '/os/data/constants';
+import { CONSTANTS } from '/os/data/constants';
 import {
   cBuyUpgrades,
   cCheckInvestments,
@@ -26,6 +19,12 @@ import {
 } from '/os/utils/corpFunctions';
 /* eslint-enable */
 
+const {
+  CITIES,
+  INDUSTRY,
+  CORPUPGRADES: UPGRADES,
+  CORPMATERIALS: MATERIALS,
+} = CONSTANTS;
 const { cName, fName, sName, iRounds, smoke } = CORP;
 const { pPrefix, pVerson, dCity, investmentRatio } = smoke;
 const {
@@ -38,22 +37,6 @@ const {
   uWilsonRatio,
   uAdvertRatio,
 } = investmentRatio;
-
-// const dMultiplier = 1;
-
-// ******** ENUM SAMPLE - DELETE LATER
-const sUPGRADES = [
-  'FocusWires', // 0
-  'Neural Accelerators', // 1
-  'Speech Processor Implants', // 2
-  'Nuoptimal Nootropic Injector Implants', // 3
-  'Smart Factories', // 4
-  'Smart Storage', // 5
-  'DreamSense', // 6
-  'Wilson Analytics', // 7
-  'ABC SalesBots', // 8
-  'Project Insight', // 9
-];
 
 // ******** Phase 2 - Tobacco Steps
 const phase2 = [
@@ -182,7 +165,7 @@ const phase2 = [
       if (funds > dProductBase && products.length === 0) {
         // Develop first product
         ns.print(
-          `[Product] Develop ${pName} (${ns.formatNumber(dProductBase, 1)})`
+          `[Product] Develop ${pName} (${ns.formatNumber(dProductBase, 1)})`,
         );
         c.makeProduct(sName, dCity, pName, dProductBase / 2, dProductBase / 2);
         return true;
@@ -290,7 +273,7 @@ const phase2 = [
             n,
             'MAX',
             pPrice.toFixed(2).toString(),
-            true
+            true,
           );
           ns.print(msg);
 
@@ -320,7 +303,7 @@ const phase2 = [
           // ns.tprint(nProduct); // DEBUG
         } else {
           ns.print(
-            `${n} | In development (${p.developmentProgress.toFixed(2)}%)`
+            `${n} | In development (${p.developmentProgress.toFixed(2)}%)`,
           );
         }
       });
@@ -355,8 +338,8 @@ const phase2 = [
       ns.print(
         `:::: Next version: v${nVersion} (${ns.formatNumber(
           invProduct,
-          2
-        )}) | Drop ${products[0]} (${ns.formatNumber(nProduct.dropRating, 2)})`
+          2,
+        )}) | Drop ${products[0]} (${ns.formatNumber(nProduct.dropRating, 2)})`,
       );
 
       // TODO: FIXME:
@@ -388,7 +371,7 @@ const phase2 = [
           ns.print(pName);
 
           ns.print(
-            `[Product] Develop ${pName} (${ns.formatNumber(invProduct, 1)})`
+            `[Product] Develop ${pName} (${ns.formatNumber(invProduct, 1)})`,
           );
           c.makeProduct(sName, dCity, pName, invProduct / 2, invProduct / 2);
         }
@@ -419,8 +402,8 @@ const phase2 = [
       ns.print(
         `:: [Dev: ${dCity}] ${dCitySize + 15} (${ns.formatNumber(
           uDevCityCost - invOffice,
-          1
-        )})`
+          1,
+        )})`,
       );
       // if (dCitySize < 60) uNeedDevCity = 0.25;
 
@@ -464,7 +447,7 @@ const phase2 = [
           sName,
           dCity,
           'Research & Development',
-          oMap.rnd
+          oMap.rnd,
         );
         c.setAutoJobAssignment(sName, dCity, 'Intern', 0);
         c.setAutoJobAssignment(sName, dCity, 'Unassigned', 0);
@@ -480,7 +463,7 @@ const phase2 = [
         if (oSizeOffset > 60) {
           const oCost = c.getOfficeSizeUpgradeCost(sName, n, 15);
           ns.print(
-            `:: [Office] ${n} (${o.size}) +15 (${ns.formatNumber(oCost, 2)})`
+            `:: [Office] ${n} (${o.size}) +15 (${ns.formatNumber(oCost, 2)})`,
           );
           // Process people
           if (oCost < invOffice && c.getCorporation().funds > oCost) {
@@ -508,7 +491,7 @@ const phase2 = [
               sName,
               n,
               'Research & Development',
-              oMap.rnd
+              oMap.rnd,
             );
             c.setAutoJobAssignment(sName, n, 'Intern', 0);
             c.setAutoJobAssignment(sName, n, 'Unassigned', 0);
@@ -565,11 +548,11 @@ const phase2 = [
 
       const uWilsonCost = c.getUpgradeLevelCost('Wilson Analytics');
       ns.print(
-        `:: Wilson Analytics (${ns.formatNumber(uWilsonCost - invWilson, 1)})`
+        `:: Wilson Analytics (${ns.formatNumber(uWilsonCost - invWilson, 1)})`,
       );
       if (uWilsonCost < invWilson && c.getCorporation().funds > uWilsonCost) {
         ns.print(
-          `:: [Wilson] +1 (${c.getUpgradeLevel('Wilson Analytics') + 1})`
+          `:: [Wilson] +1 (${c.getUpgradeLevel('Wilson Analytics') + 1})`,
         );
         c.levelUpgrade('Wilson Analytics');
       }

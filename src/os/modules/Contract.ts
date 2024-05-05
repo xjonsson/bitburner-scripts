@@ -3,7 +3,12 @@ import { NS } from '@ns';
 import { TIME, LAYOUT } from '/os/configs';
 import { ServerInfo } from '/os/modules/Server';
 import { solvers } from '/os/data/contracts';
+import { Banner, Text } from '/os/utils/colors';
 /* eslint-enable */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 
 // ******** CONTRACTS CLASS
 export default class Contracts {
@@ -13,7 +18,7 @@ export default class Contracts {
   attempted: number;
   solved: number;
   failed: number;
-  missing: Array<any>;
+  missing: Array<string>;
 
   constructor(ns: NS) {
     this.ns = ns;
@@ -51,24 +56,25 @@ export default class Contracts {
 
   // ******** ATTEMPT CONTRACT
   solve(c: { server: string; file: string; type: string; tries: number }) {
-    const solver = solvers[c.type];
+    const { ns } = this;
+    const { server: s, file: f, type: t, tries: a } = c;
+    const solver = solvers[t];
     if (solver) {
       this.attempted += 1;
-      // this.ns.print(`Attempting ${JSON.stringify(c, null, 2)}`);
-      const solution = solver(this.ns.codingcontract.getData(c.file, c.server));
-      const reward = this.ns.codingcontract.attempt(solution, c.file, c.server);
+      const solution = solver(ns.codingcontract.getData(f, s));
+      const r = ns.codingcontract.attempt(solution, f, s);
 
-      if (reward) {
+      if (r) {
         this.solved += 1;
-        this.ns.tprint(`${reward} for solving "${c.type}" on ${c.server}`);
+        ns.tprint(Banner.info('Contracts', `${r} for solving "${t}" on ${s}`));
       } else {
         this.failed += 1;
-        this.ns.tprint(`ERROR: Failed to solve "${c.type}" on ${c.server}`);
-        this.ns.exit();
+        ns.tprint(Banner.error('Contracts', `Failed to solve "${t}" on ${s}`));
+        ns.exit();
       }
     } else {
-      this.missing.push(c.type);
-      this.ns.tprint(`WARNING: No solver for "${c.type}" on ${c.server}`);
+      this.missing.push(t);
+      ns.tprint(Banner.warning('Contracts', `No solver for "${t}" on ${s}`));
     }
   }
 }
@@ -81,10 +87,6 @@ export async function main(ns: NS) {
   const wWidth = ns.ui.windowSize()[0];
   const wHeight = ns.ui.windowSize()[1];
   ns.disableLog('ALL');
-  // ns.disableLog('disableLog');
-  // ns.disableLog('clearLog');
-  // ns.disableLog('asleep');
-  // ns.disableLog('scan');
   ns.clearLog();
   ns.tail();
   ns.setTitle('Contracts');
@@ -102,8 +104,13 @@ export async function main(ns: NS) {
     contracts.update();
     // ******** Display & stats
     ns.clearLog();
-    ns.print(`⏱️${searches}`);
-    ns.print(`📝${attempted} ✅${solved} ❌${failed} 🔎${found}`);
+    ns.print(
+      `⏱️${Text.arg(searches.toString())} ` +
+        `📝${Text.magenta(attempted.toString())} ` +
+        `✅${Text.normal(solved.toString())} ` +
+        `❌${Text.error(failed.toString())} ` +
+        `🔎${Text.info(found.toString())}`,
+    );
 
     searches += 1;
     await ns.asleep(TIME.CONTRACTS);

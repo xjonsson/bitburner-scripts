@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, DEPLOY } from '/os/configs';
-import { ServerConstants } from '/os/data/constants';
+import { CONSTANTS } from '/os/data/constants';
 import { getBitNodeMults } from '/os/modules/BitNodes';
 import { Server } from '/os/modules/Server';
 /* eslint-enable */
@@ -9,9 +9,9 @@ import { Server } from '/os/modules/Server';
 // ******** Globals
 const { xSkim } = CONFIGS.hacking;
 const { HACK, WEAK, GROW, WAIT, RISK, ERROR } = DEPLOY;
-const { ServerBaseGrowthIncr: sBaseGrowth } = ServerConstants;
-const { ServerMaxGrowthLog: sMaxGrowth } = ServerConstants;
-const { ServerWeakenAmount: sWeakAmount } = ServerConstants;
+const { ServerBaseGrowthIncr: sgBase } = CONSTANTS.SERVERS;
+const { ServerMaxGrowthLog: sgMax } = CONSTANTS.SERVERS;
+const { ServerWeakenAmount: sWeak } = CONSTANTS.SERVERS;
 
 // ******** SERVER TARGET UTILITY FUNCTIONS
 // ******** Computed GROWTH ON SERVER
@@ -20,9 +20,9 @@ function cgThreads(
   _mMax: number,
   mGrow: number,
   secNow: number,
-  c = 1,
   pMult: number,
-  pMultBN: number
+  pMultBN: number,
+  c = 1,
 ): number {
   // const { hacking_grow: pGrow } = this.ns.getPlayer().mults;
   // const { growth } = this.money;
@@ -33,9 +33,9 @@ function cgThreads(
   if (mNow < 0) mNow = 0; // servers "can't" have less than 0 dollars on them
   if (mMax <= mNow) return 0; // no growth --> no threads
 
-  let adj = Math.log1p(sBaseGrowth / sNow);
-  if (adj >= sMaxGrowth) {
-    adj = sMaxGrowth;
+  let adj = Math.log1p(sgBase / sNow);
+  if (adj >= sgMax) {
+    adj = sgMax;
   }
 
   const k =
@@ -137,7 +137,7 @@ export class TServer extends Server {
     const hTime = this.ns.getHackTime(this.hostname);
     const hTh = Math.ceil(this.ns.hackAnalyzeThreads(hostname, mMax * xSkim));
     const wTh = Math.ceil(hTh / 25);
-    const gTh = cgThreads(mBatch, mMax, mGrow, sNow, 1, pMult, pMultBN);
+    const gTh = cgThreads(mBatch, mMax, mGrow, sNow, pMult, pMultBN, 1);
     const wagTh = Math.ceil(gTh / 12.5);
     const bRam = hTh * HACK.R + wTh * WEAK.R + gTh * GROW.R + wagTh * WEAK.R;
 
@@ -145,8 +145,8 @@ export class TServer extends Server {
     this.wTime = hTime * 4;
     this.gTime = hTime * 3.2;
     this.hChance = hChance;
-    this.pwTh = Math.ceil((sNow - sMin) / sWeakAmount);
-    this.pgTh = cgThreads(mNow, mMax, mGrow, sNow, 1, pMult, pMultBN);
+    this.pwTh = Math.ceil((sNow - sMin) / sWeak);
+    this.pgTh = cgThreads(mNow, mMax, mGrow, sNow, pMult, pMultBN, 1);
     this.hTh = hTh;
     this.wTh = wTh;
     this.gTh = gTh;

@@ -1,8 +1,9 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
-import { ControlCache } from '/os/modules/Cache';
+import { ControlCache, HacknetCache } from '/os/modules/Cache';
 import { getBitNodeMults } from '/os/modules/BitNodes';
+import { BG, Banner, Text } from '/os/utils/colors';
 /* eslint-enable */
 
 // ******** Globals
@@ -29,7 +30,7 @@ function hnShopItem(i: number, t: string, m: string, c: number, v: number) {
 }
 
 // ******** HACKNET CLASS
-export default class Hacknets {
+export class Hacknets {
   ns: NS;
   done: boolean;
   pMult: number;
@@ -39,6 +40,7 @@ export default class Hacknets {
   shoppingList: Array<{
     id: number;
     type: string;
+    msg: string;
     cost: number;
     value: number;
   }>;
@@ -65,7 +67,13 @@ export default class Hacknets {
   }
 
   get updateNodes() {
-    const s: any = [];
+    const s: Array<{
+      id: number;
+      type: string;
+      msg: string;
+      cost: number;
+      value: number;
+    }> = [];
     let nLevel = 0;
     let nMaxed = 0;
 
@@ -122,20 +130,14 @@ export default class Hacknets {
     if (nMaxed >= hnTCount) this.done = true;
     this.nodesLevel = nLevel;
     this.nodesMaxed = nMaxed;
-    this.shoppingList = s.sort((a: any, b: any) => a.cost - b.cost);
+    this.shoppingList = s.sort((a, b) => a.cost - b.cost);
     return s;
   }
 
-  async updatePorts() {
-    const portdata = {
-      done: this.done,
-      nodesCount: this.nodesCount,
-      nodesLevel: this.nodesLevel,
-      nodesMaxed: this.nodesMaxed,
-      // list: this.shoppingList, // NOTE: Add back for full shopping list
-    };
-    this.ns.clearPort(PORTS.HACKNET);
-    await this.ns.tryWritePort(PORTS.HACKNET, portdata);
+  updatePorts() {
+    const { ns, done, nodesCount, nodesLevel, nodesMaxed, shoppingList } = this;
+    const r = HacknetCache.update(ns, done, nodesCount, nodesLevel, nodesMaxed);
+    return r;
   }
 
   // ******** FUNCTIONS
@@ -174,32 +176,31 @@ export async function main(ns: NS) {
     ns.clearLog();
     // ******** Consts
     const control = ControlCache.read(ns, 'control');
-    const isShopHN = control?.isShopHN || true;
-    const reserve = control?.isReserve || 0;
+    const isShopHN = control?.isShopHN || false;
+    const reserve = control.isReserve || 0;
+    const { nodesMaxed, nodesCount } = hacknet;
 
     // ******** Display
-    const dStatus = isShopHN ? '🟢' : '🟥';
-    const dNodesMax = `👾${hacknet.nodesMaxed}`;
-    const dNodesCount = hacknet.nodesCount;
-    const dReserve = `💸${ns.formatNumber(reserve, 1)}`;
-    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hnTCount} ${dReserve}`);
+    const mStatus = isShopHN ? BG.info(' 👾 ') : BG.warning(' 👾 ');
+    const mMax = BG.normal(` ⭐️${nodesMaxed} `);
+    const mCount = BG.arg(` ${nodesCount}/${hnTCount} `);
+    const nReserve = `💸${Text.arg(ns.formatNumber(reserve, 1))}`;
+    ns.print(`${mStatus}${mMax}${mCount} ${nReserve}`);
 
     // ******** Shopping Loop
     if (isShopHN) {
       const list = hacknet.updateNodes;
-      await hacknet.updatePorts();
+      hacknet.updatePorts();
       if (hacknet.done) ns.exit();
       // Process
       const { id, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
         // Styling
         const price = ns.formatNumber(cost - hnMoney(ns, reserve), 1);
-        ns.print(`${id} ${msg} (${price})`);
+        ns.print(Banner.info(`N${id}`, `${msg} (${price})`));
 
         // Wait if we cant afford it
-        while (hnMoney(ns, reserve) < cost) {
-          await ns.sleep(TIME.HACKNET);
-        }
+        while (hnMoney(ns, reserve) < cost) await ns.sleep(TIME.HACKNET);
 
         // Buy it if we can
         switch (type) {

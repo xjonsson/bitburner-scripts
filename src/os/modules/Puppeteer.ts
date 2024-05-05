@@ -53,7 +53,7 @@ function updateHeaders(ns: NS) {
     'VPRS', // VPRS (Value Per Ram Second)
     'HWGW', // HWGW (Batches)
     // 'Step', // Action
-    'Update' // Update
+    'Update', // Update
   );
 }
 
@@ -107,7 +107,7 @@ function updateRow(ns: NS, st: TServer, now: number) {
     ns.formatNumber(st.bValue, 0), // VPRS (Value Per Ram Second)
     st.batches > 0 ? st.batches : '', // HWGW (Batches)
     // mA, // Action
-    mUpdate // Update
+    mUpdate, // Update
   );
 }
 
@@ -129,15 +129,25 @@ interface SNode {
 // ******** PUPPETEER CLASS
 export default class Puppeteer {
   ns: NS;
+
   aHosts: Array<string>;
+
   tHosts: Array<string>;
+
   nHosts: Array<string>;
+
   nodes: Array<{ hostname: string; ramMax: number; ramNow: number }>;
+
   nRam: number;
+
   nRamNow: number;
+
   nRamMax: number;
+
   dBatchRam: Array<number>;
+
   dBatch: number;
+
   targets: Array<any>;
   // tPrimed: Array<SFocus>;
   // tNext: Array<SFocus>;
@@ -247,7 +257,7 @@ export default class Puppeteer {
 
     // Past initial check, do processing
     let ctPrimed = ct.filter(
-      (st: TServer) => st.status.action === HACK.A
+      (st: TServer) => st.status.action === HACK.A,
     ).length;
     const ctRisk = ct.filter((st: TServer) => st.status.action === RISK.A);
     if (ct.length < xTargets || ctPrimed >= xPrimed || ctRisk.length > 0) {
@@ -405,7 +415,7 @@ export default class Puppeteer {
       }
       if (this.nRamNow > st.bRam) {
         const split = this.updateNodes().filter(
-          (n: SNode) => n.ramNow > WEAK.R
+          (n: SNode) => n.ramNow > WEAK.R,
         );
         let pBatches = Math.floor((this.nRamNow * 0.8) / st.bRam);
         // ns.tprint(`Split batch ${st.hostname} (${pBatches})`);
@@ -527,7 +537,7 @@ export default class Puppeteer {
 
 // ******** Main function
 export async function main(ns: NS) {
-  ns.ui.clearTerminal(); // FIXME:
+  // ns.ui.clearTerminal(); // FIXME:
   // ******** Setup
   // const { bufferX, bufferY } = LAYOUT;
   const { xW, xH, xOX, xOY } = LAYOUT.PUPPETEER;
@@ -541,15 +551,15 @@ export async function main(ns: NS) {
   ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
-  ns.setTitle('Puppeteer');
+  ns.setTitle('Puppeteer x5');
   ns.resizeTail(xW, xH);
-  ns.moveTail(wWidth - xW - xOX, 0);
+  ns.moveTail(wWidth - xW - xOX, xOY - 0);
   const start = performance.now();
 
   // ******** Initialize (One Time Code)
   let cLevel = -1;
   // let dTimer = 0; // FIXME:
-  // console.profile('Puppeteer'); // FIXME:
+  // console.profile('Puppeteer x2'); // FIXME:
   const puppeteer = new Puppeteer(ns);
   // console.time('Puppeteer :: updateTargets'); // FIXME:
   // await puppeteer.updateTargets();
