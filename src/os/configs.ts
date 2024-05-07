@@ -9,20 +9,19 @@
  */
 
 // ******** Game Modules
-export const MODULES: any = {};
-(function () {
+export const MODULES = {
   // System
-  MODULES.HACKNET = true; // true will buy hacknets (~7.2 GB)
-  MODULES.HOSTING = true; // true will buy servers (~8 GB)
-  MODULES.CONTRACTS = true; // true will solve contracts (~27 GB)
-  MODULES.PUPPETEER = true; // true will HWGW on servers (~18 GB)
-  MODULES.CORPORATIONS = false; // true will run a corporation (~100 GB) //FIXME:
-  MODULES.GANGS = false; // true will run a gang (~TBD)
-})();
+  HACKNET: true, // true will buy hacknets (~7.2 GB)
+  HOSTING: true, // true will buy servers (~8 GB)
+  CONTRACTS: true, // true will solve contracts (~27 GB)
+  PUPPETEER: true, // true will HWGW on servers (~18 GB)
+  CORPORATIONS: false, // true will run a corporation (~100 GB)
+  GANGS: false, // true will run a gang (~TBD)
+};
 
 // ******** General Configurations
 // These have been set for steady rampup, changes can cause errors
-export const CONFIGS: any = {
+export const CONFIGS = {
   ramReserve: 32, // 8GB reserved ram
   moneyReserve: 1e6, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: 0.2, // 20% of money will be used for savings
@@ -91,33 +90,33 @@ export const CONFIGS: any = {
 };
 
 // ******** Module Layout
-export const LAYOUT: any = {
+export const LAYOUT = {
   // Width, Heigh, offset X, offsetY
   topBar: 38,
   textHeight: 24,
   bufferX: 58,
   bufferY: 52,
   OS: {
-    xW: 200,
-    xH: 158,
+    xW: 220,
+    xH: 132,
   },
   CONTRACT: {
-    xW: 200,
-    xH: 86,
+    xW: 220,
+    xH: 62,
     xOX: 0,
-    xOY: 158,
+    xOY: 132,
   },
   HACKNET: {
-    xW: 200,
+    xW: 220,
     xH: 86,
     xOX: 0,
-    xOY: 158 + 86,
+    xOY: 132 + 62,
   },
   HOSTING: {
-    xW: 200,
+    xW: 220,
     xH: 110,
     xOX: 0,
-    xOY: 158 + 86 + 86,
+    xOY: 132 + 62 + 86,
   },
   PUPPETEER: {
     xW: 990,
@@ -130,7 +129,7 @@ export const LAYOUT: any = {
 };
 
 // ******** OS PATHS
-export const PATHS: any = {
+export const PATHS = {
   OS: '/os',
   // DATA: '/os/data',
   DEPLOY: '/os/deploy',
@@ -139,92 +138,87 @@ export const PATHS: any = {
 };
 
 // ******** CORE PATHS
-export const CORE: any = {};
-(function () {
+export const CORE = {
   // System
-  CORE.LAUNCHER = `${PATHS.OS}/launcher.js`;
-  CORE.TWITCH = `${PATHS.OS}/twitch.js`;
+  LAUNCHER: `${PATHS.OS}/launcher.js`,
+  TWITCH: `${PATHS.OS}/twitch.js`,
 
   // Modules
-  CORE.HACKNET = `${PATHS.MODULES}/Hacknets.js`;
-  CORE.HOSTING = `${PATHS.MODULES}/Hosting.js`;
-  CORE.CONTRACTS = `${PATHS.MODULES}/Contract.js`;
-  CORE.PUPPETEER = `${PATHS.MODULES}/Puppeteer.js`;
-  CORE.CORPORATIONS = `/dCorps.js`;
+  HACKNET: `${PATHS.MODULES}/Hacknets.js`,
+  HOSTING: `${PATHS.MODULES}/Hosting.js`,
+  CONTRACTS: `${PATHS.MODULES}/Contract.js`,
+  PUPPETEER: `${PATHS.MODULES}/Puppeteer.js`,
+  CORPORATIONS: '/dCorps.js',
   // CORE.GANGS = `/debug.js`;
-})();
+};
 
 // ******** TIMING CALCULATIONS
-export const TIME: any = {};
-(function () {
-  TIME.LAUNCHING = 1 * 1000; // 1 second launch wait
-  TIME.RUNNING = 1 * 1000; // 1 second checking pids
-  // TIME.CLOCK = 60 * 1000; // 1 min ticks
-  // TIME.REBOOT = 2 * 60; // 2 hours in ticks (minutes)
-  TIME.CONTROL = 1 * 1000; // 1 second updates (MINIMUM TIME FOR GAME)
-  TIME.PLAYER = 60 * 1000; // 1 second updates
-  // TIME.AUGMENTS = 3 * 60 * 1000; // 3 min updates
-  // TIME.SLEEVES = 2 * 1000; // 2 second updates
-  TIME.HACKNET = 3 * 1000; // 3 second updates
-  TIME.HOSTING = 10 * 1000; // 10 second updates
-  TIME.SERVERS = 10 * 1000; // 10 second updates
-  TIME.PUPPETEER = 1 * 1000; // 1 second updates
-  // TIME.FACTIONS = 30 * 1000; // 30 second updates
-  // TIME.CORPORATIONS = 20 * 1000; // 20 second updates
-  // TIME.CRIMES = 2 * 1000; // 2 second updates
-  // TIME.STOCKS = 1 * 1000; // 1 second updates
-  TIME.CONTRACTS = 2 * 60 * 1000; // 2 min updates
-})();
+export const TIME = {
+  LAUNCHING: 1 * 1000, // 1 second launch wait
+  RUNNING: 1 * 1000, // 1 second checking pids
+  // CLOCK: 60 * 1000, // 1 min ticks
+  // REBOOT: 2 * 60, // 2 hours in ticks (minutes)
+  CONTROL: 1 * 1000, // 1 second updates (MINIMUM TIME FOR GAME)
+  PLAYER: 60 * 1000, // 1 second updates
+  // AUGMENTS: 3 * 60 * 1000, // 3 min updates
+  // SLEEVES: 2 * 1000, // 2 second updates
+  HACKNET: 3 * 1000, // 3 second updates
+  HOSTING: 10 * 1000, // 10 second updates
+  SERVERS: 10 * 1000, // 10 second updates
+  PUPPETEER: 1 * 1000, // 1 second updates
+  // FACTIONS: 30 * 1000, // 30 second updates
+  // CORPORATIONS: 20 * 1000, // 20 second updates
+  // CRIMES: 2 * 1000, // 2 second updates
+  // STOCKS: 1 * 1000, // 1 second updates
+  CONTRACTS: 2 * 60 * 1000, // 2 min updates
+};
 
 // ******** PORTS CONFIGURATIONS
-export const PORTS: any = {};
-(function () {
-  PORTS[(PORTS.CONTROL = 1)] = 'CONTROL';
-  PORTS[(PORTS.PLAYER = 2)] = 'PLAYER';
-  PORTS[(PORTS.HACKNET = 3)] = 'HACKNET';
-  PORTS[(PORTS.HOSTING = 4)] = 'HOSTING';
-  PORTS[(PORTS.PUPPETEER = 5)] = 'PUPPETEER'; // TODO: Add servers
-  // PORTS[(PORTS.BITNODE = 3)] = 'BITNODE'; // TODO: Add bitnode
-  // PORTS[(PORTS.AUGMENTS = 5)] = 'AUGMENTS'; // TODO: Add augments
-  // PORTS[(PORTS.SLEEVES = 6)] = 'SLEEVES'; // TODO: Add sleeves
-  // PORTS[(PORTS.FACTIONS = 9)] = 'FACTIONS'; // TODO: Add factions
-  // PORTS[(PORTS.CORPORATIONS = 10)] = 'CORPORATIONS'; // TODO: Add corporations
-  // PORTS[(PORTS.CRIMES = 11)] = 'CRIMES'; // TODO: Add crimes
-  // PORTS[(PORTS.STOCKS = 12)] = 'STOCKS'; // TODO: Add stocks
-})();
+export const PORTS = {
+  CONTROL: 1,
+  PLAYER: 2,
+  HACKNET: 3,
+  HOSTING: 4,
+  PUPPETEER: 5,
+  // BITNODE: 3, // TODO: Add bitnode
+  // AUGMENTS: 5, // TODO: Add augments
+  // SLEEVES: 6, // TODO: Add sleeves
+  // FACTIONS: 9, // TODO: Add factions
+  // CORPORATIONS: 10, // TODO: Add corporations
+  // CRIMES: 11, // TODO: Add crimes
+  // STOCKS: 12, // TODO: Add stocks
+};
 
 // ******** CACHE Configurations
-export const CACHE: any = {};
-(function () {
-  CACHE.CONTROL = `${PATHS.CACHE}/cacheControl.js`;
-  CACHE.PLAYER = `${PATHS.CACHE}/cachePlayer.js`;
-  // CACHE.BITNODE = `${PATHS.CACHE}/cacheBitnode.js`; // TODO: Add bitnode cache
-  // CACHE.AUGMENTS = `${PATHS.CACHE}/cacheAugments.js`; // TODO: Add augments cache
-  // CACHE.SLEEVES = `${PATHS.CACHE}/cacheSleeves.js`; // TODO: Add sleeves cache
-  // CACHE.HACKNET = `${PATHS.CACHE}/cacheHacknet.js`; // TODO: Add hacknet cache
-  // CACHE.SERVERS = `${PATHS.CACHE}/cacheServers.js`;
-  // CACHE.FACTIONS = `${PATHS.CACHE}/cacheFactions.js`; // TODO: Add factions cache
-  // CACHE.CORPORATIONS = `${PATHS.CACHE}/cacheCorporations.js`; // TODO: Add corporations cache
-  // CACHE.CRIMES = `${PATHS.CACHE}/cacheCrimes.js`; // TODO: Add crimes cache
-  // CACHE.STOCKS = `${PATHS.CACHE}/cacheStocks.js`; // TODO: Add stocks cache
-})();
+export const CACHE = {
+  CONTROL: `${PATHS.CACHE}/cacheControl.js`,
+  PLAYER: `${PATHS.CACHE}/cachePlayer.js`,
+  // HACKNET: `${PATHS.CACHE}/cacheHacknet.js`, // TODO: Add hacknet cache
+  // BITNODE: `${PATHS.CACHE}/cacheBitnode.js`, // TODO: Add bitnode cache
+  // AUGMENTS: `${PATHS.CACHE}/cacheAugments.js`, // TODO: Add augments cache
+  // SLEEVES: `${PATHS.CACHE}/cacheSleeves.js`, // TODO: Add sleeves cache
+  // SERVERS: `${PATHS.CACHE}/cacheServers.js`,
+  // FACTIONS: `${PATHS.CACHE}/cacheFactions.js`, // TODO: Add factions cache
+  // CORPORATIONS: `${PATHS.CACHE}/cacheCorporations.js`, // TODO: Add corporations cache
+  // CRIMES: `${PATHS.CACHE}/cacheCrimes.js`, // TODO: Add crimes cache
+  // STOCKS: `${PATHS.CACHE}/cacheStocks.js`, // TODO: Add stocks cache
+};
 
 // ******** Puppeteer HWGW
-export const DEPLOY: any = {
-  xMin: `${PATHS.DEPLOY}/xmin.js`, // Minimal script
-  xMinRam: 2.41, // Minimal script RAM required
-  xHack: `${PATHS.DEPLOY}/xhack.js`, // HWGW Hack script
-  xHackRam: 1.71, // HWGW Hack script RAM required
-  xWeak: `${PATHS.DEPLOY}/xweak.js`, // HWGW Weak script
-  xWeakRam: 1.76, // HWGW Weak script RAM required
-  xGrow: `${PATHS.DEPLOY}/xgrow.js`, // HWGW Grow script
-  xGrowRam: 1.76, // HWGW Grow script RAM required
-  xShare: `${PATHS.DEPLOY}/xshare.js`, // Rep Share script
-  xShareRam: 4.0, // Rep Share RAM required
+export const DEPLOY = {
+  // Script, Action, Icon, Ram, Script
+  MIN: { A: 'MIN', I: '🐢', R: 2.41, X: `${PATHS.DEPLOY}/xmin.js` },
+  HACK: { A: 'HACK', I: '💰', R: 1.71, X: `${PATHS.DEPLOY}/xhack.js` },
+  WEAK: { A: 'WEAK', I: '🔓', R: 1.76, X: `${PATHS.DEPLOY}/xweak.js` },
+  GROW: { A: 'GROW', I: '🌿', R: 1.76, X: `${PATHS.DEPLOY}/xgrow.js` },
+  SHARE: { A: 'SHARE', I: '🫶', R: 4.0, X: `${PATHS.DEPLOY}/xshare.js` },
+  WAIT: { A: 'WAIT', I: '⏱️' },
+  RISK: { A: 'RISK', I: '🎲' },
+  ERROR: { A: 'ERROR', I: '❌' },
 };
 
 // ******** Corporations Configurations
-export const CORP: any = {
+export const CORP = {
   cName: 'cosyco', // Corporations name (Corp Name)
   fName: 'Agrico', // Agriculture division name (Farm Name)
   zName: 'Chemco', // Chemical division (Chem Name)

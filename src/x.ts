@@ -5,7 +5,7 @@ import { CORP } from '/os/configs';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
-const { cName, fName, sName } = CORP;
+// const { cName, fName, sName } = CORP;
 
 // ******** Styling
 

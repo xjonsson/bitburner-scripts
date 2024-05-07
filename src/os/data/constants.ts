@@ -1,24 +1,5 @@
-export const CONSTANTS = {
-  ServerBaseGrowthRate: 1.03, // Unadjusted Growth rate
-  ServerMaxGrowthRate: 1.0035, // Maximum possible growth rate (max rate accounting for server security)
-  ServerFortifyAmount: 0.002, // Amount by which server's security increases when its hacked/grown
-  ServerWeakenAmount: 0.05, // Amount by which server's security decreases when weakened
-  TIME_HOUR: 60 * 60 * 1000,
-  TIME_MIN: 60 * 1000,
-  TIME_SEC: 1000,
-};
-
-export const ServerConstants: {
-  BaseCostFor1GBOfRamHome: number;
-  BaseCostFor1GBOfRamServer: number;
-  HomeComputerMaxRam: number;
-  ServerBaseGrowthIncr: number;
-  ServerMaxGrowthLog: number;
-  ServerFortifyAmount: number;
-  ServerWeakenAmount: number;
-  PurchasedServerLimit: number;
-  PurchasedServerMaxRam: number;
-} = {
+// ******** SERVER CONSTANTS
+const SERVERS = {
   // Base RAM costs
   BaseCostFor1GBOfRamHome: 32000,
   BaseCostFor1GBOfRamServer: 55000, // 1 GB of RAM
@@ -28,57 +9,80 @@ export const ServerConstants: {
   ServerMaxGrowthLog: 0.00349388925425578, // Maximum possible growth rate accounting for server security, precomputed as log1p(.0035)
   ServerFortifyAmount: 0.002, // Amount by which server's security increases when its hacked/grown
   ServerWeakenAmount: 0.05, // Amount by which server's security decreases when weakened
-
   PurchasedServerLimit: 25,
   PurchasedServerMaxRam: 1048576, // 2^20
 };
 
-// NOTE: These are ordered for arrays and slice. Dont change order.
-export const CITIES = [
-  'Sector-12', // 0
-  'Aevum', // 1
-  'Chongqing', // 2
-  'New Tokyo', // 3
-  'Ishima', // 4
-  'Volhaven', // 5
-];
-
-export const UPGRADES = [
-  'FocusWires', // 0
-  'Neural Accelerators', // 1
-  'Speech Processor Implants', // 2
-  'Nuoptimal Nootropic Injector Implants', // 3
-  'Smart Factories', // 4
-  'Smart Storage', // 5
-  // 'DreamSense', // 6 // Dont buy it
-  'Wilson Analytics', // 7
-  'ABC SalesBots', // 8
-  'Project Insight', // 9
-];
-
-export const BOOST = [
-  'Hardware', // 0
-  'Robots', // 1
-  'AI Cores', // 2
-  'Real Estate', // 3
-];
-
-export const MATERIALS = {
-  Water: 'Water',
-  Ore: 'Ore',
-  Minerals: 'Minerals',
-  Food: 'Food',
-  Plants: 'Plants',
-  Metal: 'Metal',
-  Hardware: 'Hardware',
-  Chemicals: 'Chemicals',
-  Drugs: 'Drugs',
-  Robots: 'Robots',
-  AiCores: 'AI Cores',
-  RealEstate: 'Real Estate',
+// ******** LOCATION CONSTANTS
+const CITY = {
+  Aevum: 'Aevum',
+  Chongqing: 'Chongqing',
+  Sector12: 'Sector-12',
+  NewTokyo: 'New Tokyo',
+  Ishima: 'Ishima',
+  Volhaven: 'Volhaven',
 };
 
-export const RESEARCH = {
+// NOTE: These are ordered for arrays and slice. Dont change order.
+const CITIES = [
+  CITY.Sector12, // 0
+  CITY.Aevum, // 1
+  CITY.Chongqing, // 2
+  CITY.NewTokyo, // 3
+  CITY.Ishima, // 4
+  CITY.Volhaven, // 5
+];
+
+// ******** CORPORATION CONSTANTS
+const CORPJOBS = {
+  Operations: 'Operations',
+  Engineer: 'Engineer',
+  Business: 'Business',
+  Management: 'Management',
+  RandD: 'Research & Development',
+  Intern: 'Intern',
+  Unassigned: 'Unassigned',
+};
+
+const CORPUNLOCK = {
+  Export: 'Export',
+  SmartSupply: 'Smart Supply',
+  MarketResearchDemand: 'Market Research - Demand',
+  MarketDataCompetition: 'Market Data - Competition',
+  VeChain: 'VeChain',
+  ShadyAccounting: 'Shady Accounting',
+  GovernmentPartnership: 'Government Partnership',
+  WarehouseAPI: 'Warehouse API',
+  OfficeAPI: 'Office API',
+};
+
+const CORPUPGRADE = {
+  SmartFactories: 'Smart Factories',
+  SmartStorage: 'Smart Storage',
+  DreamSense: 'DreamSense',
+  WilsonAnalytics: 'Wilson Analytics',
+  NuoptimalNootropicInjectorImplants: 'Nuoptimal Nootropic Injector Implants',
+  SpeechProcessorImplants: 'Speech Processor Implants',
+  NeuralAccelerators: 'Neural Accelerators',
+  FocusWires: 'FocusWires',
+  ABCSalesBots: 'ABC SalesBots',
+  ProjectInsight: 'Project Insight',
+};
+
+const CORPUPGRADES = [
+  CORPUPGRADE.FocusWires, // 0
+  CORPUPGRADE.NeuralAccelerators, // 1
+  CORPUPGRADE.SpeechProcessorImplants, // 2
+  CORPUPGRADE.NuoptimalNootropicInjectorImplants, // 3
+  CORPUPGRADE.SmartFactories, // 4
+  CORPUPGRADE.SmartStorage, // 5
+  // CORPUPGRADE.DreamSense // 'DreamSense', // 6 // Dont buy it
+  CORPUPGRADE.WilsonAnalytics, // 7
+  CORPUPGRADE.ABCSalesBots, // 8
+  CORPUPGRADE.ProjectInsight, // 9
+];
+
+const CORPRESEARCH = {
   Lab: 'Hi-Tech R&D Laboratory',
   AutoBrew: 'AutoBrew',
   AutoParty: 'AutoPartyManager',
@@ -98,7 +102,40 @@ export const RESEARCH = {
   upgradeFulcrum: 'uPgrade: Fulcrum',
 };
 
-export const INDUSTRY = {
+const CORPMATERIALS = {
+  Water: 'Water',
+  Ore: 'Ore',
+  Minerals: 'Minerals',
+  Food: 'Food',
+  Plants: 'Plants',
+  Metal: 'Metal',
+  Hardware: 'Hardware',
+  Chemicals: 'Chemicals',
+  Drugs: 'Drugs',
+  Robots: 'Robots',
+  AiCores: 'AI Cores',
+  RealEstate: 'Real Estate',
+};
+
+const CORPBOOST = [
+  CORPMATERIALS.Hardware, // 0
+  CORPMATERIALS.Robots, // 1
+  CORPMATERIALS.AiCores, // 2
+  CORPMATERIALS.RealEstate, // 3
+];
+
+const MATERIALWEIGHTS = {
+  [CORPMATERIALS.Water]: 0.05,
+  [CORPMATERIALS.Food]: 0.03,
+  [CORPMATERIALS.Plants]: 0.05,
+  [CORPMATERIALS.Chemicals]: 0.05,
+  [CORPMATERIALS.Hardware]: 0.06,
+  [CORPMATERIALS.Robots]: 0.5,
+  [CORPMATERIALS.AiCores]: 0.1,
+  [CORPMATERIALS.RealEstate]: 0.005,
+};
+
+const INDUSTRY = {
   Water: 'Water Utilities',
   Spring: 'Spring Water',
   Agriculture: 'Agriculture',
@@ -116,7 +153,7 @@ export const INDUSTRY = {
   RealEstate: 'Real Estate',
 };
 
-export const INDUSTRYRATIO = {
+const INDUSTRYRATIO = {
   [INDUSTRY.Agriculture]: {
     startingCost: 40e9,
     requiredMaterials: { Water: 0.5, Chemicals: 0.2 },
@@ -156,13 +193,18 @@ export const INDUSTRYRATIO = {
   },
 };
 
-export const MATERIALWEIGHTS = {
-  Water: 0.05,
-  Food: 0.03,
-  Plants: 0.05,
-  Chemicals: 0.05,
-  Hardware: 0.06,
-  Robots: 0.5,
-  'AI Cores': 0.1,
-  'Real Estate': 0.005,
+export const CONSTANTS = {
+  SERVERS,
+  CITIES,
+  CITY,
+  CORPJOBS,
+  CORPUNLOCK,
+  CORPUPGRADES,
+  CORPUPGRADE,
+  CORPRESEARCH,
+  CORPMATERIALS,
+  CORPBOOST,
+  MATERIALWEIGHTS,
+  INDUSTRY,
+  INDUSTRYRATIO,
 };

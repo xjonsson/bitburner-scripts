@@ -7,7 +7,7 @@ import { Scan } from '/os/utils/scan';
 
 // const terminalInput = document.getElementById('terminal-input');
 const terminalInput = document.getElementById(
-  'terminal-input'
+  'terminal-input',
 ) as HTMLInputElement;
 const handler = Object?.keys(terminalInput)[1];
 
@@ -47,9 +47,9 @@ export async function main(ns: NS) {
 
   // ns.print(s);
   // ns.print(p.level);
+  await ns.asleep(1000);
 }
 
-/* eslint-disable-next-line */
-export function autocomplete(data: any, args: any) {
-  return data.servers;
+export function autocomplete({ servers }: { servers: string[] }) {
+  return servers;
 }

@@ -2,29 +2,29 @@
 import { CityName, NS } from '@ns';
 import { CORP } from '/os/configs';
 import { Corporation } from '/os/modules/Corporation';
-import {
-  CITIES,
-  BOOST,
-  RESEARCH,
-  INDUSTRY,
-  INDUSTRYRATIO,
-  MATERIALWEIGHTS,
-} from '/os/data/constants';
+import { CONSTANTS } from '/os/data/constants';
 /* eslint-enable */
 
+const {
+  CITIES,
+  MATERIALWEIGHTS,
+  INDUSTRYRATIO,
+  CORPBOOST: BOOST,
+  CORPRESEARCH: RESEARCH,
+} = CONSTANTS;
 const { iRounds, farm } = CORP;
 
 // ******** CORPORATE FUNCTIONS
 export function cBuyUpgrades(
   ns: NS,
-  upgrades: any[],
+  upgrades: string[],
   uLevel: number,
-  corp: Corporation
+  corp: Corporation,
 ): boolean {
   const c = ns.corporation;
 
-  if (upgrades.every((u: any) => c.getUpgradeLevel(u) >= uLevel)) {
-    ns.print(`:: ${upgrades} are at ${uLevel}`);
+  if (upgrades.every((u: string) => c.getUpgradeLevel(u) >= uLevel)) {
+    ns.print(`INFO :: ${upgrades} are at ${uLevel}`);
     return true;
   }
 
@@ -40,8 +40,8 @@ export function cBuyUpgrades(
         ns.print(
           `[Funds] Cant upgrade ${u} to ${nLevel + 1} need ${ns.formatNumber(
             price - funds,
-            1
-          )}`
+            1,
+          )}`,
         );
         corp.wait = 10;
         return false;
@@ -56,7 +56,7 @@ export function cBuyUpgrades(
 export function cCheckInvestments(
   ns: NS,
   stage: number,
-  corp: Corporation
+  corp: Corporation,
 ): boolean {
   const c = ns.corporation;
   const { funds, round } = c.getInvestmentOffer();
@@ -85,7 +85,7 @@ export function cCheckInvestments(
 export function dEnergyMorale(
   ns: NS,
   division: string,
-  corp: Corporation
+  corp: Corporation,
 ): boolean {
   const pass = CITIES.every((city: any) => {
     const { funds } = ns.corporation.getCorporation();
@@ -110,7 +110,7 @@ export function dOfficeAssignments(
   division: string,
   cities: string[],
   e: number,
-  d: number[]
+  d: number[],
 ): boolean {
   const c = ns.corporation;
   let pass = true;
@@ -138,7 +138,7 @@ export function dOfficeAssignments(
         ns.print(
           `:: Cant afford ${e - o.size} (${ns.formatNumber(price, 1)} in ${
             o.city
-          })`
+          })`,
         );
       }
       pass = false;
@@ -181,7 +181,7 @@ export function dBuyAds(
   ns: NS,
   division: string,
   count: number,
-  corp: Corporation
+  corp: Corporation,
 ): boolean {
   const c = ns.corporation;
 
@@ -211,7 +211,7 @@ export function dChangeWarehouse(
   ns: NS,
   division: string,
   storage: number,
-  corp: Corporation
+  corp: Corporation,
 ): boolean {
   let pass = true;
   const c = ns.corporation;
@@ -248,13 +248,13 @@ export function dBoostMaterial(ns: NS, division: string, s: number): boolean {
         ns.print(
           `[Buy] ${farm.boost[mName][s]} ${mName} @${
             (farm.boost[mName][s] - m.stored) / 10
-          }/s ${city}`
+          }/s ${city}`,
         );
         c.buyMaterial(
           division,
           city,
           mName,
-          (farm.boost[mName][s] - m.stored) / 10
+          (farm.boost[mName][s] - m.stored) / 10,
         );
         pass = false;
       }
@@ -268,7 +268,7 @@ export function dBoostMaterial(ns: NS, division: string, s: number): boolean {
 export function dCheckProductsSelling(
   ns: NS,
   division: string,
-  city: any
+  city: any,
 ): boolean {
   const c = ns.corporation;
   const { products } = c.getDivision(division);
@@ -297,19 +297,19 @@ export function dCheckProductsSelling(
 export function dCheckNoActiveDevelopment(
   ns: NS,
   division: string,
-  city: any
+  city: any,
 ): boolean {
   const c = ns.corporation;
   const { products } = c.getDivision(division);
   return products.every(
-    (n) => c.getProduct(division, city, n).developmentProgress === 100
+    (n) => c.getProduct(division, city, n).developmentProgress === 100,
   );
 }
 
 export function dCheckMarketResearch(
   ns: NS,
   division: string,
-  rp: number
+  rp: number,
 ): boolean {
   const c = ns.corporation;
 
@@ -425,7 +425,7 @@ export function pCalculatePrice(
   ns: NS,
   division: string,
   city: any,
-  product: string
+  product: string,
 ): number {
   const c = ns.corporation;
   // const o = c.getOffice(division, city);
@@ -457,7 +457,7 @@ export function dBoostWarehouse(
   ns: NS,
   division: string,
   city: any,
-  industry: string
+  industry: string,
 ) {
   const c = ns.corporation;
   const w = c.getWarehouse(division, city);

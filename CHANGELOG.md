@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/xjonsson/bitburner-scripts/compare/v0.2.1...v0.2.2) (2024-05-07)
+
+
+### Features
+
+* **colors:** added colors and linting to Hacknet and Hosting ([6eb5dd8](https://github.com/xjonsson/bitburner-scripts/commit/6eb5dd8e54be6da4163062f2338f4c4b7e28a1ed))
+* **os:** refactored os and Fixed [#28](https://github.com/xjonsson/bitburner-scripts/issues/28) ([2b8f3e6](https://github.com/xjonsson/bitburner-scripts/commit/2b8f3e6f3ed348279f1aae6c85a89fa97b3f6dd1))
+* **os:** upgrade linters, added colors, refactored general code ([eef6edf](https://github.com/xjonsson/bitburner-scripts/commit/eef6edfb882cdb0512f1f66814b69e5408c03957))
+
 ### [0.2.1](https://github.com/xjonsson/bitburner-scripts/compare/v0.2.0...v0.2.1) (2024-04-27)
 
 

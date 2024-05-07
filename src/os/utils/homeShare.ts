@@ -5,9 +5,9 @@ import { ServerInfo, Server } from '/os/modules/Server';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
-const { ramReserve } = CONFIGS;
-const { shareRamRatio } = CONFIGS.ramRatio;
-const { xShare, xShareRam } = DEPLOY;
+// const { ramReserve } = CONFIGS;
+const { sRamRatio } = CONFIGS.ramRatio;
+const { SHARE } = DEPLOY;
 
 // ******** Utility
 function nodeThreads(ram: number, script = 1.6): number {
@@ -26,7 +26,7 @@ function updateRam(nodes: Server[]): number {
   return nodes.reduce(
     // eslint-disable-next-line no-param-reassign
     (totalRam: number, node: Server) => (totalRam += node.ram.now),
-    0
+    0,
   );
 }
 
@@ -46,16 +46,16 @@ export async function main(ns: NS) {
     ns.clearLog();
     const now = performance.now();
     const sharePower = ns.getSharePower();
-    const nHome = ns.getServer('home');
+    // const nHome = ns.getServer('home');
     const nodesRam = updateRam(nodes);
 
     ns.print(
       `⏲️ ${formatTime(ns, now - start)} | 🔋 ${ns.formatNumber(
         sharePower,
-        2
+        2,
       )} | (${ns.formatRam(nodesRam, 2)}) ${
-        shareRamRatio * 100
-      }% | 🧵 ${ns.formatNumber(tShare, 3)}`
+        sRamRatio * 100
+      }% | 🧵 ${ns.formatNumber(tShare, 3)}`,
     );
     // await ns.share();
 
@@ -71,16 +71,16 @@ export async function main(ns: NS) {
     if (recheck < now) {
       tShare = 0;
       ns.print('Recheck');
-      // eslint-disable-next-line no-loop-func
-      nodes.forEach((n: Server) => {
-        const nRam = n.ram.now * shareRamRatio;
-        const nShare = nodeThreads(nRam, xShareRam);
-        if (nShare > 0 && n.ram.now > xShareRam) {
-          ns.exec(xShare, n.hostname, nShare, false);
+      for (let i = 0; i < nodes.length; i += 1) {
+        const n = nodes[i];
+        const nRam = n.ram.now * sRamRatio;
+        const nShare = nodeThreads(nRam, SHARE.R);
+        if (nShare > 0 && n.ram.now > SHARE.R) {
+          ns.exec(SHARE.X, n.hostname, nShare, false);
           // ns.print(`${n.hostname} (${nShare})`);
           tShare += nShare;
         }
-      });
+      }
       recheck = performance.now() + 11 * 1000;
     } else {
       ns.print(`Wait ${formatTime(ns, recheck - now)}`);

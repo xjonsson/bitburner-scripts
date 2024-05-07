@@ -21,7 +21,6 @@ export async function main(ns: NS) {
   } while (repeat);
 }
 
-/* eslint-disable-next-line */
-export function autocomplete(data: any, args: any) {
-  return data.servers;
+export function autocomplete({ servers }: { servers: string[] }) {
+  return servers;
 }

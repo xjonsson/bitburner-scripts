@@ -14,15 +14,15 @@ export async function main(ns: NS) {
   // const start = performance.now(); // DEBUG
 
   // ******** Single run code
-  const m1 = Scan.routeTerminalBackdoor(ns, 'CSEC');
-  const m2 = Scan.routeTerminalBackdoor(ns, 'avmnite-02h');
-  const m3 = Scan.routeTerminalBackdoor(ns, 'I.I.I.I');
-  const m4 = Scan.routeTerminalBackdoor(ns, 'run4theh111z');
+  const m1 = Scan.routeTerminal(ns, 'CSEC', true);
+  const m2 = Scan.routeTerminal(ns, 'avmnite-02h', true);
+  const m3 = Scan.routeTerminal(ns, 'I.I.I.I', true);
+  const m4 = Scan.routeTerminal(ns, 'run4theh111z', true);
   ns.print(
-    `alias m1="${m1}";alias m2="${m2}";alias m3="${m3}";alias m4="${m4}";`
+    `alias m1="${m1}";alias m2="${m2}";alias m3="${m3}";alias m4="${m4}";`,
   );
   ns.tprint(
-    `alias m1="${m1}";alias m2="${m2}";alias m3="${m3}";alias m4="${m4}";`
+    `alias m1="${m1}";alias m2="${m2}";alias m3="${m3}";alias m4="${m4}";`,
   );
 
   // ******** Loop code
@@ -35,4 +35,5 @@ export async function main(ns: NS) {
 
   //   await ns.asleep(1000);
   // }
+  await ns.asleep(1000);
 }

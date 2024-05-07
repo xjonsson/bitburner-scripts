@@ -1,14 +1,42 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, PORTS } from '/os/configs';
-import { PlayerCache } from '/os/modules/Cache';
+import { PlayerCache, HacknetCache, HostingCache } from '/os/modules/Cache';
 import { ServerInfo } from '/os/modules/Server';
+import { Banner } from '/os/utils/colors';
+// import Hosting from './Hosting';
 /* eslint-enable */
+
+// ******** Globals
+const { tor, ssh, ftp, smtp, http, sql } = CONFIGS.shoppingPrices;
 
 // TODO: Add faction and augments priorities
 
-export function osLogic(ns: NS, stage: number): any {
+export function osLogic(
+  ns: NS,
+  stage: number,
+): {
+  done: boolean;
+  msg: string;
+  hn: boolean;
+  hosting: boolean;
+  reserve: number;
+} {
   const p = PlayerCache.read(ns, 'player');
+  const pTOR = p ? p.programs.tor : false;
+  const pSSH = p ? p.programs.ssh : false;
+  const pFTP = p ? p.programs.ftp : false;
+  const pSMTP = p ? p.programs.smtp : false;
+  const pHTTP = p ? p.programs.http : false;
+  const pSQL = p ? p.programs.sql : false;
+  const s = {
+    done: false,
+    msg: 'MSG',
+    hn: true,
+    hosting: true,
+    reserve: 0,
+  };
+
   switch (stage) {
     // ******** Minimal startup
     // TODO: home ram < 64 save 11m (Less makes it impossible to run)
@@ -16,538 +44,161 @@ export function osLogic(ns: NS, stage: number): any {
     // TODO: home ram < 256 save 100m
     case 0: {
       // ******** Get a job
-      if (p && Object.keys(p?.work.jobs).length < 1) {
-        return {
-          done: false,
-          msg: 'STAGE_0_JOB',
-          hn: true,
-          hosting: true,
-          reserve: 0,
-        };
-      }
+      const jobs = p && Object.keys(p?.work.jobs).length;
+      if (jobs < 1) return { ...s, msg: 'Get Job' };
       // ******** Setup Hacknet
-      const hnNodes = ns.peek(PORTS.HACKNET)?.nodesCount || 0;
-      if (hnNodes < 8) {
-        return {
-          done: false,
-          msg: 'HNET_NODES_8',
-          hn: true,
-          hosting: false,
-          reserve: 0,
-        };
-      }
-
-      if (ns.getPurchasedServers().length < 8) {
-        return {
-          done: false,
-          msg: 'HOSTING_NODES_8',
-          hn: false,
-          hosting: true,
-          reserve: 0,
-        };
-      }
-      return {
-        done: true,
-        msg: 'STAGE_0_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      const hnCount = HacknetCache.read(ns).nodesCount;
+      if (hnCount < 8) return { ...s, msg: '8 Hacknet Nodes', hosting: false };
+      // ******** Get Servers
+      const hCount = HostingCache.read(ns).nodesCount;
+      if (hCount < 8) return { ...s, msg: '8 Hosting Nodes', hn: false };
+      return { ...s, done: true, msg: 'Stage 0 Complete' };
     }
     case 1: {
       // ******** Join Netburners
       if (!p?.faction.factions.includes('Netburners')) {
-        if (p?.level < 80) {
-          return {
-            done: false,
-            msg: 'LVL_80',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        // const hnCount = ns.hacknet.numNodes();
-        // const hnNodes = ns.peek(PORTS.HACKNET)?.nodes || 0;
-        const hnNodesLevel = ns.peek(PORTS.HACKNET)?.nodesLevel || 0;
-        // let hnLevel = 0; // 100
-
-        // for (let i = 0; i < hnCount; i += 1) {
-        //   const node = ns.hn.getNodeStats(i);
-        //   hnLevel += node.level;
-        // }
-
-        if (hnNodesLevel < 100) {
-          return {
-            done: false,
-            msg: 'HNET_LVL_100',
-            hn: true,
-            hosting: false,
-            reserve: 0,
-          };
-        }
-        return {
-          done: false,
-          msg: 'JOIN_NetBurners',
-          hn: false,
-          hosting: true,
-          reserve: 0,
-        };
+        if (p?.level < 80) return { ...s, msg: 'LVL 80' };
+        // ******** Hacknet Nodes Level
+        const hnLvl = HacknetCache.read(ns).nodesLevel;
+        if (hnLvl < 100) return { ...s, msg: 'HNET LVL 100', hosting: false };
+        return { ...s, msg: 'JOIN NetBurners', hn: false };
       }
 
       // ******** Get Tor
-      if (!p?.programs.tor) {
-        if (p?.money < CONFIGS.shoppingPrices.tor) {
-          return {
-            done: false,
-            msg: 'SAVE_TOR 200K',
-            hn: false,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.tor,
-          };
+      if (!pTOR) {
+        if (p?.money < tor) {
+          return { ...s, msg: 'SAVE TOR 200K', hn: false, reserve: tor };
         }
-        return {
-          done: false,
-          msg: 'BUY_TOR 200K',
-          hn: false,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.tor,
-        };
+        return { ...s, msg: 'BUY TOR 200K', hn: false, reserve: tor };
       }
-      return {
-        done: true,
-        msg: 'STAGE_1_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 1 Complete' };
     }
     case 2: {
       // ******** Get SSH
-      if (!p?.programs.ssh) {
-        if (p?.money < CONFIGS.shoppingPrices.ssh) {
-          return {
-            done: false,
-            msg: 'SAVE_SSH 500K',
-            hn: false,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.ssh,
-          };
+      if (!pSSH) {
+        if (p?.money < ssh) {
+          return { ...s, msg: 'SAVE SSH 500K', hn: false, reserve: ssh };
         }
-        return {
-          done: false,
-          msg: 'BUY_SSH 500K',
-          hn: false,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.ssh,
-        };
+        return { ...s, msg: 'BUY SSH 500K', hn: false, reserve: ssh };
       }
-      return {
-        done: true,
-        msg: 'STAGE_2_COMPLETE',
-        hn: false,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 2 Complete', hn: false };
     }
     case 3: {
       // ******** Join CSEC
       if (!p?.faction.factions.includes('CyberSec')) {
         const host = ns.getServer('CSEC');
-        const sLevel = host.requiredHackingSkill || 9999;
-        if (p?.level < sLevel) {
-          return {
-            done: false,
-            msg: `LVL_${sLevel}`,
-            hn: false,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.hasAdminRights) {
-          return {
-            done: false,
-            msg: 'ROOT_CSEC',
-            hn: false,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.backdoorInstalled) {
-          return {
-            done: false,
-            msg: 'DOOR_CSEC (m1)',
-            hn: false,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        return {
-          done: false,
-          msg: 'JOIN_CyberSec',
-          hn: false,
-          hosting: true,
-          reserve: 0,
-        };
+        const { hasAdminRights: admin, backdoorInstalled: door } = host;
+        const lvl = host.requiredHackingSkill || 9999;
+        if (p?.level < lvl) return { ...s, msg: `LVL_${lvl}`, hn: false };
+        if (!admin) return { ...s, msg: 'ROOT CSEC', hn: false };
+        if (!door) return { ...s, msg: 'DOOR CSEC (m1)', hn: false };
+        return { ...s, msg: 'JOIN CyberSec', hn: false };
       }
-      return {
-        done: true,
-        msg: 'STAGE_3_COMPLETE',
-        hn: false,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 3 Complete', hn: false };
     }
     case 4: {
       // ******** Get FTP
-      if (!p?.programs.ftp) {
-        if (p?.money < CONFIGS.shoppingPrices.ftp) {
-          return {
-            done: false,
-            msg: 'SAVE_FTP 1.5M',
-            hn: true,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.ftp,
-          };
-        }
-        return {
-          done: false,
-          msg: 'BUY_FTP 1.5M',
-          hn: true,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.ftp,
-        };
+      if (!pFTP) {
+        if (p?.money < ftp) return { ...s, msg: 'SAVE FTP 1.5M', reserve: ftp };
+        return { ...s, msg: 'BUY FTP 1.5M', reserve: ftp };
       }
-      return {
-        done: true,
-        msg: 'STAGE_4_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 4 Complete' };
     }
     case 5: {
       // ******** Join NiteSec
       if (!p?.faction.factions.includes('NiteSec')) {
         const host = ns.getServer('avmnite-02h');
-        const sLevel = host.requiredHackingSkill || 9999;
-        if (p?.level < sLevel) {
-          return {
-            done: false,
-            msg: `LVL_${sLevel}`,
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.hasAdminRights) {
-          return {
-            done: false,
-            msg: 'ROOT_avmnite-02h',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.backdoorInstalled) {
-          return {
-            done: false,
-            msg: 'DOOR_avmnite-02h (m2)',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        return {
-          done: false,
-          msg: 'JOIN_NiteSec',
-          hn: true,
-          hosting: true,
-          reserve: 0,
-        };
+        const { hasAdminRights: admin, backdoorInstalled: door } = host;
+        const lvl = host.requiredHackingSkill || 9999;
+        if (p?.level < lvl) return { ...s, msg: `LVL_${lvl}` };
+        if (!admin) return { ...s, msg: 'ROOT avmnite-02h' };
+        if (!door) return { ...s, msg: 'DOOR avmnite-02h (m2)' };
+        return { ...s, msg: 'JOIN NiteSec' };
       }
-      return {
-        done: true,
-        msg: 'STAGE_5_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 5 Complete' };
     }
     case 6: {
       // ******** Get SMTP
-      if (!p?.programs.smtp) {
-        if (p?.money < CONFIGS.shoppingPrices.smtp) {
-          return {
-            done: false,
-            msg: 'SAVE_SMTP 5M',
-            hn: true,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.smtp,
-          };
-        }
-        return {
-          done: false,
-          msg: 'BUY_SMTP 5M',
-          hn: true,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.smtp,
-        };
+      if (!pSMTP) {
+        if (p?.money < smtp)
+          return { ...s, msg: 'SAVE SMTP 5M', reserve: smtp };
+        return { ...s, msg: 'BUY SMTP 5M', reserve: smtp };
       }
-      return {
-        done: true,
-        msg: 'STAGE_6_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 6 Complete' };
     }
     case 7: {
       // ******** Join TheBlackHand
       if (!p?.faction.factions.includes('The Black Hand')) {
         const host = ns.getServer('I.I.I.I');
-        const sLevel = host.requiredHackingSkill || 9999;
-        if (p?.level < sLevel) {
-          return {
-            done: false,
-            msg: `LVL_${host.requiredHackingSkill}`,
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.hasAdminRights) {
-          return {
-            done: false,
-            msg: 'ROOT_I.I.I.I',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.backdoorInstalled) {
-          return {
-            done: false,
-            msg: 'DOOR_I.I.I.I (m3)',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        return {
-          done: false,
-          msg: 'JOIN_TheBlackHand',
-          hn: true,
-          hosting: true,
-          reserve: 0,
-        };
+        const { hasAdminRights: admin, backdoorInstalled: door } = host;
+        const lvl = host.requiredHackingSkill || 9999;
+        if (p?.level < lvl) return { ...s, msg: `LVL_${lvl}` };
+        if (!admin) return { ...s, msg: 'ROOT I.I.I.I' };
+        if (!door) return { ...s, msg: 'DOOR I.I.I.I (m3)' };
+        return { ...s, msg: 'JOIN TheBlackHand' };
       }
-      return {
-        done: true,
-        msg: 'STAGE_7_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 7 Complete' };
     }
     case 8: {
       // ******** Get HTTP
-      if (!p?.programs.http) {
-        if (p?.money < CONFIGS.shoppingPrices.http) {
-          return {
-            done: false,
-            msg: 'SAVE_HTTP 30M',
-            hn: true,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.http,
-          };
-        }
-        return {
-          done: false,
-          msg: 'BUY_HTTP 30M',
-          hn: true,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.http,
-        };
+      if (!pHTTP) {
+        if (p?.money < http)
+          return { ...s, msg: 'SAVE HTTP 30M', reserve: http };
+        return { ...s, msg: 'BUY HTTP 30M', reserve: http };
       }
-      return {
-        done: true,
-        msg: 'STAGE_8_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 8 Complete' };
     }
     case 9: {
       // ******** Join BitRunners
       if (!p?.faction.factions.includes('BitRunners')) {
         const host = ns.getServer('run4theh111z');
-        const sLevel = host.requiredHackingSkill || 9999;
-        if (p?.level < sLevel) {
-          return {
-            done: false,
-            msg: `LVL_${host.requiredHackingSkill}`,
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.hasAdminRights) {
-          return {
-            done: false,
-            msg: 'ROOT_run4theh111z',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        if (!host.backdoorInstalled) {
-          return {
-            done: false,
-            msg: 'DOOR_run4theh111z (m4)',
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
-        return {
-          done: false,
-          msg: 'JOIN_BitRunners',
-          hn: true,
-          hosting: true,
-          reserve: 0,
-        };
+        const { hasAdminRights: admin, backdoorInstalled: door } = host;
+        const lvl = host.requiredHackingSkill || 9999;
+        if (p?.level < lvl) return { ...s, msg: `LVL_${lvl}` };
+        if (!admin) return { ...s, msg: 'ROOT run4theh111z' };
+        if (!door) return { ...s, msg: 'DOOR run4theh111z (m4)' };
+        return { ...s, msg: 'JOIN BitRunners' };
       }
-      return {
-        done: true,
-        msg: 'STAGE_9_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 9 Complete' };
     }
     case 10: {
       // ******** Get SQL
-      if (!p?.programs.sql) {
-        if (p?.money < CONFIGS.shoppingPrices.sql) {
-          return {
-            done: false,
-            msg: 'SAVE_SQL 250M',
-            hn: true,
-            hosting: true,
-            reserve: CONFIGS.shoppingPrices.sql,
-          };
-        }
-        return {
-          done: false,
-          msg: 'BUY_SQL 250M',
-          hn: true,
-          hosting: true,
-          reserve: CONFIGS.shoppingPrices.sql,
-        };
+      if (!pSQL) {
+        if (p?.money < sql) return { ...s, msg: 'SAVE SQL 250M', reserve: sql };
+        return { ...s, msg: 'BUY SQL 250M', reserve: sql };
       }
-      return {
-        done: true,
-        msg: 'STAGE_10_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, done: true, msg: 'Stage 10 Complete' };
     }
     case 11: {
       // ******** Join BitRunners
       if (!p?.faction.factions.includes('Daedalus')) {
         // NOTE: Augments / 30
-        if (p?.level < 2500) {
-          return {
-            done: false,
-            msg: `LVL_2500`,
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-
+        if (p?.level < 2500) return { ...s, msg: 'LVL_2500' };
         if (p?.money < 1e11) {
-          return {
-            done: false,
-            msg: `100 Billion`,
-            hn: false,
-            hosting: true,
-            reserve: 1e11,
-          };
+          return { ...s, msg: '100 Billion', hn: false, reserve: 1e11 };
         }
-
-        return {
-          done: false,
-          msg: 'JOIN_Daedalus',
-          hn: false,
-          hosting: true,
-          reserve: 1e11,
-        };
+        return { ...s, msg: 'JOIN Daedalus', hn: false, reserve: 1e11 };
       }
 
       // NOTE: Get Red pill
       // NOTE: Install red pill
-      return {
-        done: true,
-        msg: 'STAGE_11_COMPLETE',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      // return { ...s, msg: 'STAGE_0_JOB' };
+      return { ...s, done: true, msg: 'Stage 11 Complete' };
     }
 
     case 12: {
       // ******** w0r1d_d43m0n
       if (ServerInfo.list(ns).includes('w0r1d_d43m0n')) {
         const host = ns.getServer('w0r1d_d43m0n');
-        const sLevel = host.requiredHackingSkill || 9999;
-        if (p?.level < sLevel) {
-          return {
-            done: false,
-            msg: `LVL_${host.requiredHackingSkill}`,
-            hn: true,
-            hosting: true,
-            reserve: 0,
-          };
-        }
-        return {
-          done: false,
-          msg: `BACKDOOR_w0r1d_d43m0n (m5)`,
-          hn: true,
-          hosting: true,
-          reserve: 0,
-        };
+        const lvl = host.requiredHackingSkill || 9999;
+        if (p?.level < lvl) return { ...s, msg: `LVL_${lvl}` };
+        return { ...s, msg: 'BACKDOOR w0r1d_d43m0n (m5)' };
       }
-      return {
-        done: false,
-        msg: 'INSTALL_REDPILL',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      return { ...s, msg: 'INSTALL REDPILL' };
     }
     default: {
-      return {
-        done: false,
-        msg: 'ERROR',
-        hn: true,
-        hosting: true,
-        reserve: 0,
-      };
+      ns.tprint(Banner.error('Logic', `Stage ${stage.toString()}`));
+      return { ...s, msg: 'ERROR' };
     }
   }
 }
