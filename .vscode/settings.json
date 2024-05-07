@@ -13,9 +13,9 @@
     // "titleBar.inactiveBackground": "#49D454CC" // Safe  (Public / Live)
   },
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  // "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit"
+    "source.fixAll.eslint": "explicit"
   },
   "editor.rulers": [80, 100],
   "editor.detectIndentation": false,
@@ -24,19 +24,18 @@
   "prettier.tabWidth": 2, // Should be the same as editor tab size
   "prettier.singleQuote": true,
   "emmet.excludeLanguages": ["markdown"],
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // "[html]": {
+  //   "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  // "[css]": {
+  //   "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
+  "[javascript][javascriptreact][typescript][typescriptreact]": {
+    "editor.formatOnSave": false
   },
-  "[css]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascript]": {
-    "editor.formatOnSave": false,
-    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
-  },
-  "[json]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
+  // "[json]": {
+  //   "editor.defaultFormatter": "esbenp.prettier-vscode"
+  // },
   // "prettier.printWidth": 80,
   "eslint.execArgv": null
 }

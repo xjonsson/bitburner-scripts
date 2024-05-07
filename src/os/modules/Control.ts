@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CONFIGS } from '/os/configs';
 import { osLogic } from '/os/modules/Logic';
 import { PlayerCache } from '/os/modules/Cache';
 import { reclaimer } from '/os/modules/Reclaim';
@@ -8,16 +7,22 @@ import { reclaimer } from '/os/modules/Reclaim';
 
 export class Control {
   id: string;
-  ticks: any;
+  ticks: number;
   stage: number;
-  phase: any;
   level: number;
   challenge: number;
   isPlayerCheck: boolean;
   isShopHN: boolean;
-  isShopHosting: boolean;
+  isShopH: boolean;
   isReserve: number;
   hackTargets: [];
+  phase: {
+    done: boolean;
+    msg: string;
+    hn: boolean;
+    hosting: boolean;
+    reserve: number;
+  };
 
   // ******** Constructor
   constructor(ns: NS, past: Control) {
@@ -33,7 +38,7 @@ export class Control {
 
     // ******** Update shopping based on logic
     this.isShopHN = this.phase.hn;
-    this.isShopHosting = this.phase.hosting;
+    this.isShopH = this.phase.hosting;
     this.isReserve = this.phase.reserve;
 
     // ******** Check for stage change

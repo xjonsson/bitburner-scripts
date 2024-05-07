@@ -2,14 +2,17 @@
 import { NS } from '@ns';
 /* eslint-enable */
 
-function scanner(ns: NS, start = '') {
+function scanner(
+  ns: NS,
+  start = '',
+): { route: string[]; servers: Set<string> } {
   const servers = new Set(['home']);
-  const route: any = [];
+  const route: string[] = [];
   const scan = (
     parent: string,
     server: string,
     target: string,
-    routes: any
+    routes: string[],
   ) => {
     const children = ns.scan(server);
     for (const child of children) {
@@ -44,12 +47,9 @@ export const Scan = {
     const { route } = scanner(ns, target);
     return route;
   },
-  routeTerminal(ns: NS, target = '') {
+  routeTerminal(ns: NS, target = '', backdoor = false) {
     const { route } = scanner(ns, target);
+    if (backdoor) return `connect ${route.join('; connect ')}; backdoor;`;
     return `connect ${route.join('; connect ')};`;
-  },
-  routeTerminalBackdoor(ns: NS, target = '') {
-    const { route } = scanner(ns, target);
-    return `connect ${route.join('; connect ')}; backdoor;`;
   },
 };

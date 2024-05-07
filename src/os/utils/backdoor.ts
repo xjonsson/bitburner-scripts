@@ -9,7 +9,7 @@ import { ServerInfo, Server } from '/os/modules/Server';
 
 // const terminalInput = document.getElementById('terminal-input');
 const terminalInput: any = document.getElementById(
-  'terminal-input'
+  'terminal-input',
 ) as HTMLInputElement;
 const handler = Object?.keys(terminalInput)[1];
 
@@ -39,7 +39,7 @@ export async function main(ns: NS) {
     .filter((h: string) => h !== 'home')
     .map((h: string) => new Server(ns, h))
     .filter(
-      (s: Server) => s.isRoot && !s.isServer && s.level <= p.level && !s.isDoor
+      (s: Server) => s.isRoot && !s.isServer && s.level <= p.level && !s.isDoor,
     )
     .sort((a: Server, b: Server) => a.level - b.level);
 
@@ -47,7 +47,7 @@ export async function main(ns: NS) {
 
   servers.forEach((s: Server) => {
     // const msgRoot = node.level <= p.hacking ? '✓  ' : '⛌  ';
-    const msgRoute = Scan.routeTerminalBackdoor(ns, s.hostname);
+    const msgRoute = Scan.routeTerminal(ns, s.hostname, true);
     const door = {
       hostname: s.hostname,
       level: s.level,
@@ -72,7 +72,7 @@ export async function main(ns: NS) {
         doors.length,
         next.level,
         next.hostname,
-        `(${ns.tFormat(next.time)})`
+        `(${ns.tFormat(next.time)})`,
       );
       backdoor(ns, next.route);
       doors.shift();

@@ -1,11 +1,12 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { PORTS } from '/os/configs';
+import { PORTS, DEPLOY } from '/os/configs';
 import { formatTime } from '/os/utils/formatTime';
-import { ServerTarget, X } from '/os/modules/ServerTarget';
+import { TServer } from '/os/modules/ServerTarget';
 /* eslint-enable */
 
 // ******** Globals
+const { HACK } = DEPLOY;
 
 // ******** Styling
 // const rowStyle =
@@ -59,6 +60,7 @@ export async function main(ns: NS) {
   ns.disableLog('getHackingLevel');
   ns.clearLog();
   ns.tail();
+  ns.setTitle('Monitor');
 
   // ******** Initialize (One Time Code)
   const start = performance.now();
@@ -79,12 +81,12 @@ export async function main(ns: NS) {
     // const focus = control?.hackTargets;
 
     // ******** Display
-    ns.print(`[Time] ${formatTime(ns, now - start)} | 🎯${pup.targetCount}`);
+    ns.print(`[Times] ${formatTime(ns, now - start)} | 🎯${pup.targetCount}`);
 
     if (pup) {
       updateHeaders(ns);
-      pup.targets.forEach((sst: ServerTarget) => {
-        const st = new ServerTarget(ns, sst.hostname);
+      pup.targets.forEach((sst: TServer) => {
+        const st = new TServer(ns, sst.hostname);
         let mMoney = '';
         if (st.money.now < st.money.max) {
           mMoney = ns.formatPercent(st.money.now / st.money.max, 0);
@@ -96,18 +98,18 @@ export async function main(ns: NS) {
         }
 
         let mPrepped = '✅';
-        let mHack = ns.formatNumber(st.x.hThreads, 0);
-        let mWeak = ns.formatNumber(st.x.wThreads, 0);
-        let mGrow = ns.formatNumber(st.x.gThreads, 0);
-        let mWeakAG = ns.formatNumber(st.x.wagThreads, 0);
-        let mRam = ns.formatRam(st.x.bRam, 0);
+        let mHack = ns.formatNumber(st.hTh, 0);
+        let mWeak = ns.formatNumber(st.wTh, 0);
+        let mGrow = ns.formatNumber(st.gTh, 0);
+        let mWeakAG = ns.formatNumber(st.wagTh, 0);
+        let mRam = ns.formatRam(st.bRam, 0);
 
-        if (st.status.action !== X.HACK.A) {
+        if (st.status.action !== HACK.A) {
           mPrepped = '❌';
           mHack = '';
-          mWeak = st.x.pwThreads > 0 ? ns.formatNumber(st.x.pwThreads, 0) : '';
-          mGrow = st.x.pgThreads > 0 ? ns.formatNumber(st.x.pgThreads, 0) : '';
-          mWeakAG = ns.formatNumber(st.x.wagThreads, 0);
+          mWeak = st.pwTh > 0 ? ns.formatNumber(st.pwTh, 0) : '';
+          mGrow = st.pgTh > 0 ? ns.formatNumber(st.pgTh, 0) : '';
+          mWeakAG = ns.formatNumber(st.wagTh, 0);
           mRam = '';
         }
 
@@ -119,15 +121,15 @@ export async function main(ns: NS) {
           ns.formatNumber(st.money.max, 0), // Cash
           mMoney, // Cash %
           mSec, // Sec
-          st.x.hackChance < 1 ? ns.formatNumber(st.x.hackChance, 1) : '', // Chance
+          st.hChance < 1 ? ns.formatNumber(st.hChance, 1) : '', // Chance
           mPrepped, // Prep
           mHack, // Hack Threads
           mWeak, // Weak Threads
           mGrow, // Grow Threads
           mWeakAG, // Meak Threads (Weak after Grow)
-          formatTime(ns, st.x.wTime), // Action Time
+          formatTime(ns, st.wTime), // Action Time
           mRam, // Batch Ram
-          ns.formatNumber(st.x.bValue, 0), // VPRS (Value Per Ram Second)
+          ns.formatNumber(st.bValue, 0), // VPRS (Value Per Ram Second)
           // st.batches, // 'HWGW', // HWGW (Batches)
           st.status.action // Action
         );

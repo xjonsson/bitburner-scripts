@@ -1,6 +1,5 @@
 /* eslint-disable */
 import { NS } from '@ns';
-/* eslint-enable */
 // FROM REDIT https://www.reddit.com/r/Bitburner/comments/xycccn/automating_infiltration_suggestions_needed/
 // AUTHOR: GenesisStrongshield. Contributors Particular-Ad2739, Grandasse, Mogria
 // NOTE: This script is overpowered. Using it on NWO in Volhaven gains 150k Rep

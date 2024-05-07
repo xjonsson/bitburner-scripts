@@ -2,7 +2,7 @@
 import { NS } from '@ns';
 import { CORP } from '/os/configs';
 import { Corporation } from '/os/modules/Corporation';
-import { CITIES, UPGRADES } from '/os/data/constants';
+import { CONSTANTS } from '/os/data/constants';
 import {
   cBuyUpgrades,
   cCheckInvestments,
@@ -14,6 +14,7 @@ import {
 } from '/os/utils/corpFunctions';
 /* eslint-enable */
 
+const { CITIES, CITY, CORPUPGRADES: UPGRADES } = CONSTANTS;
 const { fName, farm } = CORP;
 
 // ******** Phase 1 - Agriculture Steps
@@ -59,7 +60,7 @@ const phase1 = [
 
       const { cities } = c.getDivision(fName);
       CITIES.filter((n: any) => !cities.includes(n)).forEach((city: any) => {
-        if (city !== CITIES[0]) {
+        if (city !== CITY.Sector12) {
           if (c.getCorporation().funds > 4e9) {
             ns.print(`[Expanding] Opening ${city}`);
             c.expandCity(fName, city);

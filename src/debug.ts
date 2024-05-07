@@ -4,12 +4,11 @@ import { TIME, CONFIGS, DEPLOY } from '/os/configs';
 import { ServerInfo, Server } from '/os/modules/Server';
 import { ControlCache } from '/os/modules/Cache';
 import { ControlInfo } from '/os/modules/Control';
-import ServerTarget from '/os/modules/ServerTarget';
+import { TServer } from '/os/modules/ServerTarget';
 import { formatTime } from '/os/utils/formatTime';
 /* eslint-enable */
 
-const { xHack, xWeak, xGrow } = DEPLOY;
-const { xHackRam, xWeakRam, xGrowRam } = DEPLOY;
+const { HACK, WEAK, GROW } = DEPLOY;
 const {
   hackBuffer,
   hackDelay,
@@ -72,15 +71,11 @@ function updateServers(
     const hackTargets = ServerInfo.list(ns)
       .map((h: string) => ServerInfo.details(ns, h))
       .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
-      .map((s: Server) => new ServerTarget(ns, s.hostname))
-      .sort(
-        (a: ServerTarget, b: ServerTarget) => a.level - b.level
-        // Sort so n00dles is first on first run
-        // (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
-      )
+      .map((s: Server) => new TServer(ns, s.hostname))
+      .sort((a: TServer, b: TServer) => a.level - b.level)
       .slice(0, hackTargetsMaxOffset);
 
-    hackTargets.forEach((s: ServerTarget) => {
+    hackTargets.forEach((s: TServer) => {
       tTargets.push(s.hostname);
     });
 
@@ -95,20 +90,18 @@ function updateServers(
   // **** Reconnecting to targets
   if (tServers.length === 0) {
     tTargets.forEach((h: string) => {
-      tServers.push(new ServerTarget(ns, h));
+      tServers.push(new TServer(ns, h));
     });
     tServers
-      .sort(
-        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
-      )
+      .sort((a: TServer, b: TServer) => a.bValue - b.bValue)
       .slice(0, hackTargetsMaxOffset);
   }
 
   // **** Calculate Switching
   let batcherCount = 0;
-  tServers.forEach((s: ServerTarget) => {
+  tServers.forEach((s: TServer) => {
     // ns.tprint(`${s.hostname} | ${s.sanity.batches}`);
-    if (s.sanity.batches > 0) {
+    if (s.batches > 0) {
       batcherCount += 1;
     }
   });
@@ -122,35 +115,30 @@ function updateServers(
     const newServers = ServerInfo.list(ns)
       .map((h: string) => ServerInfo.details(ns, h))
       .filter((s: Server) => s.isTarget && !tTargets.includes(s.hostname))
-      .map((s: Server) => new ServerTarget(ns, s.hostname))
-      .filter((s: ServerTarget) => s.sanity.tRam < tRamMax)
-      .sort(
-        (a: ServerTarget, b: ServerTarget) => a.sanity.value - b.sanity.value
-      )
+      .map((s: Server) => new TServer(ns, s.hostname))
+      .filter((s: TServer) => s.bRam < tRamMax)
+      .sort((a: TServer, b: TServer) => a.bValue - b.bValue)
       .slice(-(hackSwap + offset)) // FIXME:
       // .slice(-(hackTargetsPrepMax + offset)) // FIXME:
-      .filter((s: ServerTarget) => {
+      .filter((s: TServer) => {
         // const tCheck = tServers[tServers.length - 1];
         const tCheck = tServers[0];
-        if (s.sanity.tRam < tRamMax && s.sanity.value > tCheck.sanity.value) {
+        if (s.bRam < tRamMax && s.bValue > tCheck.bValue) {
           return true;
         }
         return false;
       });
 
     if (newServers.length > 0) {
-      newServers.forEach((s: ServerTarget) => {
+      newServers.forEach((s: TServer) => {
         const tCheck = tServers[0];
         tTargets.push(s.hostname);
         tServers.push(s);
         if (tServers.length > hackTargetsMaxOffset) {
           tTargets = tTargets.filter((h: string) => h !== tCheck.hostname);
           tServers = tServers
-            .filter((t: ServerTarget) => t.hostname !== tCheck.hostname)
-            .sort(
-              (a: ServerTarget, b: ServerTarget) =>
-                a.sanity.value - b.sanity.value
-            );
+            .filter((t: TServer) => t.hostname !== tCheck.hostname)
+            .sort((a: TServer, b: TServer) => a.bValue - b.bValue);
         }
         // tTargets.shift();
         // tServers.shift();
@@ -199,63 +187,63 @@ function updateHeaders(ns: NS, now: number, start: number, networkRam: number) {
   );
 }
 
-function updateRow(ns: NS, s: ServerTarget, now: number, debug = '') {
+function updateRow(ns: NS, s: TServer, now: number, debug = '') {
   ns.printf(
     rowStyle,
     s.level,
     s.hostname,
     /* eslint-disable */
-    s.sanity.action === 'HACK'
+    s.status.action === 'HACK'
       ? '💰'
-      : s.sanity.action === 'WEAK'
+      : s.status.action === 'WEAK'
       ? '🔓'
-      : s.sanity.action === 'GROW'
+      : s.status.action === 'GROW'
       ? '🌿'
-      : s.sanity.action === 'RISK'
+      : s.status.action === 'RISK'
       ? '🎲'
       : '',
     /* eslint-enable */
     ns.formatNumber(s.money.max, 0),
     ns.formatPercent(s.money.now / s.money.max, 0),
     `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}`,
-    s.sanity.tHack > 0 ? s.sanity.tHack : '',
+    s.hTh > 0 ? s.hTh : '',
     /* eslint-disable */
-    s.sanity.action === 'HACK'
-      ? s.sanity.tWeak
-      : s.sanity.action === 'WEAK'
-      ? s.sanity.pWeak
+    s.status.action === 'HACK'
+      ? s.wTh
+      : s.status.action === 'WEAK'
+      ? s.pwTh
       : '',
-    s.sanity.action === 'HACK'
-      ? s.sanity.tGrow
-      : s.sanity.action === 'GROW'
-      ? s.sanity.pGrow
+    s.status.action === 'HACK'
+      ? s.gTh
+      : s.status.action === 'GROW'
+      ? s.pgTh
       : '',
     /* eslint-enable */
-    s.sanity.tWeakAG,
+    s.wagTh,
     // formatTime(ns, s.hackTime),
-    formatTime(ns, s.weakTime),
+    formatTime(ns, s.wTime),
     // formatTime(ns, s.growTime),
-    ns.formatRam(s.sanity.tRam, 0),
-    ns.formatNumber(s.sanity.value, 0),
-    formatTime(ns, s.lastUpdate - now),
-    s.sanity.batches,
+    ns.formatRam(s.bRam, 0),
+    ns.formatNumber(s.bValue, 0),
+    formatTime(ns, s.updateAt - now),
+    s.batches,
     debug
   );
 }
 
 // ******** HWGW Functions ******** //
-function prepWeak(ns: NS, s: ServerTarget): number {
+function prepWeak(ns: NS, s: TServer): number {
   const nodes = updateNodes(ns);
-  let rWeak = s.sanity.pWeak;
+  let rWeak = s.pwTh;
   let nSpacer = 1;
   const dStart = performance.now() + hackDelay;
   // ns.tprint(`${s.hostname} Grow (${rWeak})`); // FIXME: REMOVE ME
 
   if (rWeak > 0) {
-    let dEnd = s.weakTime + hackBuffer;
+    let dEnd = s.wTime + hackBuffer;
     nodes.forEach((n: Server) => {
       // Can we do anything
-      const nWeak = nodeThreads(n.ram.now, xWeakRam);
+      const nWeak = nodeThreads(n.ram.now, WEAK.R);
       const tWeak = rWeak > nWeak ? nWeak : rWeak;
 
       // If we have threads
@@ -267,7 +255,7 @@ function prepWeak(ns: NS, s: ServerTarget): number {
         // nSpacer += 1;
         const dWeak = dStart + hackBuffer; // Remove spacer timing
         dEnd += hackBuffer; // Removing spacer timing
-        ns.exec(xWeak, n.hostname, tWeak, s.hostname, false, dWeak);
+        ns.exec(WEAK.X, n.hostname, tWeak, s.hostname, false, dWeak);
         rWeak -= tWeak;
         nSpacer += 1;
 
@@ -284,18 +272,18 @@ function prepWeak(ns: NS, s: ServerTarget): number {
   return defaultUpdate; // hackDelay;
 }
 
-function prepGrow(ns: NS, s: ServerTarget): number {
+function prepGrow(ns: NS, s: TServer): number {
   const nodes = updateNodes(ns);
-  let rGrow = s.sanity.pGrow;
+  let rGrow = s.pgTh;
   let nSpacer = 1;
   const dStart = performance.now() + hackDelay;
   // ns.tprint(`${s.hostname} Grow (${rGrow})`); // FIXME: REMOVE ME
 
   if (rGrow > 0) {
-    let dEnd = s.growTime + hackBuffer;
+    let dEnd = s.gTime + hackBuffer;
     nodes.forEach((n: Server) => {
       // Can we do anything
-      const nGrow = nodeThreads(n.ram.now, xGrowRam);
+      const nGrow = nodeThreads(n.ram.now, GROW.R);
       const tGrow = rGrow > nGrow ? nGrow : rGrow;
 
       // If we have threads
@@ -307,7 +295,7 @@ function prepGrow(ns: NS, s: ServerTarget): number {
         // nSpacer += 1;
         const dGrow = dStart + hackBuffer; // Remove spacer timing
         dEnd += hackBuffer; // Remove spacer timing
-        ns.exec(xGrow, n.hostname, tGrow, s.hostname, false, dGrow);
+        ns.exec(GROW.X, n.hostname, tGrow, s.hostname, false, dGrow);
         rGrow -= tGrow;
         nSpacer += 1;
 
@@ -324,20 +312,20 @@ function prepGrow(ns: NS, s: ServerTarget): number {
   return defaultUpdate; // hackDelay;
 }
 
-function prepHWGW(ns: NS, s: ServerTarget): number {
+function prepHWGW(ns: NS, s: TServer): number {
   const nodes = updateNodes(ns);
   const nodesRam = updateRam(nodes);
-  const { tRam, tHack, tWeak, tGrow, tWeakAG } = s.sanity;
+  const { bRam, hTh, wTh, gTh, wagTh } = s;
   s.setBatches = 0;
   let nSpacer = 1;
 
   // Timings
   const dStart = performance.now() + hackDelay;
-  let dEnd = dStart + s.weakTime + hackBuffer;
-  const dHack = dEnd - hackBuffer * 3 - (s.hackTime + hackBuffer);
-  const dWeak = dEnd - hackBuffer * 2 - (s.weakTime + hackBuffer);
-  const dGrow = dEnd - hackBuffer * 1 - (s.growTime + hackBuffer);
-  const dWeakAG = dEnd - (s.weakTime + hackBuffer);
+  let dEnd = dStart + s.wTime + hackBuffer;
+  const dHack = dEnd - hackBuffer * 3 - (s.hTime + hackBuffer);
+  const dWeak = dEnd - hackBuffer * 2 - (s.wTime + hackBuffer);
+  const dGrow = dEnd - hackBuffer * 1 - (s.gTime + hackBuffer);
+  const dWeakAG = dEnd - (s.wTime + hackBuffer);
 
   // if (
   //   s.sanity.batches < hackBatches &&
@@ -348,53 +336,28 @@ function prepHWGW(ns: NS, s: ServerTarget): number {
   // ) {
 
   // if (s.sanity.batches < hackBatches) {
-  if (
-    s.sanity.batches < hackBatches &&
-    tHack > 0 &&
-    tWeak > 0 &&
-    tGrow > 0 &&
-    tWeakAG > 0
-  ) {
+  if (s.batches < hackBatches && hTh > 0 && wTh > 0 && gTh > 0 && wagTh > 0) {
     // Note: If we have enough to batch, then batch. otherwise partial
-    if (nodesRam.max > tRam) {
+    if (nodesRam.max > bRam) {
       nodes.forEach((n: Server) => {
-        if (n.ram.now > tRam) {
+        if (n.ram.now > bRam) {
           // ns.tprint(`${n.hostname} FULL BATCH`);
-          while (n.ram.now > tRam && s.sanity.batches < hackBatches) {
+          const { hostname: nID } = n;
+          const { hostname: sID } = s;
+          while (n.ram.now > bRam && s.batches < hackBatches) {
+            ns.exec(HACK.X, nID, hTh, sID, false, dHack + nSpacer * hackBuffer);
+            ns.exec(WEAK.X, nID, wTh, sID, false, dWeak + nSpacer * hackBuffer);
+            ns.exec(GROW.X, nID, gTh, sID, false, dGrow + nSpacer * hackBuffer);
             ns.exec(
-              xHack,
-              n.hostname,
-              tHack,
-              s.hostname,
-              false,
-              dHack + nSpacer * hackBuffer
-            );
-            ns.exec(
-              xWeak,
-              n.hostname,
-              tWeak,
-              s.hostname,
-              false,
-              dWeak + nSpacer * hackBuffer
-            );
-            ns.exec(
-              xGrow,
-              n.hostname,
-              tGrow,
-              s.hostname,
-              false,
-              dGrow + nSpacer * hackBuffer
-            );
-            ns.exec(
-              xWeak,
-              n.hostname,
-              tWeakAG,
-              s.hostname,
+              WEAK.X,
+              nID,
+              wagTh,
+              sID,
               false,
               dWeakAG + nSpacer * hackBuffer
             );
             nSpacer += 1;
-            s.setBatches = s.sanity.batches + 1;
+            s.setBatches = s.batches + 1;
           }
           // dEnd += nSpacer * hackBuffer;
         } else {
@@ -405,19 +368,19 @@ function prepHWGW(ns: NS, s: ServerTarget): number {
     } else {
       // No single node can batch
       // ns.tprint('Cant HWGW, basic hack');
-      let rHack = tHack;
+      let rHack = hTh;
       if (rHack > 0) {
-        dEnd = s.hackTime + hackBuffer;
+        dEnd = s.hTime + hackBuffer;
         nodes.forEach((n: Server) => {
           // Can we do anything
-          const nHack = nodeThreads(n.ram.now, xHackRam);
+          const nHack = nodeThreads(n.ram.now, HACK.R);
           const pHack = rHack > nHack ? nHack : rHack;
 
           // If we have threads
           if (pHack > 0 && n.ram.now > 0) {
             const dpHack = dStart + nSpacer * hackBuffer;
             dEnd += nSpacer * hackBuffer;
-            ns.exec(xHack, n.hostname, pHack, s.hostname, false, dpHack);
+            ns.exec(HACK.X, n.hostname, pHack, s.hostname, false, dpHack);
             rHack -= pHack;
             nSpacer += 1;
 
@@ -475,46 +438,44 @@ export async function main(ns: NS) {
     }
 
     // ******** Servers each tick
-    servers.forEach((s: ServerTarget) => {
-      if (s.lastUpdate > now) {
+    servers.forEach((s: TServer) => {
+      if (s.updateAt > now) {
         updateRow(ns, s, now, 'WAIT');
       } else {
-        s.update = 10 * 1000; // 10s Updates if nothing happening
+        s.setUpdate(10 * 1000); // 10s Updates if nothing happening
 
-        if (s.sanity.action === 'WEAK') {
+        if (s.status.action === 'WEAK') {
           updateRow(ns, s, now, 'WEAK');
-          s.update = prepWeak(ns, s);
+          s.setUpdate(prepWeak(ns, s));
           // s.update = s.weakTime + hackDelay;
-        } else if (s.sanity.action === 'GROW') {
+        } else if (s.status.action === 'GROW') {
           updateRow(ns, s, now, 'GROW');
-          s.update = prepGrow(ns, s);
+          s.setUpdate(prepGrow(ns, s));
           // s.update = s.growTime + hackDelay;
-        } else if (s.sanity.action === 'HACK') {
+        } else if (s.status.action === 'HACK') {
           updateRow(ns, s, now, 'BATCH');
-          s.update = prepHWGW(ns, s);
+          s.setUpdate(prepHWGW(ns, s));
           // s.update = defaultUpdate;
-        } else if (s.sanity.action === 'RISK') {
+        } else if (s.status.action === 'RISK') {
           updateRow(ns, s, now, 'RISK'); // Under hack chance
-          s.update = 10 * 60 * 1000; // Wait to see if chance increases (10min)
+          s.setUpdate(10 * 60 * 1000); // Wait to see if chance increases (10min)
         } else {
           updateRow(ns, s, now, 'ERROR'); // ENDING LINE likely network ram (Reduce batch sizes)
           ns.tprint(
-            `ERROR: ${s.hostname} A:${s.sanity.action} | V:${ns.formatNumber(
-              s.sanity.value,
+            `ERROR: ${s.hostname} A:${s.status.action} | V:${ns.formatNumber(
+              s.bValue,
               2
-            )} R:${ns.formatNumber(s.sanity.tRam, 2)} | tH:${
-              s.sanity.tHack
-            } tW:${s.sanity.tWeak} tG:${s.sanity.tGrow} tWAG:${
-              s.sanity.tWeakAG
-            } | pW:${s.sanity.pWeak} pG:${s.sanity.pGrow} | B:${
-              s.sanity.batches
+            )} R:${ns.formatNumber(s.bRam, 2)} | tH:${s.hTh} tW:${s.wTh} tG:${
+              s.gTh
+            } tWAG:${s.wagTh} | pW:${s.pwTh} pG:${s.pgTh} | B:${
+              s.batches
             } | Sec:${ns.formatNumber(
               s.sec.now - s.sec.min,
               2
             )} | $:${ns.formatNumber(
               s.money.now / s.money.max,
               2
-            )} | HC:${ns.formatNumber(s.hackChance, 2)}`
+            )} | HC:${ns.formatNumber(s.hChance, 2)}`
           );
         }
       }

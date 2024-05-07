@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { ServerInfo, Server } from '/os/modules/Server';
-import { ServerTarget } from '/os/modules/ServerTarget';
+import { TServer } from '/os/modules/ServerTarget';
 import { formatTime } from 'os/utils/formatTime';
 /* eslint-enable */
 
@@ -30,7 +30,7 @@ export async function main(ns: NS) {
       .filter((h: string) => h !== 'home')
       .map((h: string) => ServerInfo.details(ns, h))
       .filter((s: Server) => s.isTarget)
-      .map((s: Server) => new ServerTarget(ns, s.hostname))
+      .map((s: Server) => new TServer(ns, s.hostname))
       .sort((a: Server, b: Server) => a.level - b.level);
 
     const rowHeader =
@@ -45,18 +45,18 @@ export async function main(ns: NS) {
       'Money',
       '%',
       '+Sec',
+      'Hack',
       'Weak',
       'Grow',
       'Meak',
       'Hack',
-      'Hack',
       'Weak',
       'Grow',
       'Batch',
-      'Value'
+      'Value',
     );
 
-    servers.forEach((s: ServerTarget) => {
+    servers.forEach((s: TServer) => {
       ns.printf(
         rowHeader,
         s.isServer ? '' : s.level,
@@ -71,16 +71,16 @@ export async function main(ns: NS) {
         s.status.action === 'WEAK'
           ? `+${ns.formatNumber(s.sec.now - s.sec.min, 1)}`
           : '',
-        s.status.action === 'WEAK' ? s.x.wThreads : '',
-        s.status.action === 'GROW' ? s.x.gThreads : '',
-        s.status.action === 'GROW' ? s.x.wagThreads : '',
-        s.status.action === 'HACK' ? s.x.hThreads : '',
-        s.status.action === 'HACK' ? formatTime(ns, s.x.hTime) : '',
-        s.status.action === 'WEAK' ? formatTime(ns, s.x.wTime) : '',
-        s.status.action === 'GROW' ? formatTime(ns, s.x.gTime) : '',
+        s.status.action === 'HACK' ? s.hTh : '',
+        s.status.action === 'WEAK' ? s.wTh : '',
+        s.status.action === 'GROW' ? s.gTh : '',
+        s.status.action === 'GROW' ? s.wagTh : '',
+        s.status.action === 'HACK' ? formatTime(ns, s.hTime) : '',
+        s.status.action === 'WEAK' ? formatTime(ns, s.wTime) : '',
+        s.status.action === 'GROW' ? formatTime(ns, s.gTime) : '',
         // s.aAttack ? ns.formatRam(batch.dRam, 2) : '',
-        ns.formatRam(s.x.bRam, 1),
-        ns.formatNumber(s.x.bValue, 2)
+        ns.formatRam(s.bRam, 1),
+        ns.formatNumber(s.bValue, 2),
       );
     });
 

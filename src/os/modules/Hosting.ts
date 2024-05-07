@@ -1,8 +1,9 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
-import { ControlCache } from '/os/modules/Cache';
+import { ControlCache, HostingCache } from '/os/modules/Cache';
 import deployScripts from '/os/utils/deploy';
+import { Banner, BG, Text } from '/os/utils/colors';
 /* eslint-enable */
 
 // ******** Globals
@@ -24,8 +25,8 @@ export default class Hosting {
   shoppingList: Array<{
     id: number;
     name: string;
-    ram: number;
     type: string;
+    ram: number;
     msg: string;
     cost: number;
   }>;
@@ -46,8 +47,15 @@ export default class Hosting {
   }
 
   get updateNodes() {
-    const nCount = this.nodesCount;
-    const s: any = [];
+    const { nodesCount: nCount } = this;
+    const s: Array<{
+      id: number;
+      name: string;
+      type: string;
+      ram: number;
+      msg: string;
+      cost: number;
+    }> = [];
     let nMaxed = 0;
     let rTotal = 0;
     let rHighest = 0;
@@ -57,8 +65,8 @@ export default class Hosting {
       s.push({
         id: nCount,
         name: `ps-${nCount}`,
-        ram: hSRam,
         type: 'NEW',
+        ram: hSRam,
         msg: '💰 New',
         cost: this.ns.getPurchasedServerCost(hSRam),
       });
@@ -69,8 +77,8 @@ export default class Hosting {
       const node = {
         id: i,
         name: h,
-        ram: this.ns.getServerMaxRam(h),
         type: 'MAX',
+        ram: this.ns.getServerMaxRam(h),
         msg: `🔋 ${this.ns.formatRam(hTRam, 0)}`,
         cost: 0,
       };
@@ -92,21 +100,21 @@ export default class Hosting {
     this.nodesMaxed = nMaxed;
     this.ramTotal = rTotal;
     this.ramHighest = rHighest;
-    this.shoppingList = s.sort((a: any, b: any) => a.cost - b.cost);
+    this.shoppingList = s.sort((a, b) => a.cost - b.cost);
     return s;
   }
 
-  async updatePorts() {
-    const portData = {
-      done: this.done,
-      nodesCount: this.nodesCount,
-      nodesMaxed: this.nodesMaxed,
-      ramTotal: this.ramTotal,
-      ramHighest: this.ramHighest,
-      // list: this.shoppingList, // NOTE: Add back for full shopping list
-    };
-    this.ns.clearPort(PORTS.HOSTING);
-    await this.ns.tryWritePort(PORTS.HOSTING, portData);
+  updatePorts() {
+    const { ns, done, nodesCount, nodesMaxed, ramTotal, ramHighest } = this;
+    return HostingCache.update(
+      ns,
+      done,
+      nodesCount,
+      nodesMaxed,
+      ramTotal,
+      ramHighest,
+      // this.shoppingList,
+    );
   }
 
   // ******** FUNCTIONS
@@ -140,38 +148,31 @@ export async function main(ns: NS) {
     ns.clearLog();
     // ******** Consts
     const control = ControlCache.read(ns, 'control');
-    const isShopHosting = control?.isShopHN || true;
+    const isShopH = control?.isShopH || false;
     const reserve = control?.isReserve || 0;
+    const { nodesMaxed, nodesCount, ramTotal, ramHighest } = hosting;
 
     // ******** Display
-    const dStatus = isShopHosting ? '🟢' : '🟥';
-    const dNodesMax = `🖥️${hosting.nodesMaxed}`;
-    const dNodesCount = hosting.nodesCount;
-    const dReserve = `💸${ns.formatNumber(reserve, 1)}`;
-    const dRamTotal = `🔋${ns.formatRam(hosting.ramTotal, 1)}`;
-    const dRamHighest = `💎${ns.formatRam(hosting.ramHighest, 1)}`;
-    ns.print(`${dStatus}${dNodesMax} ${dNodesCount}/${hTCount} ${dReserve}`);
-    ns.print(`${dRamTotal} | ${dRamHighest}`);
+    const mStatus = isShopH ? BG.info(' 🖥️ ') : BG.warning(' 🖥️ ');
+    const mMax = BG.normal(` ⭐️${nodesMaxed} `);
+    const mCount = BG.arg(` ${nodesCount}/${hTCount} `);
+    const mRTotal = BG.show(` 🔋${ns.formatRam(ramTotal, 1)} `);
+    const mRHigh = BG.show(` 💎${ns.formatRam(ramHighest, 1)} `);
+    const nReserve = `💸${Text.arg(ns.formatNumber(reserve, 1))}`;
+    ns.print(`${mRTotal}${mRHigh}`);
+    ns.print(`${mStatus}${mMax}${mCount} ${nReserve}`);
 
     // ******** Shopping Loop
-    if (isShopHosting) {
+    if (isShopH) {
       const list = hosting.updateNodes;
-      await hosting.updatePorts();
-      if (hosting.done) ns.exit();
-
-      // Process
+      hosting.updatePorts();
+      if (hosting.done) break;
       const { name, ram, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
-        // Styling
         const price = ns.formatNumber(cost - hMoney(ns, reserve), 1);
-        ns.print(`${name} ${msg} (${price})`);
+        ns.print(Banner.info(`${name}`, `${msg} (${price})`));
+        while (hMoney(ns, reserve) < cost) await ns.sleep(TIME.HOSTING);
 
-        // Wait if we cant affort it
-        while (hMoney(ns, reserve) < cost) {
-          await ns.sleep(TIME.HOSTING);
-        }
-
-        // Buy it if we can
         switch (type) {
           case 'NEW':
             ns.purchaseServer(name, ram);
@@ -188,6 +189,8 @@ export async function main(ns: NS) {
 
     await ns.sleep(TIME.HOSTING);
   }
+  const msg = `Complete ${hTCount} Nodes at Ram ${ns.formatRam(hTRam, 2)}`;
+  ns.tprint(Banner.insert('Hacknet', `${msg}`));
 }
 
 /* ******** SAMPLE HOSTING
