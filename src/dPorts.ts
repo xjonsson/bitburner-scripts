@@ -14,7 +14,7 @@ export async function main(ns: NS) {
 
     ns.print(`Count: ${count}`);
     ns.print('======== DEBUG ========');
-    const data: any = ns.peek(PORTS.HACKNET);
+    const data: any = ns.peek(PORTS.HOSTING);
     ns.print(data);
 
     count += 1;

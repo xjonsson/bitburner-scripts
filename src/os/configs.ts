@@ -55,7 +55,7 @@ export const CONFIGS = {
   hacknet: {
     hnMoneyRatio: 0.2, // 20% of money will be used on hacknet
     hnBreakEvenTime: 2 * 60 * 60, // 2 hours in seconds
-    hnTCount: 18, // 20 Soft Max (Real Max Infinity)
+    hnTCount: 16, // 20 Soft Max (Real Max Infinity)
     hnTLevel: 200, // 200, // 200 (Real Max)
     hnTRam: 64, // 64, // 64 (Real Max)
     hnTCores: 16, // 16, // 16 (Real Max)

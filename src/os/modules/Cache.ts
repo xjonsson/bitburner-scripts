@@ -81,7 +81,13 @@ interface IHacknet {
   nodesCount: number;
   nodesLevel: number;
   nodesMaxed: number;
-  // list: this.shoppingList, // NOTE: Add back for full shopping list
+  list: Array<{
+    id: number;
+    type: string;
+    msg: string;
+    cost: number;
+    value: number;
+  }>;
 }
 
 export const HacknetCache = {
@@ -93,21 +99,70 @@ export const HacknetCache = {
         nodesCount: 0,
         nodesLevel: 0,
         nodesMaxed: 0,
-        // list: this.shoppingList, // NOTE: Add back for full shopping list
+        list: [],
       };
     }
     return data as IHacknet;
   },
-  update(ns: NS, done: boolean, count: number, level: number, maxed: number) {
-    const pData = {
-      done,
-      nodesCount: count,
-      nodesLevel: level,
-      nodesMaxed: maxed,
-      // list: this.shoppingList, // NOTE: Add back for full shopping list
-    };
+  update(
+    ns: NS,
+    done: boolean,
+    nodesCount: number,
+    nodesLevel: number,
+    nodesMaxed: number,
+    list = [],
+  ) {
+    const pData = { done, nodesCount, nodesLevel, nodesMaxed, list };
     ns.clearPort(PORTS.HACKNET);
     ns.tryWritePort(PORTS.HACKNET, pData);
+    return pData;
+  },
+};
+
+// ******** HOSTING CACHE ********
+interface IHosting {
+  done: boolean;
+  nodesCount: number;
+  nodesMaxed: number;
+  ramTotal: number;
+  ramHighest: number;
+  list: Array<{
+    id: number;
+    name: string;
+    type: string;
+    ram: number;
+    msg: string;
+    cost: number;
+  }>;
+}
+
+export const HostingCache = {
+  read(ns: NS) {
+    const data: unknown = ns.peek(PORTS.HOSTING);
+    if (data === 'NULL PORT DATA') {
+      return {
+        done: false,
+        nodesCount: 0,
+        nodesMaxed: 0,
+        ramTotal: 0,
+        ramHighest: 0,
+        list: [],
+      };
+    }
+    return data as IHosting;
+  },
+  update(
+    ns: NS,
+    done: boolean,
+    nodesCount: number,
+    nodesMaxed: number,
+    ramTotal: number,
+    ramHighest: number,
+    list = [],
+  ) {
+    const pData = { done, nodesCount, nodesMaxed, ramTotal, ramHighest, list };
+    ns.clearPort(PORTS.HOSTING);
+    ns.tryWritePort(PORTS.HOSTING, pData);
     return pData;
   },
 };

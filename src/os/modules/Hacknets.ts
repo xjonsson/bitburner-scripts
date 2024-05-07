@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
+import { CONFIGS, TIME, LAYOUT } from '/os/configs';
 import { ControlCache, HacknetCache } from '/os/modules/Cache';
 import { getBitNodeMults } from '/os/modules/BitNodes';
 import { BG, Banner, Text } from '/os/utils/colors';
@@ -135,9 +135,8 @@ export class Hacknets {
   }
 
   updatePorts() {
-    const { ns, done, nodesCount, nodesLevel, nodesMaxed, shoppingList } = this;
-    const r = HacknetCache.update(ns, done, nodesCount, nodesLevel, nodesMaxed);
-    return r;
+    const { ns, done, nodesCount, nodesLevel, nodesMaxed } = this;
+    return HacknetCache.update(ns, done, nodesCount, nodesLevel, nodesMaxed);
   }
 
   // ******** FUNCTIONS
@@ -191,18 +190,13 @@ export async function main(ns: NS) {
     if (isShopHN) {
       const list = hacknet.updateNodes;
       hacknet.updatePorts();
-      if (hacknet.done) ns.exit();
-      // Process
+      if (hacknet.done) break;
       const { id, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
-        // Styling
         const price = ns.formatNumber(cost - hnMoney(ns, reserve), 1);
         ns.print(Banner.info(`N${id}`, `${msg} (${price})`));
-
-        // Wait if we cant afford it
         while (hnMoney(ns, reserve) < cost) await ns.sleep(TIME.HACKNET);
 
-        // Buy it if we can
         switch (type) {
           case 'NEW':
             ns.hacknet.purchaseNode();
@@ -224,6 +218,8 @@ export async function main(ns: NS) {
 
     await ns.sleep(TIME.HACKNET);
   }
+  const msg = `Complete ${hnTCount} Nodes at Level ${hnTLevel} Ram ${hnTRam} Cores ${hnTCores}`;
+  ns.tprint(Banner.insert('Hacknet', `${msg}`));
 }
 
 /* ******** SAMPLE HACKNET
