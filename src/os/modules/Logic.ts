@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, PORTS } from '/os/configs';
-import { PlayerCache, HacknetCache } from '/os/modules/Cache';
+import { PlayerCache, HacknetCache, HostingCache } from '/os/modules/Cache';
 import { ServerInfo } from '/os/modules/Server';
 import { Banner } from '/os/utils/colors';
 // import Hosting from './Hosting';
@@ -50,8 +50,8 @@ export function osLogic(
       const hnCount = HacknetCache.read(ns).nodesCount;
       if (hnCount < 8) return { ...s, msg: '8 Hacknet Nodes', hosting: false };
       // ******** Get Servers
-      const servers = ns.getPurchasedServers().length;
-      if (servers < 8) return { ...s, msg: '8 Hosting Nodes', hn: false };
+      const hCount = HostingCache.read(ns).nodesCount;
+      if (hCount < 8) return { ...s, msg: '8 Hosting Nodes', hn: false };
       return { ...s, done: true, msg: 'Stage 0 Complete' };
     }
     case 1: {

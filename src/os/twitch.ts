@@ -3,8 +3,6 @@ import { NS } from '@ns';
 import { TIME, CORE, MODULES, CACHE, LAYOUT } from '/os/configs';
 import { launch } from '/os/utils/launch';
 import { ControlCache, PlayerCache } from '/os/modules/Cache';
-import { Control } from '/os/modules/Control';
-import { formatTime } from '/os/utils/formatTime';
 import { Banner, BG, Text } from '/os/utils/colors';
 /* eslint-enable */
 
@@ -15,9 +13,9 @@ function pError(ns: NS, section: string, error: any) {
 
 // ******** Styling
 const rowStyle1Col = '%-20s';
-const rowStyle2Col = '%-9s %-9s ';
+// const rowStyle2Col = '%-9s %-9s ';
 const rowStyle3Col = '%-6s %-6s %-6s';
-const rowStyle4Col = '%-4s %-4s %-4s %-4s';
+// const rowStyle4Col = '%-4s %-4s %-4s %-4s';
 
 const updateControl = async (ns: NS) => {
   ns.tprint(Banner.insert('Control', 'Starting...'));

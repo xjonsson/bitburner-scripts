@@ -7,14 +7,6 @@ import { HacknetCache } from '/os/modules/Cache';
 // ******** Globals
 // const { SUCCESS, INFO, WARN, ERROR, DARK } = COLORS;
 
-const Type = {
-  SUCCESS: 'SUCCESS',
-  INFO: 'INFO',
-  WARN: 'WARN',
-  ERROR: 'ERROR',
-  DARK: 'DARK',
-};
-
 // ******** Main function
 export async function main(ns: NS) {
   ns.disableLog('ALL');
