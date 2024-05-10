@@ -143,6 +143,7 @@ export const CORE = {
   // System
   LAUNCHER: `${PATHS.OS}/launcher.js`,
   TWITCH: `${PATHS.OS}/twitch.js`,
+  BN: `${PATHS.OS}/bn.txt`,
 
   // Modules
   HACKNET: `${PATHS.MODULES}/Hacknets.js`,

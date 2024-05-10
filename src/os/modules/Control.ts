@@ -1,9 +1,9 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { MODULES, CONFIGS } from '/os/configs';
+import { CONFIGS, CORE, MODULES } from '/os/configs';
 import { osLogic } from '/os/modules/Logic';
 import { PlayerCache, HacknetCache, HostingCache } from '/os/modules/Cache';
-import { getBNMults, IBNMults } from '/os/modules/BitNodes';
+import { IBNMults, getBNData } from '/os/modules/BitNodes';
 import { reclaimer } from '/os/modules/Reclaim';
 import { Banner } from '/os/utils/colors';
 /* eslint-enable */
@@ -42,13 +42,14 @@ export class Control {
   };
 
   // ******** Constructor
-  constructor(ns: NS, past?: Control, bnLevel = 1) {
+  constructor(ns: NS, past?: Control) {
     // ******** Defaults
     this.id = 'control';
     this.ticks = past ? past.ticks + 1 : 0;
-    this.bitnode = past ? past.bitnode : ns.getResetInfo().currentNode;
+    const { bitnode, bnLevel, bnMults } = getBNData(ns);
+    this.bitnode = past ? past.bitnode : bitnode;
     this.bnLevel = past ? past.bnLevel : bnLevel;
-    this.bnMults = past ? past.bnMults : getBNMults(this.bitnode, this.bnLevel);
+    this.bnMults = past ? past.bnMults : bnMults;
     this.stage = past ? past.stage : 0;
     this.phase = osLogic(ns, this.stage);
     this.level = past ? past.level : -1;
@@ -83,6 +84,7 @@ export class Control {
     }
   }
 
+  // ******** METHODS
   get hostingSoftCap() {
     if (!CORPORATIONS || this.isCorporation) return 1048576;
     const mphNode = corpStart / hTCount;
@@ -94,10 +96,12 @@ export class Control {
     }
     return softCap;
   }
+
+  // ******** Functions
 }
 
 export const ControlInfo = {
-  details(ns: NS, pastControl?: Control, bnLevel = 1) {
-    return new Control(ns, pastControl, bnLevel);
+  details(ns: NS, pastControl?: Control) {
+    return new Control(ns, pastControl);
   },
 };

@@ -1,3 +1,14 @@
+/* eslint-disable */
+import { NS } from '@ns';
+import { CORE } from '/os/configs';
+/* eslint-enable */
+
+export interface IBN {
+  bitnode: number;
+  bnLevel: number;
+  bnMults: IBNMults;
+}
+
 export interface IBNMults {
   AgilityLevelMultiplier: number;
   AugmentationMoneyCost: number;
@@ -107,6 +118,10 @@ const mDefault: IBNMults = {
   CorporationSoftcap: 1,
   CorporationDivisions: 1,
 };
+
+export function getBNData(ns: NS): IBN {
+  return JSON.parse(ns.read(CORE.BN)) as IBN;
+}
 
 export function getBNMults(n: number, lvl: number): IBNMults {
   switch (n) {

@@ -2,7 +2,7 @@
 import { NS } from '@ns';
 import { CONFIGS, TIME, LAYOUT } from '/os/configs';
 import { ControlCache, HacknetCache, IHNList } from '/os/modules/Cache';
-import { getBNMults } from '/os/modules/BitNodes';
+import { getBNData } from '/os/modules/BitNodes';
 import { BG, Banner, Text } from '/os/utils/colors';
 /* eslint-enable */
 
@@ -36,14 +36,14 @@ export class Hacknets {
   shoppingList: IHNList[];
 
   // ******** CONSTRUCTOR
-  constructor(ns: NS, bnLevel = 1) {
+  constructor(ns: NS) {
     // ******** Defaults
     this.id = 'hacknet';
     this.ns = ns;
-    const cBN = ns.getResetInfo().currentNode;
     this.done = false;
     this.pMult = ns.getPlayer().mults.hacknet_node_money || 1;
-    this.pMultBN = getBNMults(cBN, bnLevel).HacknetNodeMoney || 1;
+    const { bnMults } = getBNData(ns);
+    this.pMultBN = bnMults.HacknetNodeMoney || 1;
     this.nodesCount = ns.hacknet.numNodes();
     this.nodesLevel = 0;
     this.nodesMaxed = 0;
@@ -210,8 +210,8 @@ export async function main(ns: NS) {
 }
 
 export const HacknetsInfo = {
-  details(ns: NS, bnLevel = 1) {
-    return new Hacknets(ns, bnLevel);
+  details(ns: NS) {
+    return new Hacknets(ns);
   },
 };
 

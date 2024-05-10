@@ -2,7 +2,7 @@
 import { NS } from '@ns';
 import { CONFIGS, DEPLOY } from '/os/configs';
 import { CONSTANTS } from '/os/data/constants';
-import { getBitNodeMults } from '/os/modules/BitNodes';
+import { getBNData } from '/os/modules/BitNodes';
 import { Server } from '/os/modules/Server';
 /* eslint-enable */
 
@@ -96,8 +96,8 @@ export class TServer extends Server {
     super(ns, hostname);
     this.ns = ns;
     this.pMult = ns.getPlayer().mults.hacking_grow;
-    this.pMultBN =
-      getBitNodeMults(ns.getResetInfo().currentNode, 1).ServerGrowthRate || 1;
+    const { bnMults } = getBNData(ns);
+    this.pMultBN = bnMults.ServerGrowthRate || 1;
     this.hTime = -1;
     this.wTime = -1;
     this.gTime = -1;
