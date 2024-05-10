@@ -1,8 +1,8 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, TIME, LAYOUT } from '/os/configs';
-import { ControlCache, HacknetCache } from '/os/modules/Cache';
-import { getBitNodeMults } from '/os/modules/BitNodes';
+import { ControlCache, HacknetCache, IHNList } from '/os/modules/Cache';
+import { getBNMults } from '/os/modules/BitNodes';
 import { BG, Banner, Text } from '/os/utils/colors';
 /* eslint-enable */
 
@@ -20,60 +20,43 @@ function hnMoney(ns: NS, r: number): number {
 }
 
 function hnShopItem(i: number, t: string, m: string, c: number, v: number) {
-  return {
-    id: i,
-    type: t,
-    msg: m,
-    cost: c,
-    value: v,
-  };
+  return { id: i, type: t, msg: m, cost: c, value: v };
 }
 
 // ******** HACKNET CLASS
 export class Hacknets {
+  id: string;
   ns: NS;
   done: boolean;
   pMult: number;
   pMultBN: number;
+  nodesCount: number;
   nodesLevel: number;
   nodesMaxed: number;
-  shoppingList: Array<{
-    id: number;
-    type: string;
-    msg: string;
-    cost: number;
-    value: number;
-  }>;
+  shoppingList: IHNList[];
 
   // ******** CONSTRUCTOR
-  constructor(ns: NS, lvl = 1) {
-    const cBN = ns.getResetInfo().currentNode;
+  constructor(ns: NS, bnLevel = 1) {
+    // ******** Defaults
+    this.id = 'hacknet';
     this.ns = ns;
+    const cBN = ns.getResetInfo().currentNode;
     this.done = false;
     this.pMult = ns.getPlayer().mults.hacknet_node_money || 1;
-    this.pMultBN = getBitNodeMults(cBN, lvl).HacknetNodeMoney || 1;
+    this.pMultBN = getBNMults(cBN, bnLevel).HacknetNodeMoney || 1;
+    this.nodesCount = ns.hacknet.numNodes();
     this.nodesLevel = 0;
     this.nodesMaxed = 0;
-    this.shoppingList = [];
+    this.shoppingList = this.updateNodes();
   }
 
   // ******** METHODS
-  get nodesCount() {
-    return this.ns.hacknet.numNodes();
-  }
-
   get list() {
     return this.shoppingList;
   }
 
-  get updateNodes() {
-    const s: Array<{
-      id: number;
-      type: string;
-      msg: string;
-      cost: number;
-      value: number;
-    }> = [];
+  updateNodes(): IHNList[] {
+    const s: IHNList[] = [];
     let nLevel = 0;
     let nMaxed = 0;
 
@@ -131,12 +114,19 @@ export class Hacknets {
     this.nodesLevel = nLevel;
     this.nodesMaxed = nMaxed;
     this.shoppingList = s.sort((a, b) => a.cost - b.cost);
+    this.updatePorts();
     return s;
   }
 
   updatePorts() {
-    const { ns, done, nodesCount, nodesLevel, nodesMaxed } = this;
-    return HacknetCache.update(ns, done, nodesCount, nodesLevel, nodesMaxed);
+    return HacknetCache.update(
+      this.ns,
+      this.done,
+      this.nodesCount,
+      this.nodesLevel,
+      this.nodesMaxed,
+      this.shoppingList,
+    );
   }
 
   // ******** FUNCTIONS
@@ -165,9 +155,7 @@ export async function main(ns: NS) {
   ns.moveTail(wWidth - xW - xOX, wHeight - xH - bufferY - xOY);
 
   // ******** Initialize (One Time Code)
-  if (ns.hacknet.numNodes() === 0) {
-    ns.hacknet.purchaseNode();
-  }
+  if (ns.hacknet.numNodes() === 0) ns.hacknet.purchaseNode();
   const hacknet = new Hacknets(ns);
 
   // ******** Primary (Loop Time Code)
@@ -176,7 +164,7 @@ export async function main(ns: NS) {
     // ******** Consts
     const control = ControlCache.read(ns, 'control');
     const isShopHN = control?.isShopHN || false;
-    const reserve = control.isReserve || 0;
+    const reserve = control?.isReserve || 0;
     const { nodesMaxed, nodesCount } = hacknet;
 
     // ******** Display
@@ -188,8 +176,7 @@ export async function main(ns: NS) {
 
     // ******** Shopping Loop
     if (isShopHN) {
-      const list = hacknet.updateNodes;
-      hacknet.updatePorts();
+      const list = hacknet.updateNodes();
       if (hacknet.done) break;
       const { id, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
@@ -221,6 +208,12 @@ export async function main(ns: NS) {
   const msg = `Complete ${hnTCount} Nodes at Level ${hnTLevel} Ram ${hnTRam} Cores ${hnTCores}`;
   ns.tprint(Banner.insert('Hacknet', `${msg}`));
 }
+
+export const HacknetsInfo = {
+  details(ns: NS, bnLevel = 1) {
+    return new Hacknets(ns, bnLevel);
+  },
+};
 
 /* ******** SAMPLE HACKNET
  *  This can be read on port data. List needs to be uncommented for full

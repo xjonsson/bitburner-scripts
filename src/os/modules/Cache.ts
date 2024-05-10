@@ -76,18 +76,20 @@ export const PlayerCache = {
 };
 
 // ******** HACKNET CACHE ********
+export interface IHNList {
+  id: number;
+  type: string;
+  msg: string;
+  cost: number;
+  value: number;
+}
+
 interface IHacknet {
   done: boolean;
   nodesCount: number;
   nodesLevel: number;
   nodesMaxed: number;
-  list: Array<{
-    id: number;
-    type: string;
-    msg: string;
-    cost: number;
-    value: number;
-  }>;
+  list: IHNList[];
 }
 
 export const HacknetCache = {
@@ -110,7 +112,7 @@ export const HacknetCache = {
     nodesCount: number,
     nodesLevel: number,
     nodesMaxed: number,
-    list = [],
+    list: IHNList[],
   ) {
     const pData = { done, nodesCount, nodesLevel, nodesMaxed, list };
     ns.clearPort(PORTS.HACKNET);
@@ -120,20 +122,22 @@ export const HacknetCache = {
 };
 
 // ******** HOSTING CACHE ********
+export interface IHList {
+  id: number;
+  name: string;
+  type: string;
+  ram: number;
+  msg: string;
+  cost: number;
+}
+
 interface IHosting {
   done: boolean;
   nodesCount: number;
   nodesMaxed: number;
   ramTotal: number;
   ramHighest: number;
-  list: Array<{
-    id: number;
-    name: string;
-    type: string;
-    ram: number;
-    msg: string;
-    cost: number;
-  }>;
+  list: IHList[];
 }
 
 export const HostingCache = {
@@ -158,7 +162,7 @@ export const HostingCache = {
     nodesMaxed: number,
     ramTotal: number,
     ramHighest: number,
-    list = [],
+    list: IHList[],
   ) {
     const pData = { done, nodesCount, nodesMaxed, ramTotal, ramHighest, list };
     ns.clearPort(PORTS.HOSTING);

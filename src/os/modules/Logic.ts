@@ -18,9 +18,9 @@ export function osLogic(
 ): {
   done: boolean;
   msg: string;
+  reserve: number;
   hn: boolean;
   hosting: boolean;
-  reserve: number;
 } {
   const p = PlayerCache.read(ns, 'player');
   const pTOR = p ? p.programs.tor : false;
@@ -32,9 +32,9 @@ export function osLogic(
   const s = {
     done: false,
     msg: 'MSG',
+    reserve: 0,
     hn: true,
     hosting: true,
-    reserve: 0,
   };
 
   switch (stage) {

@@ -15,7 +15,7 @@ export const MODULES = {
   HOSTING: true, // true will buy servers (~8 GB)
   CONTRACTS: true, // true will solve contracts (~27 GB)
   PUPPETEER: true, // true will HWGW on servers (~18 GB)
-  CORPORATIONS: false, // true will run a corporation (~100 GB)
+  CORPORATIONS: true, // true will run a corporation (~100 GB)
   GANGS: false, // true will run a gang (~TBD)
 };
 
@@ -37,6 +37,7 @@ export const CONFIGS = {
     deepscanV2: 25e6, // 25 Million (25000000)
     autolink: 1e6, // 1 Million (1000000)
     formulas: 5e9, // 5 Billion (5000000000)
+    corpStart: 150e9, // 150 Billion
   },
   ramRatio: {
     /* It can be useful to ramp up share ratio for faction farming

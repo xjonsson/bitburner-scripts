@@ -13,9 +13,13 @@ export async function main(ns: NS) {
     ns.clearLog();
 
     ns.print(`Count: ${count}`);
-    ns.print('======== DEBUG ========');
-    const data: any = ns.peek(PORTS.HOSTING);
+    ns.print('======== CONTROL ========');
+    const data: any = ns.peek(PORTS.CONTROL);
     ns.print(data);
+
+    // ns.print('======== HACKNET ========');
+    // const hn: any = ns.peek(PORTS.HACKNET);
+    // ns.print(hn);
 
     count += 1;
     await ns.sleep(1000);
