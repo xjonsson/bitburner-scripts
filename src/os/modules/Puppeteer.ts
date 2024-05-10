@@ -4,6 +4,8 @@ import { CONFIGS, TIME, PORTS, LAYOUT, DEPLOY } from '/os/configs';
 import { Server, ServerInfo } from '/os/modules/Server';
 import { TServer } from '/os/modules/ServerTarget';
 import { formatTime } from '/os/utils/formatTime';
+import { Banner, BG, Text } from '/os/utils/colors';
+import { updateRow, updateHeaders } from '/os/modules/styling/stylePuppeteer';
 /* eslint-enable */
 
 // ******** Globals
@@ -12,105 +14,6 @@ const { xBuffer, xDelay, xBatches, xBatchesMax, xTargets, xPrimed } =
 const { wRamRatio, sRamRatio } = CONFIGS.ramRatio;
 const { HACK, WEAK, GROW, WAIT, RISK } = DEPLOY;
 
-// ******** Styling
-const rowStyle =
-  '%4s ' + // Level
-  '%-18s' + // Server
-  '%1s ' + // Action Icon
-  '%4s ' + // Cash
-  '%4s ' + // Cash %
-  '%5s ' + // Sec
-  '%4s ' + // Chance
-  '%1s ' + // Prep
-  '%4s ' + // Hack Threads
-  '%4s ' + // Weak Threads
-  '%4s ' + // Grow Threads
-  '%4s ' + // Meak Threads (Weak after Grow)
-  '%7s ' + // Action Time
-  '%5s ' + // Batch Ram
-  '%4s ' + // VPRS (Value Per Ram Second)
-  '%4s ' + // HWGW (Batches)
-  // '%5s ' + // Action
-  '%9s'; // Update
-
-function updateHeaders(ns: NS) {
-  ns.printf(
-    rowStyle,
-    'LVL', // Level
-    'Server', // Server
-    '📝', // Action Icon
-    'Cash', // Cash
-    '%', // Cash %
-    '+Sec', // Sec
-    'HC', // Chance
-    '💎', // Prep
-    'Hack', // Hack Threads
-    'Weak', // Weak Threads
-    'Grow', // Grow Threads
-    'Meak', // Meak Threads (Weak after Grow)
-    'Time', // Action Time
-    'Batch', // Batch Ram
-    'VPRS', // VPRS (Value Per Ram Second)
-    'HWGW', // HWGW (Batches)
-    // 'Step', // Action
-    'Update', // Update
-  );
-}
-
-function updateRow(ns: NS, st: TServer, now: number) {
-  const { now: mNow, max: mMax } = st.money;
-  const { now: sNow, min: sMin } = st.sec;
-  const { action: mA, icon: mI } = st.status;
-  const mUpdate = Number.isFinite(st.updateAt)
-    ? formatTime(ns, st.updateAt - now)
-    : 'ERROR';
-  let mMoney = '';
-  let mSec = '';
-  let mPrepped = '✅';
-  let mHack = ns.formatNumber(st.hTh, 0);
-  let mWeak = ns.formatNumber(st.wTh, 0);
-  let mGrow = ns.formatNumber(st.gTh, 0);
-  let mWeakAG = ns.formatNumber(st.wagTh, 0);
-  let mRam = ns.formatRam(st.bRam, 0);
-  let mTime = st.wTime > 0 ? formatTime(ns, st.wTime) : st.wTime;
-
-  if (mA === WEAK.A) mSec = `+${ns.formatNumber(sNow - sMin, 1)}`;
-  if (mA === GROW.A) {
-    mMoney = ns.formatPercent(mNow / mMax, 0);
-    mTime = st.gTime > 0 ? formatTime(ns, st.gTime) : st.gTime;
-  }
-  if (mA !== HACK.A) {
-    mPrepped = '❌';
-    mHack = '';
-    mWeak = st.pwTh > 0 ? ns.formatNumber(st.pwTh, 0) : '';
-    mGrow = st.pgTh > 0 ? ns.formatNumber(st.pgTh, 0) : '';
-    mWeakAG = ns.formatNumber(st.wagTh, 0);
-    mRam = '';
-  }
-
-  ns.printf(
-    rowStyle,
-    st.level, // Level
-    st.hostname, // Server
-    mI, // Action Icon
-    ns.formatNumber(mMax, 0), // Cash
-    mMoney, // Cash %
-    mSec, // Sec
-    st.hChance < 1 ? ns.formatNumber(st.hChance, 1) : '', // Chance
-    mPrepped, // Prep
-    mHack, // Hack Threads
-    mWeak, // Weak Threads
-    mGrow, // Grow Threads
-    mWeakAG, // Meak Threads (Weak after Grow)
-    mTime, // Action Time
-    mRam, // Batch Ram
-    ns.formatNumber(st.bValue, 0), // VPRS (Value Per Ram Second)
-    st.batches > 0 ? st.batches : '', // HWGW (Batches)
-    // mA, // Action
-    mUpdate, // Update
-  );
-}
-
 // ******** PUPPETEER INTERFACES
 interface SNode {
   id: string;
@@ -118,39 +21,21 @@ interface SNode {
   ramNow: number;
 }
 
-// interface SFocus {
-//   id: string;
-//   value: number;
-//   primed: boolean;
-// }
-
 // ******** PUPPETEER UTILITY FUNCTIONS
 
 // ******** PUPPETEER CLASS
 export default class Puppeteer {
   ns: NS;
-
   aHosts: Array<string>;
-
   tHosts: Array<string>;
-
   nHosts: Array<string>;
-
   nodes: Array<{ hostname: string; ramMax: number; ramNow: number }>;
-
   nRam: number;
-
   nRamNow: number;
-
   nRamMax: number;
-
-  dBatchRam: Array<number>;
-
+  dBRam: Array<number>;
   dBatch: number;
-
   targets: Array<any>;
-  // tPrimed: Array<SFocus>;
-  // tNext: Array<SFocus>;
 
   // ******** CONSTRUCTOR
   constructor(ns: NS) {
@@ -158,15 +43,15 @@ export default class Puppeteer {
 
     // Hosts
     this.aHosts = ServerInfo.list(ns);
-    this.tHosts = [];
-    this.nHosts = [];
-    this.updateHosts();
+    const { targetHosts, nodeHosts } = this.updateHosts();
+    this.tHosts = targetHosts;
+    this.nHosts = nodeHosts;
 
     // Nodes
     this.nRam = 0;
     this.nRamNow = 0;
     this.nRamMax = 0;
-    this.dBatchRam = [];
+    this.dBRam = [];
     this.dBatch = xBatches;
     this.nodes = []; // this.updateNodes();
 
@@ -177,11 +62,11 @@ export default class Puppeteer {
   }
 
   // ******** METHODS
-  updateDynBatch(): number {
-    const { dBatchRam: dBRA } = this;
-    if (dBRA.length === 0) this.dBatch = xBatches;
-    while (dBRA.length > 10) dBRA.shift();
-    const avg = dBRA.reduce((sum, curr) => sum + curr, 0) / dBRA.length;
+  updateDRam(): number {
+    const { dBRam } = this;
+    if (dBRam.length === 0) this.dBatch = xBatches;
+    while (dBRam.length > 10) dBRam.shift();
+    const avg = dBRam.reduce((sum, curr) => sum + curr, 0) / dBRam.length;
     let { dBatch } = this;
     if (avg >= wRamRatio) dBatch += 8;
     if (avg < sRamRatio) dBatch -= 8;
@@ -222,13 +107,13 @@ export default class Puppeteer {
           ramNow: s.ram.now,
         };
       })
-      .sort((a: any, b: any) => b.ramMax - a.ramMax);
+      .sort((a, b) => b.ramMax - a.ramMax);
 
     this.nRam = ram;
     this.nRamNow = ramNow;
     this.nRamMax = ramMax;
-    this.dBatchRam.push(ramNow / ram);
-    this.updateDynBatch();
+    this.dBRam.push(ramNow / ram);
+    this.updateDRam();
     return n;
   }
 
@@ -537,13 +422,10 @@ export default class Puppeteer {
 
 // ******** Main function
 export async function main(ns: NS) {
-  // ns.ui.clearTerminal(); // FIXME:
+  ns.ui.clearTerminal(); // FIXME:
   // ******** Setup
-  // const { bufferX, bufferY } = LAYOUT;
   const { xW, xH, xOX, xOY } = LAYOUT.PUPPETEER;
   const wWidth = ns.ui.windowSize()[0];
-  // const wHeight = ns.ui.windowSize()[1];
-  // ns.disableLog('ALL');
   ns.disableLog('disableLog');
   ns.disableLog('getHackingLevel');
   ns.disableLog('asleep');
@@ -551,33 +433,20 @@ export async function main(ns: NS) {
   ns.disableLog('exec');
   ns.clearLog();
   ns.tail();
-  ns.setTitle('Puppeteer x5');
+  ns.setTitle('Puppeteer');
   ns.resizeTail(xW, xH);
   ns.moveTail(wWidth - xW - xOX, xOY - 0);
   const start = performance.now();
 
   // ******** Initialize (One Time Code)
   let cLevel = -1;
-  // let dTimer = 0; // FIXME:
-  // console.profile('Puppeteer x2'); // FIXME:
   const puppeteer = new Puppeteer(ns);
-  // console.time('Puppeteer :: updateTargets'); // FIXME:
-  // await puppeteer.updateTargets();
-  // console.timeEnd('Puppeteer :: updateTargets'); // FIXME:
-
-  // ******** DEBUG ONETIME ********
-  // let profiler = 0;
-  // console.log(`==== New Profiler ====`);
-  // ******** DEBUG ONETIME END ********
 
   // ******** Primary (Loop Time Code)
-  // while (profiler < 20) {
-  // FIXME:
   while (true) {
     ns.clearLog();
     // ******** Consts
     const now = performance.now();
-    // puppeteer.updateNodes(); // FIXME: remove this, should not be every tick
     const { nRam, nRamNow, nRamMax } = puppeteer;
 
     // ******** Display
@@ -595,18 +464,10 @@ export async function main(ns: NS) {
       cLevel = pLevel;
       puppeteer.updateHosts();
       puppeteer.updateTargets();
-      // await puppeteer.updateTargets(); // TODO:
     }
-
-    // if (dTimer >= 8) {
-    //   // await puppeteer.updateTargets(); // FIXME:
-    //   await puppeteer.xTargets(); // FIXME:
-    //   dTimer = 0;
-    // }
 
     // Using for of so we can await
     // ******** Puppeteer (loop time code)
-    // console.time('Puppeteer :: DisplayTargets'); // FIXME:
     for (const st of puppeteer.targets as TServer[]) {
       // Display
       updateRow(ns, st, now);
@@ -615,18 +476,21 @@ export async function main(ns: NS) {
         const { action } = st.status;
         switch (action) {
           case HACK.A: {
-            const delay = puppeteer.hack(st);
-            st.setUpdate(delay);
+            // const delay = puppeteer.hack(st);
+            // st.setUpdate(delay);
+            st.setUpdate(TIME.SERVERS);
             break;
           }
           case WEAK.A: {
-            const delay = puppeteer.weak(st);
-            st.setUpdate(delay);
+            // const delay = puppeteer.weak(st);
+            // st.setUpdate(delay);
+            st.setUpdate(TIME.SERVERS);
             break;
           }
           case GROW.A: {
-            const delay = puppeteer.grow(st);
-            st.setUpdate(delay);
+            // const delay = puppeteer.grow(st);
+            // st.setUpdate(delay);
+            st.setUpdate(TIME.SERVERS);
             break;
           }
           case WAIT.A: {
@@ -642,12 +506,7 @@ export async function main(ns: NS) {
       }
       if (Number.isNaN(st.updateAt)) st.setUpdate(TIME.SERVERS);
     }
-    // console.timeEnd('Puppeteer :: DisplayTargets'); // FIXME:
-    // profiler += 1; // FIXME:
 
     await ns.asleep(TIME.PUPPETEER);
   }
-  // console.profileEnd('Puppeteer'); // FIXME:
-  // console.profileEnd();
-  // console.timeEnd('Puppeteer'); // FIXME:
 }

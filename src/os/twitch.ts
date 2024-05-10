@@ -93,10 +93,10 @@ export async function main(ns: NS) {
   updateControl(ns).catch((e) => pError(ns, 'Control', e));
   updatePlayer(ns).catch((e) => pError(ns, 'Player', e));
   // Optional modules
-  if (HACKNET) updateHacknet(ns).catch((e) => pError(ns, 'Hacknet', e)); // TODO: Improve timings
-  if (HOSTING) updateHosting(ns).catch((e) => pError(ns, 'Hosting', e)); // TODO: Improve performance
-  if (CONTRACTS) updateContracts(ns).catch((e) => pError(ns, 'Contracts', e)); // TODO: Complete solutions
-  if (PUPPETEER) updatePuppeteer(ns).catch((e) => pError(ns, 'Puppeteer', e)); // TODO: Complete solutions
+  if (HACKNET) updateHacknet(ns).catch((e) => pError(ns, 'Hacknet', e));
+  if (HOSTING) updateHosting(ns).catch((e) => pError(ns, 'Hosting', e));
+  if (PUPPETEER) updatePuppeteer(ns).catch((e) => pError(ns, 'Puppeteer', e));
+  if (CONTRACTS) updateContracts(ns).catch((e) => pError(ns, 'Contracts', e));
   // if (CORPORATIONS)
   //   updateCorporations(ns).catch((e) => pError(ns, 'Corporations', e)); // TODO: Complete solutions
 

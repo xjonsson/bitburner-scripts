@@ -203,7 +203,8 @@ export async function main(ns: NS) {
       }
     }
 
-    await ns.sleep(TIME.HACKNET);
+    if (nodesCount < 8) await ns.sleep(100);
+    else await ns.sleep(TIME.HACKNET);
   }
   const msg = `Complete ${hnTCount} Nodes at Level ${hnTLevel} Ram ${hnTRam} Cores ${hnTCores}`;
   ns.tprint(Banner.insert('Hacknet', `${msg}`));
