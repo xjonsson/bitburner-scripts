@@ -113,7 +113,7 @@ export class Hacknets {
     if (nMaxed >= hnTCount) this.done = true;
     this.nodesLevel = nLevel;
     this.nodesMaxed = nMaxed;
-    this.shoppingList = s.sort((a, b) => a.cost - b.cost);
+    this.shoppingList = s.sort((a, b) => a.value - b.value);
     this.updatePorts();
     return s;
   }

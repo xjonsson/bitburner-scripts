@@ -23,7 +23,7 @@ export const MODULES = {
 // These have been set for steady rampup, changes can cause errors
 export const CONFIGS = {
   ramReserve: 32, // 8GB reserved ram
-  moneyReserve: 1e6, // 100000 * 1000000, // 1000000 1 Million,
+  moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: 0.2, // 20% of money will be used for savings
   shoppingPrices: {
     tor: 200e3, // 200 K

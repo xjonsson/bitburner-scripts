@@ -14,7 +14,7 @@ export async function main(ns: NS) {
 
     ns.print(`Count: ${count}`);
     ns.print('======== CONTROL ========');
-    const data: any = ns.peek(PORTS.CONTROL);
+    const data: any = ns.peek(PORTS.HACKNET);
     ns.print(data);
 
     // ns.print('======== HACKNET ========');
