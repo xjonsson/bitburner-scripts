@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { PORTS } from '/os/configs';
+import { CONFIGS, PORTS } from '/os/configs';
 import { Control } from '/os/modules/Control';
 import { Player } from '/os/modules/Player';
 import { Banner } from '/os/utils/colors';
@@ -167,6 +167,51 @@ export const HostingCache = {
     const pData = { done, nodesCount, nodesMaxed, ramTotal, ramHighest, list };
     ns.clearPort(PORTS.HOSTING);
     ns.tryWritePort(PORTS.HOSTING, pData);
+    return pData;
+  },
+};
+
+// ******** PUPPETEER CACHE ********
+export interface PTList {
+  hostname: string;
+  id: string;
+  hTime: number;
+  wTime: number;
+  gTime: number;
+  hChance: number;
+  pwTh: number;
+  pgTh: number;
+  hTh: number;
+  wTh: number;
+  gTh: number;
+  wagTh: number;
+  bRam: number;
+  bValue: number;
+  batches: number;
+  status: { action: string; icon: string };
+  updateAt: number;
+}
+
+interface IPuppeteer {
+  dBatch: number;
+  targetCount: number;
+  targets: PTList[];
+}
+
+const { xBatches } = CONFIGS.hacking;
+
+export const PuppeteerCache = {
+  read(ns: NS) {
+    const data: unknown = ns.peek(PORTS.PUPPETEER);
+    if (data === 'NULL PORT DATA') {
+      return { dBatch: xBatches, targetCount: 0, targets: [] };
+    }
+    return data as IPuppeteer;
+  },
+  update(ns: NS, dBatch: number, targetCount: number, targets: PTList[]) {
+    const pData = { dBatch, targetCount, targets };
+    ns.clearPort(PORTS.PUPPETEER);
+    ns.tryWritePort(PORTS.PUPPETEER, pData);
     return pData;
   },
 };

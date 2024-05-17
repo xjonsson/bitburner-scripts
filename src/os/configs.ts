@@ -149,7 +149,7 @@ export const CORE = {
   HACKNET: `${PATHS.MODULES}/Hacknets.js`,
   HOSTING: `${PATHS.MODULES}/Hosting.js`,
   CONTRACTS: `${PATHS.MODULES}/Contract.js`,
-  PUPPETEER: `${PATHS.MODULES}/Puppeteer.js`,
+  PUPPETEER: `${PATHS.MODULES}/Puppeteer/Puppeteer.js`,
   CORPORATIONS: '/dCorps.js',
   // CORE.GANGS = `/debug.js`;
 };

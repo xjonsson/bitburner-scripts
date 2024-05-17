@@ -7,6 +7,7 @@ import { PORTS } from '/os/configs';
 export async function main(ns: NS) {
   ns.disableLog('sleep');
   ns.tail();
+  ns.setTitle('Ports Test');
 
   let count = 0;
   while (true) {
