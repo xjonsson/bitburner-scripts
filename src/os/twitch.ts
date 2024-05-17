@@ -13,7 +13,7 @@ function pError(ns: NS, section: string, error: any) {
 
 // ******** Styling
 const rowStyle1Col = '%-20s';
-// const rowStyle2Col = '%-9s %-9s ';
+const rowStyle2Col = '%-9s %-9s ';
 const rowStyle3Col = '%-6s %-6s %-6s';
 // const rowStyle4Col = '%-4s %-4s %-4s %-4s';
 
@@ -93,12 +93,12 @@ export async function main(ns: NS) {
   updateControl(ns).catch((e) => pError(ns, 'Control', e));
   updatePlayer(ns).catch((e) => pError(ns, 'Player', e));
   // Optional modules
-  if (HACKNET) updateHacknet(ns).catch((e) => pError(ns, 'Hacknet', e)); // TODO: Improve timings
-  if (HOSTING) updateHosting(ns).catch((e) => pError(ns, 'Hosting', e)); // TODO: Improve performance
-  if (CONTRACTS) updateContracts(ns).catch((e) => pError(ns, 'Contracts', e)); // TODO: Complete solutions
-  if (PUPPETEER) updatePuppeteer(ns).catch((e) => pError(ns, 'Puppeteer', e)); // TODO: Complete solutions
-  if (CORPORATIONS)
-    updateCorporations(ns).catch((e) => pError(ns, 'Corporations', e)); // TODO: Complete solutions
+  if (HACKNET) updateHacknet(ns).catch((e) => pError(ns, 'Hacknet', e));
+  if (HOSTING) updateHosting(ns).catch((e) => pError(ns, 'Hosting', e));
+  if (PUPPETEER) updatePuppeteer(ns).catch((e) => pError(ns, 'Puppeteer', e));
+  if (CONTRACTS) updateContracts(ns).catch((e) => pError(ns, 'Contracts', e));
+  // if (CORPORATIONS)
+  //   updateCorporations(ns).catch((e) => pError(ns, 'Corporations', e)); // TODO: Complete solutions
 
   // Keep the game loop going
   while (true) {
@@ -106,7 +106,7 @@ export async function main(ns: NS) {
     const player = PlayerCache.read(ns, 'player');
     const { ticks } = control;
     const { level, money, challenge } = player;
-    const { stage, phase, hackTargets, isShopHN, isShopH } = control;
+    const { stage, phase, isShopHN, isShopH } = control;
     // const time = performance.now();
     // const { level } = player;
 
@@ -137,9 +137,9 @@ export async function main(ns: NS) {
 
     // Display progression
     ns.printf(
-      rowStyle3Col,
+      rowStyle2Col,
       `🔑 ${Text.arg(challenge.toString())}`,
-      `🎯 ${Text.arg(hackTargets?.length.toString() || 'X')}`,
+      // `🎯 ${Text.arg(hackTargets?.length.toString() || 'X')}`,
       `💎 ${Text.arg(stage.toString())}`,
     );
     ns.printf(

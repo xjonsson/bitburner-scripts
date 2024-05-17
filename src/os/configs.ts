@@ -15,7 +15,7 @@ export const MODULES = {
   HOSTING: true, // true will buy servers (~8 GB)
   CONTRACTS: true, // true will solve contracts (~27 GB)
   PUPPETEER: true, // true will HWGW on servers (~18 GB)
-  CORPORATIONS: false, // true will run a corporation (~100 GB)
+  CORPORATIONS: true, // true will run a corporation (~100 GB)
   GANGS: false, // true will run a gang (~TBD)
 };
 
@@ -23,7 +23,7 @@ export const MODULES = {
 // These have been set for steady rampup, changes can cause errors
 export const CONFIGS = {
   ramReserve: 32, // 8GB reserved ram
-  moneyReserve: 1e6, // 100000 * 1000000, // 1000000 1 Million,
+  moneyReserve: 0, // 100000 * 1000000, // 1000000 1 Million,
   moneyRatio: 0.2, // 20% of money will be used for savings
   shoppingPrices: {
     tor: 200e3, // 200 K
@@ -37,6 +37,7 @@ export const CONFIGS = {
     deepscanV2: 25e6, // 25 Million (25000000)
     autolink: 1e6, // 1 Million (1000000)
     formulas: 5e9, // 5 Billion (5000000000)
+    corpStart: 150e9, // 150 Billion
   },
   ramRatio: {
     /* It can be useful to ramp up share ratio for faction farming
@@ -142,12 +143,13 @@ export const CORE = {
   // System
   LAUNCHER: `${PATHS.OS}/launcher.js`,
   TWITCH: `${PATHS.OS}/twitch.js`,
+  BN: `${PATHS.OS}/bn.txt`,
 
   // Modules
   HACKNET: `${PATHS.MODULES}/Hacknets.js`,
   HOSTING: `${PATHS.MODULES}/Hosting.js`,
   CONTRACTS: `${PATHS.MODULES}/Contract.js`,
-  PUPPETEER: `${PATHS.MODULES}/Puppeteer.js`,
+  PUPPETEER: `${PATHS.MODULES}/Puppeteer/Puppeteer.js`,
   CORPORATIONS: '/dCorps.js',
   // CORE.GANGS = `/debug.js`;
 };

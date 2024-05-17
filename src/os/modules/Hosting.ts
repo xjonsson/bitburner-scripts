@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { NS } from '@ns';
 import { CONFIGS, TIME, PORTS, LAYOUT } from '/os/configs';
-import { ControlCache, HostingCache } from '/os/modules/Cache';
+import { ControlCache, HostingCache, IHList } from '/os/modules/Cache';
 import deployScripts from '/os/utils/deploy';
 import { Banner, BG, Text } from '/os/utils/colors';
 /* eslint-enable */
@@ -17,45 +17,32 @@ function hMoney(ns: NS, r: number): number {
 
 // ******** HOSTING CLASS
 export default class Hosting {
+  id: string;
   ns: NS;
   done: boolean;
+  nodesCount: number;
   nodesMaxed: number;
   ramTotal: number;
   ramHighest: number;
-  shoppingList: Array<{
-    id: number;
-    name: string;
-    type: string;
-    ram: number;
-    msg: string;
-    cost: number;
-  }>;
+  shoppingList: IHList[];
 
   // ******** CONSTRUCTOR
   constructor(ns: NS) {
+    // ******** Defaults
+    this.id = 'hosting';
     this.ns = ns;
     this.done = false;
+    this.nodesCount = ns.getPurchasedServers().length;
     this.nodesMaxed = 0;
     this.ramTotal = 0;
     this.ramHighest = 0;
-    this.shoppingList = this.updateNodes;
+    this.shoppingList = this.updateNodes();
   }
 
   // ******** METHODS
-  get nodesCount() {
-    return this.ns.getPurchasedServers().length;
-  }
-
-  get updateNodes() {
+  updateNodes(): IHList[] {
     const { nodesCount: nCount } = this;
-    const s: Array<{
-      id: number;
-      name: string;
-      type: string;
-      ram: number;
-      msg: string;
-      cost: number;
-    }> = [];
+    const s: IHList[] = [];
     let nMaxed = 0;
     let rTotal = 0;
     let rHighest = 0;
@@ -101,19 +88,19 @@ export default class Hosting {
     this.ramTotal = rTotal;
     this.ramHighest = rHighest;
     this.shoppingList = s.sort((a, b) => a.cost - b.cost);
+    this.updatePorts();
     return s;
   }
 
   updatePorts() {
-    const { ns, done, nodesCount, nodesMaxed, ramTotal, ramHighest } = this;
     return HostingCache.update(
-      ns,
-      done,
-      nodesCount,
-      nodesMaxed,
-      ramTotal,
-      ramHighest,
-      // this.shoppingList,
+      this.ns,
+      this.done,
+      this.nodesCount,
+      this.nodesMaxed,
+      this.ramTotal,
+      this.ramHighest,
+      this.shoppingList,
     );
   }
 
@@ -164,8 +151,7 @@ export async function main(ns: NS) {
 
     // ******** Shopping Loop
     if (isShopH) {
-      const list = hosting.updateNodes;
-      hosting.updatePorts();
+      const list = hosting.updateNodes();
       if (hosting.done) break;
       const { name, ram, type, msg, cost } = list[0];
       if (Number.isFinite(cost) && cost) {
@@ -192,6 +178,12 @@ export async function main(ns: NS) {
   const msg = `Complete ${hTCount} Nodes at Ram ${ns.formatRam(hTRam, 2)}`;
   ns.tprint(Banner.insert('Hacknet', `${msg}`));
 }
+
+export const HostingInfo = {
+  details(ns: NS) {
+    return new Hosting(ns);
+  },
+};
 
 /* ******** SAMPLE HOSTING
  *  This can be read on port data. List needs to be uncommented for full

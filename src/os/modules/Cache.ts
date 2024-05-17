@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { NS } from '@ns';
-import { PORTS } from '/os/configs';
+import { CONFIGS, PORTS } from '/os/configs';
 import { Control } from '/os/modules/Control';
 import { Player } from '/os/modules/Player';
 import { Banner } from '/os/utils/colors';
@@ -76,18 +76,20 @@ export const PlayerCache = {
 };
 
 // ******** HACKNET CACHE ********
+export interface IHNList {
+  id: number;
+  type: string;
+  msg: string;
+  cost: number;
+  value: number;
+}
+
 interface IHacknet {
   done: boolean;
   nodesCount: number;
   nodesLevel: number;
   nodesMaxed: number;
-  list: Array<{
-    id: number;
-    type: string;
-    msg: string;
-    cost: number;
-    value: number;
-  }>;
+  list: IHNList[];
 }
 
 export const HacknetCache = {
@@ -110,7 +112,7 @@ export const HacknetCache = {
     nodesCount: number,
     nodesLevel: number,
     nodesMaxed: number,
-    list = [],
+    list: IHNList[],
   ) {
     const pData = { done, nodesCount, nodesLevel, nodesMaxed, list };
     ns.clearPort(PORTS.HACKNET);
@@ -120,20 +122,22 @@ export const HacknetCache = {
 };
 
 // ******** HOSTING CACHE ********
+export interface IHList {
+  id: number;
+  name: string;
+  type: string;
+  ram: number;
+  msg: string;
+  cost: number;
+}
+
 interface IHosting {
   done: boolean;
   nodesCount: number;
   nodesMaxed: number;
   ramTotal: number;
   ramHighest: number;
-  list: Array<{
-    id: number;
-    name: string;
-    type: string;
-    ram: number;
-    msg: string;
-    cost: number;
-  }>;
+  list: IHList[];
 }
 
 export const HostingCache = {
@@ -158,11 +162,56 @@ export const HostingCache = {
     nodesMaxed: number,
     ramTotal: number,
     ramHighest: number,
-    list = [],
+    list: IHList[],
   ) {
     const pData = { done, nodesCount, nodesMaxed, ramTotal, ramHighest, list };
     ns.clearPort(PORTS.HOSTING);
     ns.tryWritePort(PORTS.HOSTING, pData);
+    return pData;
+  },
+};
+
+// ******** PUPPETEER CACHE ********
+export interface PTList {
+  hostname: string;
+  id: string;
+  hTime: number;
+  wTime: number;
+  gTime: number;
+  hChance: number;
+  pwTh: number;
+  pgTh: number;
+  hTh: number;
+  wTh: number;
+  gTh: number;
+  wagTh: number;
+  bRam: number;
+  bValue: number;
+  batches: number;
+  status: { action: string; icon: string };
+  updateAt: number;
+}
+
+interface IPuppeteer {
+  dBatch: number;
+  targetCount: number;
+  targets: PTList[];
+}
+
+const { xBatches } = CONFIGS.hacking;
+
+export const PuppeteerCache = {
+  read(ns: NS) {
+    const data: unknown = ns.peek(PORTS.PUPPETEER);
+    if (data === 'NULL PORT DATA') {
+      return { dBatch: xBatches, targetCount: 0, targets: [] };
+    }
+    return data as IPuppeteer;
+  },
+  update(ns: NS, dBatch: number, targetCount: number, targets: PTList[]) {
+    const pData = { dBatch, targetCount, targets };
+    ns.clearPort(PORTS.PUPPETEER);
+    ns.tryWritePort(PORTS.PUPPETEER, pData);
     return pData;
   },
 };

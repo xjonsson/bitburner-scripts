@@ -1,4 +1,70 @@
-const mDefault = {
+/* eslint-disable */
+import { NS } from '@ns';
+import { CORE } from '/os/configs';
+/* eslint-enable */
+
+export interface IBN {
+  bitnode: number;
+  bnLevel: number;
+  bnMults: IBNMults;
+}
+
+export interface IBNMults {
+  AgilityLevelMultiplier: number;
+  AugmentationMoneyCost: number;
+  AugmentationRepCost: number;
+  BladeburnerRank: number;
+  BladeburnerSkillCost: number;
+  CharismaLevelMultiplier: number;
+  ClassGymExpGain: number;
+  CodingContractMoney: number;
+  CompanyWorkExpGain: number;
+  CompanyWorkMoney: number;
+  CompanyWorkRepGain: number;
+  CorporationValuation: number;
+  CrimeExpGain: number;
+  CrimeMoney: number;
+  CrimeSuccessRate: number;
+  DaedalusAugsRequirement: number;
+  DefenseLevelMultiplier: number;
+  DexterityLevelMultiplier: number;
+  FactionPassiveRepGain: number;
+  FactionWorkExpGain: number;
+  FactionWorkRepGain: number;
+  FourSigmaMarketDataApiCost: number;
+  FourSigmaMarketDataCost: number;
+  GangSoftcap: number;
+  GangUniqueAugs: number;
+  GoPower: number;
+  HackExpGain: number;
+  HackingLevelMultiplier: number;
+  HackingSpeedMultiplier: number;
+  HacknetNodeMoney: number;
+  HomeComputerRamCost: number;
+  InfiltrationMoney: number;
+  InfiltrationRep: number;
+  ManualHackMoney: number;
+  PurchasedServerCost: number;
+  PurchasedServerSoftcap: number;
+  PurchasedServerLimit: number;
+  PurchasedServerMaxRam: number;
+  RepToDonateToFaction: number;
+  ScriptHackMoney: number;
+  ScriptHackMoneyGain: number;
+  ServerGrowthRate: number;
+  ServerMaxMoney: number;
+  ServerStartingMoney: number;
+  ServerStartingSecurity: number;
+  ServerWeakenRate: number;
+  StrengthLevelMultiplier: number;
+  StaneksGiftPowerMultiplier: number;
+  StaneksGiftExtraSize: number;
+  WorldDaemonDifficulty: number;
+  CorporationSoftcap: number;
+  CorporationDivisions: number;
+}
+
+const mDefault: IBNMults = {
   AgilityLevelMultiplier: 1,
   AugmentationMoneyCost: 1,
   AugmentationRepCost: 1,
@@ -53,7 +119,11 @@ const mDefault = {
   CorporationDivisions: 1,
 };
 
-export function getBitNodeMults(n: number, lvl: number) {
+export function getBNData(ns: NS): IBN {
+  return JSON.parse(ns.read(CORE.BN)) as IBN;
+}
+
+export function getBNMults(n: number, lvl: number): IBNMults {
   switch (n) {
     case 1: {
       return mDefault;
