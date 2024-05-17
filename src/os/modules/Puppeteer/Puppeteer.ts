@@ -314,6 +314,7 @@ export default class Puppeteer {
         }
       }
     }
+    return TIME.SERVERS;
   }
 
   weak(st: TServer) {
