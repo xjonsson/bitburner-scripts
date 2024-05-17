@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/xjonsson/bitburner-scripts/compare/v0.2.2...v0.2.3) (2024-05-17)
+
+
+### Features
+
+* **bitnode:** added dynamic bitnode for control, hacknet, server calculations ([a5c219e](https://github.com/xjonsson/bitburner-scripts/commit/a5c219ebef978d471d1318d9b44317fe783f6df3))
+* **control:** refactor control and logic ([9e4f047](https://github.com/xjonsson/bitburner-scripts/commit/9e4f047c14153847afd89db519aa9cdb66a112be))
+* **puppeteer:** added better target swap and selection ([b7902ae](https://github.com/xjonsson/bitburner-scripts/commit/b7902aeeec91cc6df2d965df597544f0beaf8728))
+
+
+### Bug Fixes
+
+* **hacknet:** hacknets were still using cost rather than payback time, fixed now ([005083a](https://github.com/xjonsson/bitburner-scripts/commit/005083ac0449ce9d11273660e47d01f8319a7bc6))
+
 ### [0.2.2](https://github.com/xjonsson/bitburner-scripts/compare/v0.2.1...v0.2.2) (2024-05-07)
 
 
